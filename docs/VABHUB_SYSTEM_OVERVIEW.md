@@ -455,6 +455,8 @@ VabHub 系统总览（单一事实来源）
   新增 Docker 部署指南与示例 docker-compose 配置，统一 README/GETTING_STARTED 的安装路径，明确 Docker/docker-compose 为唯一官方支持的部署方式。
 - **2025-12-03 – DOCKER-SMOKE-RUN-1 完成**：  
   在真实 Docker 环境中完成 0.1.0-rc1 的 docker-compose 首跑与核心功能冒烟检查，确认 Docker 部署路径可用，并将经验回写到部署与预发布文档。
+- **2025-12-03 – REPO-HYGIENE-1 完成**：  
+  完成仓库文档瘦身与 LICENSE 补齐，建立文档分层结构（user/admin/dev/internal），优化 GitHub 访客体验，添加 MIT License。
 - （此处由后续任务持续追加）
 
 ---

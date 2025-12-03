@@ -102,3 +102,13 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - DOCKER-LOGS-IMPROVE-1：优化 Docker 容器日志配置，方便用户调试
 - DOCKER-INIT-USER-1：实现 Docker 首次启动时自动创建初始用户
 - DOCKER-PREBUILT-IMAGES-1：提供预构建的 Docker 镜像，减少用户构建时间
+
+## 11. REPO-HYGIENE-1 检查
+
+- [x] 根目录清理：移除了大量开发文档，仅保留核心文件
+- [x] 文档分层：建立了 user/admin/dev/internal 目录结构
+- [x] LICENSE 文件：添加了 MIT License
+- [x] README 瘦身：优化了 README.md，突出用户核心需求
+- [x] 文档索引：创建了 docs/INDEX.md 作为文档入口
+- [x] 文档迁移：将文档按受众分类迁移到对应目录
+- [x] GitHub 体验优化：减少了根目录的杂乱文件
