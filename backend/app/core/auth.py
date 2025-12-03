@@ -35,3 +35,20 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="无法获取用户信息"
         )
+
+
+async def require_admin(
+    db: AsyncSession,
+    user_id: int = 1  # 简化实现，默认用户ID为1
+) -> User:
+    """
+    要求当前用户具备管理员权限，否则403。
+    供plugin_admin和后续admin-only接口使用。
+    """
+    current_user = await get_current_user(db, user_id)
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    return current_user

@@ -480,6 +480,8 @@ VabHub 系统总览（单一事实来源）
   为通知相关测试补齐 get_session 历史兼容别名，消除 ImportError，保证 pytest 可以完成收集。
 - **2025-12-04 – CI-BACKEND-ASYNCSESSION-FIX-1 完成**：
   修复 app.main 兼容模块导入错误 & FastAPI 中 AsyncSession 依赖声明错误，保证后端 pytest 能顺利完成收集。
+- **2025-12-04 – CI-BACKEND-REQUIRE-ADMIN-1 完成**：
+  修复 plugin_admin 对 require_admin 的依赖，统一使用 DbSessionDep 和 CurrentAdminUserDep 依赖注入模式。
 - （此处由后续任务持续追加）
 
 ---
