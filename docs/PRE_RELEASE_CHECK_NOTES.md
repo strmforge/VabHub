@@ -155,3 +155,9 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [x] scripts/dev_check_backend.sh 在 CI 环境下严格检查 pytest 安装，本地环境可宽松跳过
 - [x] CI 工作流中注入 VABHUB_CI=1 环境变量，确保脚本在 CI 环境下正确运行
 - [x] CI 工作流使用 requirements-dev.txt 安装所有必要依赖，确保 pytest 可用
+
+## 19. 后端运行依赖检查
+
+- [x] 后端 requirements.txt 中包含 psutil、zhconv 和 pypinyin 依赖
+- [x] CI 环境中，uvicorn backend.main:app 能正常启动并通过 /health 探活
+- [x] 搜索模块所需的 zhconv 和 pypinyin 依赖已补齐，避免功能退化和 CI 噪音

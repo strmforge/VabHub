@@ -473,6 +473,9 @@ VabHub 系统总览（单一事实来源）
 - **2025-12-04 – CI-BACKEND-PYTEST-3 完成**：
   修复 email-validator 依赖 & app.main 兼容模块 & 测试语法错误，保证后端 pytest 能在 CI 中完整启动。
   解决了 email-validator 缺失、app.main 导入错误、测试文件语法错误等问题。
+- **2025-12-04 – CI-BACKEND-UVICORN-PSUTIL-1 完成**：
+  补齐 psutil + 搜索扩展依赖，修复后端健康检查启动失败问题。
+  解决了 CI 中 uvicorn 启动失败、健康检查无法通过的问题，确保后端服务能正常运行。
 - （此处由后续任务持续追加）
 
 ---

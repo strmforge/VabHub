@@ -11,6 +11,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
+    env:
+      VABHUB_CI: "1"
 
     steps:
       - name: Checkout repository
@@ -24,7 +27,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Start backend server
         working-directory: backend
