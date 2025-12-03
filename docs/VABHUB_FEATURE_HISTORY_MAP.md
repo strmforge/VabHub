@@ -45,6 +45,7 @@
 2025-12  REPO-DOCS-PUBLIC-1：完成文档精简 + 公共部署说明强化
 2025-12  REPO-DOCS-ROOT-MD-TRIM-1：根目录 Markdown 文档清理
 2025-12  REPO-SCRIPTS-ORGANIZE-1：根目录脚本归档与规范化
+2025-12  CI-FRONTEND-PNPM-1：前端 CI 工具链调整，统一使用 Node 20 + pnpm/action-setup 安装 pnpm
 ```
 
 ---
@@ -125,4 +126,4 @@
 
 ---
 
-*最后更新：2025-12-03 RELEASE-NOTES-RC1-1*
+*最后更新：2025-12-04 CI-FRONTEND-PNPM-1*

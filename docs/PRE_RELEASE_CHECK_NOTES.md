@@ -135,3 +135,10 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [ ] README.md 中的 Docker Compose 示例是否最新
 - [ ] docs/user/GETTING_STARTED.md 中的 Docker Compose 示例是否最新
 - [ ] docs/user/DEPLOY_WITH_DOCKER.md 中的 Docker Compose 示例是否最新
+
+## 16. CI Node/pnpm 工具链检查
+
+- [x] GitHub Actions 中前端相关 workflow 统一使用 Node 20 + pnpm
+- [x] 所有使用 pnpm 的 workflow 都配置了 actions/setup-node@v4 + pnpm/action-setup@v4 组合
+- [x] pnpm 命令不再报 "Unable to locate executable file: pnpm" 错误
+- [x] 已为 pnpm-lock.yaml 配置了 cache-dependency-path 以提高缓存命中率
