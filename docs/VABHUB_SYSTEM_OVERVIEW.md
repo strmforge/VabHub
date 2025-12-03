@@ -457,6 +457,8 @@ VabHub 系统总览（单一事实来源）
   在真实 Docker 环境中完成 0.1.0-rc1 的 docker-compose 首跑与核心功能冒烟检查，确认 Docker 部署路径可用，并将经验回写到部署与预发布文档。
 - **2025-12-03 – REPO-HYGIENE-1 完成**：  
   完成仓库文档瘦身与 LICENSE 补齐，建立文档分层结构（user/admin/dev/internal），优化 GitHub 访客体验，添加 MIT License。
+- **2025-12-03 – REPO-DOCS-PUBLIC-1 完成**：  
+  公开仓库文档精简 & Docker Compose 可视化部署说明强化，精简公共仓库文档，仅保留系统总览/AI 总览/前端地图/部署与上手指南/版本历史等核心文档；大量阶段总结/测试报告从仓库移除或转为本地笔记；补充 README / GETTING_STARTED / DEPLOY_WITH_DOCKER 中的 Docker Compose 示例，使 Docker-only 部署路径对新用户更直观。
 - （此处由后续任务持续追加）
 
 ---

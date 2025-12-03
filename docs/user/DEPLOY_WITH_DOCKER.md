@@ -36,39 +36,236 @@ cp .env.docker.example .env.docker
 - `SECRET_KEY` 和 `JWT_SECRET_KEY`：设置为强随机字符串
 - `TMDB_API_KEY`：填写您的 TMDB API Key（获取地址：https://www.themoviedb.org/settings/api）
 
-### 步骤 3：启动服务
+### 步骤 3：Docker Compose 配置
+
+VabHub 使用 Docker Compose 管理所有服务。以下是完整的 `docker-compose.yml` 示例，与仓库中提供的配置保持一致：
+
+```yaml
+# VabHub Docker Compose 配置
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库：存储应用数据
+  db:
+    image: postgres:14-alpine
+    container_name: vabhub-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vabhub}
+      POSTGRES_USER: ${DB_USER:-vabhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vabhub_password}
+    volumes:
+      - vabhub_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-vabhub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # Redis 缓存：提高应用性能
+  redis:
+    image: redis:7-alpine
+    container_name: vabhub-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - vabhub_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # 后端服务：处理核心业务逻辑
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vabhub-backend
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
+      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8092}
+      - PORT=${PORT:-8092}
+      - WORKERS=${WORKERS:-4}
+      - APP_WEB_BASE_URL=${APP_WEB_BASE_URL:-http://localhost:80}
+    volumes:
+      - vabhub_data:/app/data
+      - vabhub_logs:/app/logs
+    ports:
+      - "8092:8092"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # 前端服务：提供用户界面
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8092/api}
+    container_name: vabhub-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+volumes:
+  vabhub_db_data:
+    name: vabhub_db_data
+  vabhub_redis_data:
+    name: vabhub_redis_data
+  vabhub_data:
+    name: vabhub_data
+  vabhub_logs:
+    name: vabhub_logs
+
+networks:
+  vabhub-internal:
+    driver: bridge
+```
+
+### 步骤 4：启动服务
 
 使用 docker-compose 启动所有服务：
 
 ```bash
+# 启动所有服务（后台运行）
 docker compose up -d
+
+# 查看服务状态
+docker compose ps
+
+# 查看日志（可选）
+docker compose logs -f
 ```
 
-### 步骤 4：访问应用
+### 步骤 5：访问应用
 
 等待服务启动完成（约 30 秒），然后在浏览器中访问：
 
-- 前端页面：http://<宿主机 IP>:80
-- 后端 API：http://<宿主机 IP>:8092
-- API 文档：http://<宿主机 IP>:8092/docs
+- **前端页面**：http://<宿主机 IP>:80
+- **后端 API**：http://<宿主机 IP>:8092
+- **API 文档**：http://<宿主机 IP>:8092/docs
 
-## §2. 目录与卷说明
+### 步骤 6：创建初始用户
 
-| 宿主机路径 | 容器内路径 | 用途 |
-|------------|------------|------|
-| 自动创建的 Docker 卷 | `/var/lib/postgresql/data` | PostgreSQL 数据库数据 |
-| 自动创建的 Docker 卷 | `/data` | Redis 缓存数据 |
-| 自动创建的 Docker 卷 | `/app/data` | VabHub 应用数据（媒体库、配置等） |
-| 自动创建的 Docker 卷 | `/app/logs` | VabHub 应用日志 |
+首次部署后，通过以下方式创建初始用户：
 
-### 自定义媒体库路径（可选）
+1. 访问 API 文档：http://<宿主机 IP>:8092/docs
+2. 找到 `/api/auth/register` 接口
+3. 点击 "Try it out" 按钮
+4. 填写用户名、邮箱和密码
+5. 点击 "Execute" 按钮完成注册
 
-如果您希望将媒体库数据存储在自定义路径，可以修改 `docker-compose.yml`，添加自定义卷挂载：
+## §2. Docker Compose 详解
+
+### 2.1 核心服务说明
+
+| 服务 | 镜像 | 端口 | 功能 |
+|------|------|------|------|
+| `db` | `postgres:14-alpine` | 无（内部网络） | PostgreSQL 数据库，存储所有应用数据 |
+| `redis` | `redis:7-alpine` | 无（内部网络） | Redis 缓存，提高应用性能 |
+| `backend` | 本地构建 | 8092 | 后端服务，处理核心业务逻辑 |
+| `frontend` | 本地构建 | 80 | 前端服务，提供用户界面 |
+
+### 2.2 自定义配置选项
+
+#### 2.2.1 自定义端口
+
+如果需要修改服务端口，可以编辑 `docker-compose.yml` 文件中的 `ports` 配置：
+
+```yaml
+# 修改前端端口为 8080
+frontend:
+  ports:
+    - "8080:80"
+
+# 修改后端端口为 9000
+backend:
+  ports:
+    - "9000:8092"
+```
+
+同时需要修改 `.env.docker` 中的相应环境变量：
+
+```bash
+APP_BASE_URL=http://localhost:9000
+APP_WEB_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:9000/api
+```
+
+#### 2.2.2 自定义挂载路径
+
+如果需要将数据存储在自定义路径，可以修改 `docker-compose.yml` 文件：
 
 ```yaml
 volumes:
-  - /path/to/your/medias:/app/data
+  vabhub_db_data:
+    name: vabhub_db_data
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /path/to/your/db/data
+  vabhub_data:
+    name: vabhub_data
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /path/to/your/app/data
+  vabhub_logs:
+    name: vabhub_logs
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /path/to/your/app/logs
 ```
+
+#### 2.2.3 调整资源限制
+
+可以为服务添加资源限制，避免占用过多系统资源：
+
+```yaml
+backend:
+  # ... 其他配置 ...
+  deploy:
+    resources:
+      limits:
+        cpus: '2.0'
+        memory: 4G
+      reservations:
+        cpus: '1.0'
+        memory: 2G
+```
+
+### 2.3 官方支持说明
+
+**重要提示**：VabHub 官方推荐且唯一维护的部署方式是 **Docker / docker-compose 部署**。其他运行方式（裸机 Python、k8s 等）仅面向开发者/高级用户，暂不提供详细教程和官方支持。
+
+所有 Docker Compose 配置示例与仓库中的 `docker-compose.yml` 文件保持一致。如果未来需要修改 Compose 配置，必须同步更新以下文档：
+
+1. `README.md` - 快速开始部分的 Docker Compose 示例
+2. `docs/user/GETTING_STARTED.md` - 详细部署步骤中的 Docker Compose 说明
+3. `docs/user/DEPLOY_WITH_DOCKER.md` - 完整部署指南中的 Docker Compose 配置
 
 ## §3. 环境变量说明（精简版）
 

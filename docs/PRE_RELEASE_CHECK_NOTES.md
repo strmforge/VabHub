@@ -112,3 +112,16 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [x] 文档索引：创建了 docs/INDEX.md 作为文档入口
 - [x] 文档迁移：将文档按受众分类迁移到对应目录
 - [x] GitHub 体验优化：减少了根目录的杂乱文件
+
+## 12. 公开仓库文档检查
+
+- [ ] 公开仓库文档数量是否保持精简（无新增大批开发总结文档）
+- [ ] 公开文档白名单是否严格执行
+- [ ] 临时/测试文档是否存放在 local-notes/ 目录
+
+## 13. Docker Compose 同步检查
+
+- [ ] 文档中的 Docker Compose 示例与仓库中的 docker-compose.yml 是否同步
+- [ ] README.md 中的 Docker Compose 示例是否最新
+- [ ] docs/user/GETTING_STARTED.md 中的 Docker Compose 示例是否最新
+- [ ] docs/user/DEPLOY_WITH_DOCKER.md 中的 Docker Compose 示例是否最新

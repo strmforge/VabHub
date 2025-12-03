@@ -42,6 +42,7 @@
 2025-12  NAV-STRUCTURE-CLEANUP-1：前端导航分组统一，AI 中心入口落地
 2025-12  CONFIG-SELF-CHECK-1：配置总览与自检指南统一
 2025-12  RELEASE-NOTES-RC1-1：VabHub 0.1.0-rc1 内部 RC 版本发布，统一版本号与元数据
+2025-12  REPO-DOCS-PUBLIC-1：完成文档精简 + 公共部署说明强化
 ```
 
 ---

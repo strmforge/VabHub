@@ -26,32 +26,81 @@ VabHub 是一个面向 **NAS/PT 玩家** 的本地优先「搜索 · 下载 · �
 
 ### 2.1 推荐：Docker 部署（官方支持）
 
-#### 快速部署步骤
+#### 详细部署步骤
 
+##### 1. 克隆仓库
 ```bash
-# 1. 克隆仓库
 git clone https://github.com/your-username/vabhub.git
 cd vabhub
-
-# 2. 配置环境变量
-cp .env.docker.example .env.docker
-# 编辑 .env.docker，至少配置：
-# - TMDB_API_KEY=your-tmdb-key
-# - SECRET_KEY 和 JWT_SECRET_KEY 设置为强随机字符串
-
-# 3. 启动服务
-docker compose up -d
 ```
 
-默认访问地址：
-- 前端：http://localhost:80
-- 后端：http://localhost:8092
-- API文档：http://localhost:8092/docs
+##### 2. 准备环境变量
+
+```bash
+# 复制环境变量模板
+cp .env.docker.example .env.docker
+```
+
+**编辑 `.env.docker` 文件，配置必要参数**：
+
+```bash
+# 媒体信息服务
+TMDB_API_KEY=your-tmdb-key  # 从 https://www.themoviedb.org/ 获取
+
+# 安全密钥（必须修改）
+SECRET_KEY=your-strong-random-string  # 建议使用 openssl rand -hex 32 生成
+JWT_SECRET_KEY=another-strong-random-string  # 建议使用 openssl rand -hex 32 生成
+
+# 应用配置
+APP_BASE_URL=http://localhost:8092  # 后端访问地址
+APP_WEB_BASE_URL=http://localhost:80  # 前端访问地址
+VITE_API_BASE_URL=http://localhost:8092/api  # 前端调用后端的 API 地址
+```
+
+##### 3. 检查 Docker 配置
+
+VabHub 使用 Docker Compose 管理多个服务，核心服务包括：
+
+| 服务 | 功能 | 端口 | 挂载卷 |
+|------|------|------|--------|
+| `db` | PostgreSQL 数据库 | 无（内部网络） | `vabhub_db_data` |
+| `redis` | 缓存服务 | 无（内部网络） | `vabhub_redis_data` |
+| `backend` | 后端应用 | 8092 | `vabhub_data`（应用数据）、`vabhub_logs`（日志） |
+| `frontend` | 前端应用 | 80 | 无 |
+
+##### 4. 启动服务
+
+```bash
+# 启动所有服务（后台运行）
+docker compose up -d
+
+# 查看服务状态
+docker compose ps
+
+# 查看日志（可选）
+docker compose logs -f
+```
+
+##### 5. 首次访问
+
+服务启动后，通过以下地址访问：
+
+- **前端 UI**：http://localhost:80
+- **后端 API**：http://localhost:8092
+- **API 文档**：http://localhost:8092/docs
 
 **部署后第一次打开 VabHub**：
-- 首次进入建议先看首页 Dashboard 和系统&设置模块，确认整体健康状态
-- 访问 API 文档（http://localhost:8092/docs）可创建初始用户
-- 首次启动时，部分高级功能默认关闭，可根据需要在设置中开启
+1. 访问 API 文档（http://localhost:8092/docs）创建初始用户
+2. 用创建的用户登录前端 UI
+3. 查看首页 Dashboard 确认系统状态
+4. 进入「系统 & 设置」页面配置下载器和站点
+5. 进入「站点管理」添加 PT 站点
+
+##### 6. 后续操作
+
+- **停止服务**：`docker compose down`
+- **重启服务**：`docker compose restart`
+- **更新服务**：`git pull && docker compose up -d --build`
 
 **完整 Docker 部署指南**：请阅读 [DEPLOY_WITH_DOCKER.md](DEPLOY_WITH_DOCKER.md)
 

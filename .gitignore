@@ -89,3 +89,6 @@ backend/logs/
 *.tar
 *.tar.gz
 
+# Local development notes
+local-notes/
+

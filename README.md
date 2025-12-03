@@ -31,16 +31,64 @@ VabHub 是面向 **NAS/PT 玩家** 的本地优先媒体自动化中枢，打通
 
 VabHub 仅提供 Docker 部署方式的官方支持。
 
+#### 1. 克隆项目
 ```bash
-# 1. 克隆项目
 git clone https://github.com/your-username/vabhub.git
 cd vabhub
+```
 
-# 2. 配置环境变量
+#### 2. 配置环境变量
+```bash
 cp .env.docker.example .env.docker
 # 编辑 .env.docker 文件，配置必要参数
+```
 
-# 3. 启动服务
+#### 3. Docker Compose 配置示例
+
+以下是 VabHub 的核心 Docker Compose 配置，完整配置请参考仓库中的 `docker-compose.yml` 文件：
+
+```yaml
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库：存储应用数据
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: vabhub
+      POSTGRES_USER: vabhub
+      POSTGRES_PASSWORD: vabhub_password
+    volumes:
+      - vabhub_db_data:/var/lib/postgresql/data
+
+  # Redis 缓存：提高应用性能
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - vabhub_redis_data:/data
+
+  # 后端服务：处理核心业务逻辑
+  backend:
+    build: ./backend
+    environment:
+      - DATABASE_URL=postgresql://vabhub:vabhub_password@db:5432/vabhub
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - vabhub_data:/app/data
+      - vabhub_logs:/app/logs
+    ports:
+      - "8092:8092"
+
+  # 前端服务：提供用户界面
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+```
+
+#### 4. 启动服务
+```bash
 docker compose up -d
 ```
 
@@ -48,6 +96,15 @@ docker compose up -d
 - 前端：http://localhost:80
 - 后端：http://localhost:8092
 - API 文档：http://localhost:8092/docs
+
+#### 服务说明
+
+| 服务 | 用途 | 端口 | 挂载卷 |
+|------|------|------|--------|
+| `db` | PostgreSQL 数据库，存储所有应用数据 | 无（内部网络） | `vabhub_db_data` |
+| `redis` | Redis 缓存，提高应用性能 | 无（内部网络） | `vabhub_redis_data` |
+| `backend` | 后端服务，处理核心业务逻辑 | 8092 | `vabhub_data`（应用数据）、`vabhub_logs`（日志） |
+| `frontend` | 前端服务，提供用户界面 | 80 | 无 |
 
 ## 📚 文档
 
