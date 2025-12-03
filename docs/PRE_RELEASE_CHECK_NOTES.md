@@ -124,7 +124,12 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [ ] 仓库根目录是否仅包含 README/CHANGELOG/LICENSE 与必要配置/代码文件，不存在额外 Markdown 文档
 - [ ] 如发现新建 root-level .md 文件，需迁移到 docs 或 local-notes 并从仓库移除
 
-## 14. Docker Compose 同步检查
+## 14. 根目录脚本检查
+
+- [ ] 仓库根目录是否不存在任何脚本文件（.bat/.ps1/.py）
+- [ ] 所有脚本是否集中在 scripts/** 目录下
+
+## 15. Docker Compose 同步检查
 
 - [ ] 文档中的 Docker Compose 示例与仓库中的 docker-compose.yml 是否同步
 - [ ] README.md 中的 Docker Compose 示例是否最新

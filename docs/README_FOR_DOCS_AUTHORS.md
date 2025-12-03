@@ -130,7 +130,19 @@
   - 要么只放在本地 local-notes/，不加入 Git
 - **约束说明**：自 REPO-DOCS-ROOT-MD-TRIM-1 任务完成起，严格执行此规则，防止根目录再次堆积开发文档。
 
-#### 1.5.5 内部文档（docs/internal/）
+### 1.5.5 脚本文件规范
+
+- **禁止在仓库根目录新增任何脚本文件**（.bat, .ps1, .py 等）
+- **所有脚本必须放入 scripts/ 及其子目录**：
+  - `scripts/windows/`：Windows 开发/调试脚本
+  - `scripts/python/`：Python 测试/辅助脚本
+  - `scripts/tools/`：仓库维护/运维工具脚本
+- **文档优先推荐 Docker 部署**：
+  - 能通过 Docker 部署完成的场景，文档优先描述 Docker 流程
+  - 不再指导用户执行根目录脚本
+- **约束说明**：自 REPO-SCRIPTS-ORGANIZE-1 任务完成起，严格执行此规则，防止根目录再次堆积脚本文件。
+
+#### 1.5.6 内部文档（docs/internal/）
 - 定位：仅供项目维护者使用的内部文档
 - 内容：
   - 项目计划
