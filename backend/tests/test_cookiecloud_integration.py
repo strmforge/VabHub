@@ -373,7 +373,7 @@ class TestCookieCloudIntegration:
         # Mock客户端在处理第二个站点时失败
         mock_client = AsyncMock()
         
-        async failing_get_cookies(*args, **kwargs):
+        async def failing_get_cookies(*args, **kwargs):
             raise Exception("Database error during sync")
         
         mock_client.get_cookies = failing_get_cookies

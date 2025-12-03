@@ -6,6 +6,7 @@ import pytest
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.inbox import InboxRunLog
 from app.modules.inbox.models import InboxItem
 from app.modules.inbox.media_detection.base import MediaTypeGuess

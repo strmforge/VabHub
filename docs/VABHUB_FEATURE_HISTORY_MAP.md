@@ -48,6 +48,7 @@
 2025-12  CI-FRONTEND-PNPM-1：前端 CI 工具链调整，统一使用 Node 20 + pnpm/action-setup 安装 pnpm
 2025-12  CI-BACKEND-AIOSQLITE-1：修复后端 CI 中缺失 aiosqlite 导致 API 启动失败的问题
 2025-12  CI-BACKEND-PYTEST-2：后端自检脚本与 CI 测试依赖收敛，确保 CI 环境下必跑 pytest
+2025-12  CI-BACKEND-PYTEST-3：修复 email-validator 依赖、app.main 兼容模块、测试语法错误，确保后端 pytest 能完整启动
 ```
 
 ---
@@ -128,4 +129,4 @@
 
 ---
 
-*最后更新：2025-12-04 CI-BACKEND-PYTEST-2*
+*最后更新：2025-12-04 CI-BACKEND-PYTEST-3*

@@ -470,6 +470,9 @@ VabHub 系统总览（单一事实来源）
 - **2025-12-04 – CI-BACKEND-PYTEST-2 完成**：
   后端自检脚本与 GitHub CI 测试依赖收敛，确保 CI 环境下必跑 pytest，避免"测试未运行但流水线显示通过"的情况。
   新建 requirements-dev.txt 统一管理测试依赖，修改脚本在 CI 环境下严格检查 pytest 安装。
+- **2025-12-04 – CI-BACKEND-PYTEST-3 完成**：
+  修复 email-validator 依赖 & app.main 兼容模块 & 测试语法错误，保证后端 pytest 能在 CI 中完整启动。
+  解决了 email-validator 缺失、app.main 导入错误、测试文件语法错误等问题。
 - （此处由后续任务持续追加）
 
 ---
