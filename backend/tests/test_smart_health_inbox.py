@@ -5,6 +5,7 @@
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.inbox import InboxRunLog
 from app.api.smart_health import smart_health
 

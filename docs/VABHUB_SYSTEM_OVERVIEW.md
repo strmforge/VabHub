@@ -476,6 +476,8 @@ VabHub 系统总览（单一事实来源）
 - **2025-12-04 – CI-BACKEND-UVICORN-PSUTIL-1 完成**：
   补齐 psutil + 搜索扩展依赖，修复后端健康检查启动失败问题。
   解决了 CI 中 uvicorn 启动失败、健康检查无法通过的问题，确保后端服务能正常运行。
+- **2025-12-04 – CI-BACKEND-NOTIFY-GET-SESSION-1 完成**：
+  为通知相关测试补齐 get_session 历史兼容别名，消除 ImportError，保证 pytest 可以完成收集。
 - （此处由后续任务持续追加）
 
 ---

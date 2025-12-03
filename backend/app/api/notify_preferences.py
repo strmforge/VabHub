@@ -8,10 +8,8 @@ NOTIFY-UX-1 实现
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.core.auth import get_current_user
+from app.core.deps import DbSessionDep, CurrentUserDep
 from app.models.user import User
 from app.schemas.notify_preferences import (
     UserNotifyPreferenceCreate,
@@ -33,8 +31,8 @@ router = APIRouter(prefix="/notify/preferences", tags=["notify-preferences"])
 
 @router.get("/matrix", response_model=UserNotifyPreferenceMatrix)
 async def get_preference_matrix(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     获取当前用户的完整通知偏好矩阵
@@ -52,8 +50,8 @@ async def get_preference_matrix(
 @router.put("", response_model=UserNotifyPreferenceRead)
 async def upsert_preference(
     data: UserNotifyPreferenceUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     创建或更新通知偏好
@@ -69,8 +67,8 @@ async def upsert_preference(
 @router.delete("/{preference_id}")
 async def delete_preference(
     preference_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """删除通知偏好（恢复默认行为）"""
     success = await notify_preference_service.delete_preference(db, current_user.id, preference_id)
@@ -83,8 +81,8 @@ async def delete_preference(
 
 @router.get("/snooze", response_model=Optional[UserNotifySnoozeRead])
 async def get_snooze_status(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """获取当前用户的静音/Snooze 状态"""
     snooze = await notify_preference_service.get_user_snooze(db, current_user.id)
@@ -96,8 +94,8 @@ async def get_snooze_status(
 @router.put("/snooze", response_model=UserNotifySnoozeRead)
 async def update_snooze(
     data: UserNotifySnoozeUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     更新静音/Snooze 状态
@@ -120,8 +118,8 @@ async def update_snooze(
 @router.post("/snooze/quick", response_model=UserNotifySnoozeRead)
 async def quick_snooze(
     data: SnoozeRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     快速 Snooze
@@ -147,8 +145,8 @@ async def quick_snooze(
 
 @router.delete("/snooze")
 async def clear_snooze(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """清除静音/Snooze 状态（恢复正常）"""
     await notify_preference_service.clear_snooze(db, current_user.id)
@@ -160,8 +158,8 @@ async def clear_snooze(
 @router.post("/mute-type")
 async def mute_notification_type(
     data: MuteNotificationTypeRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     静音某类通知
@@ -185,8 +183,8 @@ async def mute_notification_type(
 @router.post("/unmute-type")
 async def unmute_notification_type(
     data: MuteNotificationTypeRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     取消静音某类通知

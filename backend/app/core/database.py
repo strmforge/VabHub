@@ -61,6 +61,7 @@ async def get_db() -> AsyncSession:
 
 # 为兼容性添加别名
 get_async_session = get_db
+get_session = get_db
 
 
 async def init_db():

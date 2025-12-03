@@ -50,6 +50,7 @@
 2025-12  CI-BACKEND-PYTEST-2：后端自检脚本与 CI 测试依赖收敛，确保 CI 环境下必跑 pytest
 2025-12  CI-BACKEND-PYTEST-3：修复 email-validator 依赖、app.main 兼容模块、测试语法错误，确保后端 pytest 能完整启动
 2025-12  CI-BACKEND-UVICORN-PSUTIL-1：补齐 psutil + 搜索扩展依赖，修复后端健康检查启动失败问题
+2025-12  CI-BACKEND-NOTIFY-GET-SESSION-1：为通知相关测试补齐 get_session 历史兼容别名，消除 ImportError，保证 pytest 可以完成收集
 ```
 
 ---
@@ -130,4 +131,4 @@
 
 ---
 
-*最后更新：2025-12-04 CI-BACKEND-UVICORN-PSUTIL-1*
+*最后更新：2025-12-04 CI-BACKEND-NOTIFY-GET-SESSION-1*
