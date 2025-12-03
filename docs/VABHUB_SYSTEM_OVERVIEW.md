@@ -459,6 +459,8 @@ VabHub 系统总览（单一事实来源）
   完成仓库文档瘦身与 LICENSE 补齐，建立文档分层结构（user/admin/dev/internal），优化 GitHub 访客体验，添加 MIT License。
 - **2025-12-03 – REPO-DOCS-PUBLIC-1 完成**：  
   公开仓库文档精简 & Docker Compose 可视化部署说明强化，精简公共仓库文档，仅保留系统总览/AI 总览/前端地图/部署与上手指南/版本历史等核心文档；大量阶段总结/测试报告从仓库移除或转为本地笔记；补充 README / GETTING_STARTED / DEPLOY_WITH_DOCKER 中的 Docker Compose 示例，使 Docker-only 部署路径对新用户更直观。
+- **2025-12-03 – REPO-DOCS-ROOT-MD-TRIM-1 完成**：  
+  仓库根目录 Markdown 文档彻底清理，将根目录大量历史实施总结/测试报告类 Markdown 文档从公共仓库移除，仅保留 README/CHANGELOG；对保留内容进行汇总沉淀到 LEGACY 实施笔记与 VABHUB_FEATURE_HISTORY_MAP 中，额外文本只保存在本地 local-notes/，显著提升 GitHub 仓库首页可读性。
 - （此处由后续任务持续追加）
 
 ---
