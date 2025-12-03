@@ -1,0 +1,77 @@
+# VabHub 后端依赖
+
+# Web框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# 数据库
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9  # PostgreSQL支持
+aiosqlite==0.19.0  # SQLite异步支持
+
+# 认证和安全
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+pycryptodome==3.19.0  # CookieCloud加密解密支持
+
+# HTTP客户端
+httpx==0.25.2
+aiohttp==3.9.1
+requests==2.31.0
+
+# 缓存
+redis==5.0.1
+hiredis==2.2.3
+
+# 任务队列
+celery==5.3.4
+redis==5.0.1
+
+# 定时任务
+apscheduler==3.10.4
+
+# 数据处理
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# 日志
+loguru==0.7.2
+
+# 工具库
+python-dateutil==2.8.2
+pytz==2023.3
+pyyaml==6.0.1
+jinja2==3.1.2
+
+# 媒体处理
+python-magic==0.4.27
+mutagen==1.47.0
+
+# 文件操作
+aiofiles==23.2.1
+pathlib==1.0.1
+
+# 系统监控
+psutil==5.9.6
+
+# 通知
+python-telegram-bot==20.7
+# smtplib是Python标准库，不需要安装
+
+# WebSocket
+websockets==12.0
+
+# 测试
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+
+# 开发工具
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+

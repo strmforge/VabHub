@@ -1,0 +1,15 @@
+{
+  "official": [
+    {
+      "id": "example_pt_site",
+      "name": "示例 PT 插件",
+      "description": "官方示例，演示 PT 站点订阅与下载流程。",
+      "version": "0.1.0",
+      "tags": ["official", "pt"],
+      "homepage": "https://github.com/vabhub",
+      "download_url": "https://raw.githubusercontent.com/vabhub/vabhub/main/plugins/example_pt_site.py"
+    }
+  ]
+}
+
+

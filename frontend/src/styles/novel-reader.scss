@@ -1,0 +1,242 @@
+/**
+ * 小说阅读器样式
+ * 
+ * 包含主题、字号、移动端适配等样式
+ */
+
+// 主题颜色定义
+$theme-light-bg: #f5f5f5;
+$theme-light-content-bg: #ffffff;
+$theme-light-text: #222222;
+
+$theme-dark-bg: #121212;
+$theme-dark-content-bg: #1e1e1e;
+$theme-dark-text: #e0e0e0;
+
+$theme-sepia-bg: #f5ecd8;
+$theme-sepia-content-bg: #faf5eb;
+$theme-sepia-text: #3b2f2f;
+
+// 阅读器根容器
+.novel-reader {
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  // 主题样式
+  &.theme-light {
+    background-color: $theme-light-bg;
+    color: $theme-light-text;
+
+    .novel-reader-content {
+      background-color: $theme-light-content-bg;
+    }
+  }
+
+  &.theme-dark {
+    background-color: $theme-dark-bg;
+    color: $theme-dark-text;
+
+    .novel-reader-content {
+      background-color: $theme-dark-content-bg;
+    }
+  }
+
+  &.theme-sepia {
+    background-color: $theme-sepia-bg;
+    color: $theme-sepia-text;
+
+    .novel-reader-content {
+      background-color: $theme-sepia-content-bg;
+    }
+  }
+
+  // 字号样式
+  &.font-xs {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  &.font-sm {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  &.font-md {
+    font-size: 18px;
+    line-height: 1.8;
+  }
+
+  &.font-lg {
+    font-size: 20px;
+    line-height: 1.8;
+  }
+
+  &.font-xl {
+    font-size: 22px;
+    line-height: 1.9;
+  }
+}
+
+// 阅读器内容区域
+.novel-reader-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  transition: background-color 0.3s ease;
+
+  p {
+    margin: 0 0 0.85em;
+  }
+
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+    margin: 0;
+  }
+}
+
+// 阅读器工具栏
+.reader-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(var(--v-border-opacity), var(--v-border-opacity));
+
+  .left {
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-weight: 500;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chapter {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 4px;
+    }
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+// 移动端适配
+@media (max-width: 960px) {
+  .novel-reader {
+    // 移动端阅读区域铺满宽度
+    .novel-reader-content {
+      max-width: 100%;
+      padding: 16px;
+    }
+
+    // 隐藏桌面端章节列表
+    .novel-reader-chapter-list-desktop {
+      display: none !important;
+    }
+
+    // 显示移动端章节按钮
+    .novel-reader-chapter-button-mobile {
+      display: block !important;
+    }
+  }
+
+  // 桌面端隐藏移动端按钮
+  .novel-reader-chapter-button-mobile {
+    display: none;
+  }
+
+  // 移动端底部导航栏
+  .novel-reader-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: inherit;
+    border-top: 1px solid rgba(var(--v-border-opacity), var(--v-border-opacity));
+    z-index: 100;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+
+    .nav-button {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  // 移动端阅读区域需要底部留白（避免被底部导航栏遮挡）
+  .novel-reader-content-mobile {
+    padding-bottom: 80px;
+  }
+}
+
+// 桌面端显示章节列表
+@media (min-width: 961px) {
+  .novel-reader-chapter-list-desktop {
+    display: block !important;
+  }
+
+  .novel-reader-chapter-button-mobile {
+    display: none !important;
+  }
+
+  .novel-reader-bottom-nav {
+    display: none !important;
+  }
+}
+
+// 章节列表项状态样式
+.chapter-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.read {
+    opacity: 0.6;
+  }
+
+  &.current {
+    font-weight: 600;
+    border-left: 3px solid rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.08);
+  }
+
+  &.unread {
+    opacity: 1;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+// 搜索对话框样式
+.v-dialog {
+  .v-list-item {
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  mark {
+    background-color: rgba(var(--v-theme-warning), 0.3);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+}
+

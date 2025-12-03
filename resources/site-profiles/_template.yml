@@ -1,0 +1,60 @@
+meta:
+  id: _template
+  name: 示例站
+  family: nexusphp        # 站点类型（NexusPHP/Gazelle/Unit3D等）
+  version: 1.0.0
+  domains: ["https://example.test"]
+
+verify:                    # 站点验证规则
+  any:
+    - meta_generator_equals: "NexusPHP"
+    - title_contains: "NexusPHP"
+    - selector_exists: "table.torrents"
+
+parse:                     # 解析规则
+  list:                    # 列表解析（种子列表等）
+    row: "table.torrents > tbody > tr"
+    fields:
+      title_raw: 
+        selector: "a[href*='details.php?id=']"
+        text: true
+      size_bytes: 
+        selector: "td.size"
+        text: true
+        transform: "size"
+      seeders: 
+        selector: "td.seeders"
+        text: true
+        transform: "int"
+      leechers: 
+        selector: "td.leechers"
+        text: true
+        transform: "int"
+  
+  detail:                  # 详情解析（种子详情等）
+    fields:
+      title: 
+        selector: "h1.title"
+        text: true
+      description: 
+        selector: "div.description"
+        text: true
+  
+  user:                    # 用户信息解析
+    fields:
+      username: 
+        selector: "span.username"
+        text: true
+      upload: 
+        selector: "td.upload"
+        text: true
+        transform: "size"
+      download: 
+        selector: "td.download"
+        text: true
+        transform: "size"
+      ratio: 
+        selector: "td.ratio"
+        text: true
+        transform: "float"
+

@@ -1,0 +1,13 @@
+site: ttg
+hr:
+  enabled: false
+inbox:
+  enabled: true
+  parser: "ttg_inbox"
+  pm_keywords:
+    delete: ["種子已被刪除", "种子被删除", "has been deleted"]
+site_guard:
+  enabled: true
+  default_safe_scan_minutes: 12
+  default_safe_pages_per_hour: 200
+

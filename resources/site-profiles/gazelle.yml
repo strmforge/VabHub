@@ -1,0 +1,71 @@
+meta:
+  id: gazelle
+  name: Gazelle通用配置
+  family: gazelle
+  version: 1.0.0
+  domains: []  # 通用配置，不限制域名
+
+verify:
+  any:
+    - meta_generator_equals: "Gazelle"
+    - title_contains: "Gazelle"
+    - selector_exists: "div.torrent_table"
+    - selector_exists: "table.torrent_table"
+
+parse:
+  list:
+    row: "table.torrent_table > tbody > tr.group, table.torrent_table > tbody > tr.torrent"
+    fields:
+      title_raw:
+        selector: "a[href*='/torrents.php?id='], a[href*='/torrents.php?torrentid=']"
+        text: true
+      size_bytes:
+        selector: "td.number_column"
+        text: true
+        transform: "size"
+      seeders:
+        selector: "td.number_column"
+        text: true
+        transform: "int"
+      leechers:
+        selector: "td.number_column"
+        text: true
+        transform: "int"
+      upload_time:
+        selector: "td.time"
+        text: true
+  
+  detail:
+    fields:
+      title:
+        selector: "h2.torrent_title"
+        text: true
+      description:
+        selector: "div.torrent_description"
+        text: true
+      download_link:
+        selector: "a[href*='/torrents.php?action=download&id=']"
+        attr: "href"
+  
+  user:
+    fields:
+      username:
+        selector: "span.username, a.username"
+        text: true
+      upload:
+        selector: "td.upload, span.upload"
+        text: true
+        transform: "size"
+      download:
+        selector: "td.download, span.download"
+        text: true
+        transform: "size"
+      ratio:
+        selector: "td.ratio, span.ratio"
+        text: true
+        transform: "float"
+      seeding:
+        selector: "td.seeding, span.seeding"
+        text: true
+        transform: "int"
+

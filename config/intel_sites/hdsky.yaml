@@ -1,0 +1,19 @@
+site: hdsky
+hr:
+  enabled: true
+  mode: "TASK_LIST"
+  disappear_semantics: "UNKNOWN"
+  max_observe_days: 60
+  hr_page_url: "https://hdsky.me/hr.php"
+inbox:
+  enabled: true
+  parser: "nexusphp_inbox"
+  pm_keywords:
+    penalty: ["H&R", "HR 扣分", "HP minus"]
+    delete: ["种子被删除", "Torrent Deleted"]
+    throttle: ["存在异常的浏览行为", "限制该功能访问至"]
+site_guard:
+  enabled: true
+  default_safe_scan_minutes: 8
+  default_safe_pages_per_hour: 150
+

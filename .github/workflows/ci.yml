@@ -1,0 +1,59 @@
+name: VabHub CI
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+    
+    - name: Run backend checks
+      run: |
+        bash scripts/dev_check_backend.sh
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+    
+    - name: Enable corepack
+      run: corepack enable
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        pnpm install
+    
+    - name: Run frontend checks
+      run: |
+        bash scripts/dev_check_frontend.sh

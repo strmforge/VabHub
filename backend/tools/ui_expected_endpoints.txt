@@ -1,0 +1,149 @@
+# VabHub前端期望的API端点清单
+# 格式：HTTP方法 路径（可选，如果没有方法则只写路径）
+# 以#开头的行为注释
+
+# 健康检查
+GET /healthz
+GET /metrics
+
+# 订阅管理
+GET /api/subscriptions
+POST /api/subscriptions
+PUT /api/subscriptions/{sid}
+DELETE /api/subscriptions/{sid}
+POST /api/subscriptions/test
+
+# 规则集
+GET /api/ruleset
+PUT /api/ruleset
+
+# 任务管理
+GET /api/tasks
+POST /api/tasks/{tid}/retry
+DELETE /api/tasks/{tid}
+
+# 刮削器配置
+GET /api/scraper/config
+PUT /api/scraper/config
+POST /api/scraper/test
+
+# 媒体库服务器
+GET /api/library/servers
+POST /api/library/{server}/refresh
+
+# 下载器
+GET /api/dl/instances
+POST /api/dl/{did}/test
+GET /api/dl/{did}/stats
+
+# 存储管理
+GET /api/storage/status
+GET /api/storage/config
+PUT /api/storage/config
+
+# STRM和网关
+POST /api/strm/emit
+POST /api/gateway/sign
+
+# 插件管理
+GET /api/plugins/registry
+POST /api/plugins/{pid}/install
+
+# 密钥管理
+GET /api/secrets/status
+
+# 用户认证
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/auth/me
+
+# 站点管理
+GET /api/sites
+POST /api/sites
+PUT /api/sites/{site_id}
+DELETE /api/sites/{site_id}
+GET /api/sites/{site_id}/icon
+POST /api/sites/{site_id}/icon/refresh
+GET /api/sites/{site_id}/domains
+PUT /api/sites/{site_id}/domains
+POST /api/sites/{site_id}/domains/add
+POST /api/sites/{site_id}/domains/remove
+POST /api/sites/{site_id}/domains/set-active
+POST /api/sites/{site_id}/domains/check-all
+POST /api/sites/{site_id}/profile/identify
+POST /api/sites/{site_id}/profile/parse
+GET /api/sites/{site_id}/profile/family
+GET /api/sites/{site_id}/profile/profiles
+
+# 下载管理
+GET /api/downloads
+POST /api/downloads
+GET /api/downloads/{download_id}
+DELETE /api/downloads/{download_id}
+POST /api/downloads/{download_id}/pause
+POST /api/downloads/{download_id}/resume
+
+# 媒体管理
+GET /api/media
+GET /api/media/{media_id}
+POST /api/media
+PUT /api/media/{media_id}
+DELETE /api/media/{media_id}
+
+# 搜索
+POST /api/search
+GET /api/search/history
+
+# 榜单
+GET /api/charts/music/platforms
+POST /api/charts/music
+GET /api/charts/video/sources
+POST /api/charts/video
+
+# 音乐
+GET /api/music/search
+GET /api/music/tracks/{track_id}
+GET /api/music/charts/platforms
+POST /api/music/charts
+
+# 豆瓣
+GET /api/douban/search
+GET /api/douban/detail/{douban_id}
+GET /api/douban/rating/{douban_id}
+GET /api/douban/top250
+GET /api/douban/hot/movie
+GET /api/douban/hot/tv
+
+# RSSHub
+GET /api/rsshub/sources
+GET /api/rsshub/composites
+POST /api/rsshub/subscriptions/{target_type}/{target_id}/toggle
+GET /api/rsshub/sources/{id}/preview
+
+# STRM
+GET /api/strm/stream/{storage_type}/{token}
+GET /api/strm/subtitle/{storage_type}/{token}
+GET /api/strm/network-info
+POST /api/strm/incremental-sync
+POST /api/strm/full-sync
+POST /api/strm/sync/start
+POST /api/strm/sync/stop
+GET /api/strm/sync/tasks
+GET /api/strm/sync/tasks/{task_id}
+POST /api/strm/sync/tasks/{task_id}/stop
+GET /api/strm/sync/history
+
+# 仪表盘
+GET /api/dashboard
+GET /api/dashboard/stats/system
+GET /api/dashboard/stats/media
+
+# 系统设置
+GET /api/system/settings
+PUT /api/system/settings
+GET /api/system/settings/{key}
+PUT /api/system/settings/{key}
+
+# WebSocket
+WS /api/ws/ws
+

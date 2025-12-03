@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "profiles": {
+    "nexusphp.yml": "1.0.0",
+    "gazelle.yml": "1.0.0",
+    "unit3d.yml": "1.0.0",
+    "discuzx.yml": "1.0.0",
+    "iptorrents.yml": "1.0.0",
+    "torrentleech.yml": "1.0.0",
+    "filelist.yml": "1.0.0",
+    "nexusproject.yml": "1.0.0",
+    "nexusrabbit.yml": "1.0.0",
+    "smallhorse.yml": "1.0.0",
+    "tnode.yml": "1.0.0",
+    "_template.yml": "1.0.0"
+  },
+  "domains": {},
+  "logos": {}
+}
+

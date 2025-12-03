@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-11-13T07:08:18.722927",
+  "total_tests": 5,
+  "passed": 4,
+  "failed": 1,
+  "pass_rate": 80.0,
+  "total_duration": 1.88,
+  "results": {
+    "核心模块": true,
+    "数据库连接": true,
+    "STRM配置": true,
+    "STRM任务管理器": true,
+    "API端点": false
+  },
+  "detailed_results": [
+    {
+      "module": "<module 'app.core.database' from 'F:\\\\VabHub项目\\\\VabHub\\\\backend\\\\app\\\\core\\\\database.py'>",
+      "test_name": "核心模块导入",
+      "passed": true,
+      "details": "3/3个模块可用",
+      "duration": 0.4062774181365967,
+      "timestamp": "2025-11-13T07:08:17.244983"
+    },
+    {
+      "module": "数据库",
+      "test_name": "数据库连接",
+      "passed": true,
+      "details": "",
+      "duration": 0.004999399185180664,
+      "timestamp": "2025-11-13T07:08:17.249982"
+    },
+    {
+      "module": "STRM配置",
+      "test_name": "创建配置",
+      "passed": true,
+      "details": "",
+      "duration": 0.13148093223571777,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "STRM配置",
+      "test_name": "配置字段验证",
+      "passed": true,
+      "details": "",
+      "duration": 0.0,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "STRM任务管理器",
+      "test_name": "单例模式",
+      "passed": true,
+      "details": "",
+      "duration": 0.0,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "STRM任务管理器",
+      "test_name": "列出运行中的任务",
+      "passed": true,
+      "details": "找到0个任务",
+      "duration": 0.0,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "STRM任务管理器",
+      "test_name": "获取任务历史",
+      "passed": true,
+      "details": "找到0条历史",
+      "duration": 0.0,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "STRM任务管理器",
+      "test_name": "任务状态枚举",
+      "passed": true,
+      "details": "支持5种状态",
+      "duration": 0.0,
+      "timestamp": "2025-11-13T07:08:17.381463"
+    },
+    {
+      "module": "API端点",
+      "test_name": "API端点测试",
+      "passed": false,
+      "details": "invalid syntax (cloud_115_api.py, line 1175)",
+      "duration": 1.3414638042449951,
+      "timestamp": "2025-11-13T07:08:18.722927"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+/**
+ * VabHub 主样式文件
+ * 现代化、美观的设计系统
+ */
+
+@import 'vuetify/styles';
+
+// 设计系统变量
+:root {
+  --vabhub-border-radius: 12px;
+  --vabhub-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --vabhub-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --vabhub-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --vabhub-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// 全局样式
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 卡片样式增强
+.v-card {
+  transition: var(--vabhub-transition);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--vabhub-shadow-lg);
+  }
+}
+
+// 按钮样式增强
+.v-btn {
+  text-transform: none !important;
+  font-weight: 500;
+  transition: var(--vabhub-transition);
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+// 输入框样式增强
+.v-text-field {
+  .v-field {
+    border-radius: var(--vabhub-border-radius);
+  }
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--v-theme-surface), 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-on-surface), 0.3);
+  border-radius: 4px;
+  
+  &:hover {
+    background: rgba(var(--v-theme-on-surface), 0.5);
+  }
+}
+
+// 动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// 玻璃态效果
+.glass-effect {
+  background: rgba(var(--v-theme-surface), 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+}
+
+// 渐变背景
+.gradient-bg {
+  background: linear-gradient(135deg, 
+    rgb(var(--v-theme-primary)) 0%, 
+    rgb(var(--v-theme-secondary)) 100%);
+}
+
+// 响应式工具类
+@media (max-width: 600px) {
+  .v-container {
+    padding: 12px !important;
+  }
+}
+

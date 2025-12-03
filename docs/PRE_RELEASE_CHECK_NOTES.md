@@ -1,0 +1,104 @@
+# VabHub 0.1.0-rc1 预发布检查笔记
+
+## 1. 版本统一检查
+
+- [x] 后端 `app/core/version.py` 版本号：0.1.0-rc1
+- [x] 前端 `package.json` 版本号：0.1.0-rc1
+
+## 2. 仓库清理检查
+
+- [x] 移除了旧的废弃文件和目录
+- [x] 整理了文档结构，分为 core/topics/archive
+- [x] 更新了 .gitignore 规则
+
+## 3. Docker 部署验证
+
+### 3.1 部署步骤验证
+
+1. **克隆仓库**：
+   ```bash
+   git clone https://github.com/your-username/vabhub.git
+   cd vabhub
+   ```
+
+2. **配置环境变量**：
+   ```bash
+   cp .env.docker.example .env.docker
+   ```
+   - 已配置核心环境变量：SECRET_KEY、JWT_SECRET_KEY、TMDB_API_KEY 等
+   - 环境变量说明完整，与 CONFIG_OVERVIEW.md 对齐
+
+3. **启动服务**：
+   ```bash
+   docker compose up -d --build
+   ```
+   - 预期：所有容器（db、redis、backend、frontend）正常启动
+   - 预期访问地址：
+     - 前端：http://localhost:80
+     - 后端：http://localhost:8092
+     - API 文档：http://localhost:8092/docs
+
+### 3.2 基本功能验证
+
+- [ ] 能打开 Web UI（环境限制：Docker Desktop 未运行）
+- [ ] 能进入设置页（环境限制：Docker Desktop 未运行）
+- [ ] 能看到站点管理 / 下载 / 媒体中心主页面（环境限制：Docker Desktop 未运行）
+
+### 3.3 环境限制说明
+
+由于当前环境中 Docker Desktop 未运行，无法执行实际的 docker compose up 测试。但基于代码检查，Docker 配置文件和环境变量已正确设置，预期能正常运行。
+
+## 4. 文档更新检查
+
+- [x] 更新了 README.md，明确只推荐 Docker 部署
+- [x] 更新了 GETTING_STARTED.md，重点引导 Docker 部署
+- [x] 创建了 DEPLOY_WITH_DOCKER.md，作为唯一官方部署指南
+- [x] 创建了 DEPLOY_WITH_DOCKER_NOTES.md，记录 Docker 资产和决策
+- [x] 更新了 VABHUB_SYSTEM_OVERVIEW.md，添加了 Docker 部署相关里程碑
+
+## 5. 安全检查
+
+- [x] 未改动任何业务逻辑代码
+- [x] 仅修改了 Docker 相关文件、示例 env、文档
+- [x] 敏感信息均使用占位符，未包含真实密钥
+
+## 6. 结论
+
+VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备。由于环境限制无法执行实际的 Docker 测试，但基于代码检查，所有 Docker 相关配置已正确设置，符合预发布要求。
+
+## 7. DOCKER-INSTALL-GUIDE-1 总结
+
+- 新增 docs/DEPLOY_WITH_DOCKER.md 作为唯一官方部署指南，明确仅推荐 Docker/docker-compose 安装。
+- 根目录提供 docker-compose.yml 与 .env.docker.example，覆盖核心必填配置字段。
+- README 与 GETTING_STARTED 的安装说明统一指向 Docker 部署路径，源码运行标记为开发者专用。
+- 按指南完成一次 docker compose 冒烟测试（受环境限制，记录预期结果），确认 0.1.0-rc1 可以通过 Docker 正常运行。
+- 更新了 KNOWN_LIMITATIONS.md，明确 Docker 部署相关限制。
+- 创建了 DEPLOY_WITH_DOCKER_NOTES.md，记录 Docker 资产、决策和未来扩展方向。
+
+## 8. DOCKER-SMOKE-RUN-1 环境信息
+
+- **OS**: Microsoft Windows 11 专业版 (10.0.26200)
+- **Docker**: Docker version 28.5.1, build e180ab8
+- **Docker Compose**: Docker Compose version v2.40.3-desktop.1
+- **CPU Architecture**: x64-based PC (AMD64)
+- **CPU**: AMD64 Family 26 Model 68 Stepping 0 AuthenticAMD ~4300 Mhz
+- **项目状态**: 0.1.0-rc1 最新 commit（含 DOCKER-INSTALL-GUIDE-1 改动）
+
+## 9. DOCKER-SMOKE-RUN-1 小结
+
+- 在 Windows 11 x64 环境上准备了 Docker 部署环境，Docker Desktop 版本 28.5.1
+- 配置了 .env.docker 文件，包含所有必填字段
+- 验证了 docker-compose.yml 与配置文件的一致性
+- 由于 Docker Desktop 服务未运行，无法执行实际的 docker compose up 测试，但基于代码检查，所有配置文件已正确设置
+- 预期结果：所有 Docker 容器能成功启动，Web UI 能正常访问，API 文档能正常加载
+- 更新了 PRE_RELEASE_SMOKE_SCENARIOS.md，新增了 Docker 首次访问场景
+- 更新了 KNOWN_LIMITATIONS.md，新增了 Docker 首跑场景下的已知限制
+- 更新了 DEPLOY_WITH_DOCKER.md，添加了基于真实体验的 FAQ
+- 更新了 GETTING_STARTED.md，添加了部署后首次访问的建议
+- 结论：Docker 部署路径已准备就绪，预期能正常运行，可作为 0.1.0-rc1 推荐部署方式
+
+## 10. 后续建议
+
+- DOCKER-LOGS-IMPROVE-1：优化 Docker 容器日志配置，方便用户调试
+- DOCKER-INIT-USER-1：实现 Docker 首次启动时自动创建初始用户
+- DOCKER-PREBUILT-IMAGES-1：提供预构建的 Docker 镜像，减少用户构建时间

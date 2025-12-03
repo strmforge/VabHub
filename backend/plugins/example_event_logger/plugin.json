@@ -1,0 +1,18 @@
+{
+  "id": "vabhub.example.event_logger",
+  "display_name": "事件日志示例插件",
+  "version": "1.0.0",
+  "description": "演示 VabHub Plugin SDK 和 EventBus 的使用方法。订阅系统事件并记录日志。",
+  "author": "VabHub Team",
+  "homepage": "https://github.com/strmforge/vabhub",
+  "backend": {
+    "entry_module": "event_logger_plugin.main"
+  },
+  "capabilities": {
+    "search_providers": [],
+    "bot_commands": [],
+    "workflows": [],
+    "ui_panels": []
+  },
+  "ui_panels": []
+}

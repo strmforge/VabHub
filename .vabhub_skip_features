@@ -1,0 +1,23 @@
+# VabHub 跳过功能清单
+# 此文件用于标记不推荐实现的功能，避免重复讨论
+
+# 不推荐实现的功能列表
+SKIP_FEATURES = [
+    "AI_AGENT_SYSTEM",      # AI Agent系统 - 功能重复，成本高，使用率低
+    "SERVARR_INTEGRATION",  # Servarr集成 - 使用场景有限，功能重复
+]
+
+# 原因说明
+REASONS = {
+    "AI_AGENT_SYSTEM": {
+        "reason": "功能重复，成本高，使用率低",
+        "details": "VabHub已有更强大的AI功能（推荐系统、多模态分析），AI Agent只是用自然语言包装现有功能，需要用户付费使用外部LLM，使用率低",
+        "document": "AI-Agent和Servarr集成必要性分析.md"
+    },
+    "SERVARR_INTEGRATION": {
+        "reason": "使用场景有限，功能重复",
+        "details": "只有使用Overseerr/Jellyseerr的用户需要，VabHub已有完整的订阅API，功能完全重复",
+        "document": "AI-Agent和Servarr集成必要性分析.md"
+    }
+}
+

@@ -1,0 +1,71 @@
+meta:
+  id: iptorrents
+  name: IPTorrents通用配置
+  family: iptorrents
+  version: 1.0.0
+  domains: []  # 通用配置，不限制域名
+
+verify:
+  any:
+    - meta_generator_equals: "IPTorrents"
+    - title_contains: "IPTorrents"
+    - url_contains: "iptorrents.com"
+    - selector_exists: "table.torrent_table"
+
+parse:
+  list:
+    row: "table.torrent_table > tbody > tr"
+    fields:
+      title_raw:
+        selector: "a[href*='/t/'], a[href*='/torrent/']"
+        text: true
+      size_bytes:
+        selector: "td.size"
+        text: true
+        transform: "size"
+      seeders:
+        selector: "td.seeders"
+        text: true
+        transform: "int"
+      leechers:
+        selector: "td.leechers"
+        text: true
+        transform: "int"
+      upload_time:
+        selector: "td.time"
+        text: true
+  
+  detail:
+    fields:
+      title:
+        selector: "h1.torrent_title, div.torrent_title"
+        text: true
+      description:
+        selector: "div.torrent_description"
+        text: true
+      download_link:
+        selector: "a[href*='/download/'], a[href*='/dl/']"
+        attr: "href"
+  
+  user:
+    fields:
+      username:
+        selector: "span.username, a.username"
+        text: true
+      upload:
+        selector: "td.upload, span.upload"
+        text: true
+        transform: "size"
+      download:
+        selector: "td.download, span.download"
+        text: true
+        transform: "size"
+      ratio:
+        selector: "td.ratio, span.ratio"
+        text: true
+        transform: "float"
+      seeding:
+        selector: "td.seeding, span.seeding"
+        text: true
+        transform: "int"
+

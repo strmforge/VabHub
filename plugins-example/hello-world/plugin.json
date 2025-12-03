@@ -1,0 +1,43 @@
+{
+  "id": "vabhub.example.hello_world",
+  "display_name": "Hello World 示例插件",
+  "version": "0.2.0",
+  "description": "演示如何实现 SearchProvider、Bot 命令、Workflow 和 UI Panel 扩展。",
+  "author": "VabHub Team",
+  "homepage": "https://github.com/vabhub/vabhub",
+  "backend": {
+    "entry_module": "hello_plugin.main"
+  },
+  "frontend": {
+    "entry_point": "dev:hello_plugin"
+  },
+  "capabilities": {
+    "search_providers": ["hello_world.sample_search"],
+    "bot_commands": ["hello"],
+    "workflows": ["hello_world.demo_job"],
+    "ui_panels": ["hello_metrics", "hello_info"]
+  },
+  "ui_panels": [
+    {
+      "id": "hello_metrics",
+      "title": "Hello Metrics",
+      "description": "展示示例统计数据",
+      "placement": "home_dashboard",
+      "type": "metric_grid",
+      "order": 10,
+      "enabled_by_default": true,
+      "config": {
+        "cols": 3
+      }
+    },
+    {
+      "id": "hello_info",
+      "title": "Hello 插件信息",
+      "description": "展示插件的 Markdown 信息",
+      "placement": "dev_plugin",
+      "type": "markdown",
+      "order": 20,
+      "enabled_by_default": true
+    }
+  ]
+}

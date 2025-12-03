@@ -1,0 +1,74 @@
+meta:
+  id: tnode
+  name: TNode通用配置
+  family: tnode
+  version: 1.0.0
+  domains: []  # 通用配置，不限制域名
+
+verify:
+  any:
+    - meta_generator_equals: "TNode"
+    - title_contains: "TNode"
+    - selector_exists: "table.torrents"
+
+parse:
+  list:
+    row: "table.torrents > tbody > tr"
+    fields:
+      title_raw:
+        selector: "a[href*='details.php?id=']"
+        text: true
+      size_bytes:
+        selector: "td.size"
+        text: true
+        transform: "size"
+      seeders:
+        selector: "td.seeders"
+        text: true
+        transform: "int"
+      leechers:
+        selector: "td.leechers"
+        text: true
+        transform: "int"
+      upload_time:
+        selector: "td.time"
+        text: true
+  
+  detail:
+    fields:
+      title:
+        selector: "h1.title, div.title"
+        text: true
+      description:
+        selector: "div.description, div.nfo"
+        text: true
+      download_link:
+        selector: "a[href*='download.php?id=']"
+        attr: "href"
+  
+  user:
+    fields:
+      username:
+        selector: "span.username, a.username"
+        text: true
+      upload:
+        selector: "td.upload, span.upload"
+        text: true
+        transform: "size"
+      download:
+        selector: "td.download, span.download"
+        text: true
+        transform: "size"
+      ratio:
+        selector: "td.ratio, span.ratio"
+        text: true
+        transform: "float"
+      bonus:
+        selector: "td.bonus, span.bonus"
+        text: true
+        transform: "float"
+      seeding:
+        selector: "td.seeding, span.seeding"
+        text: true
+        transform: "int"
+

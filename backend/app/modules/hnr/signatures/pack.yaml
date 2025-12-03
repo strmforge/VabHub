@@ -1,0 +1,135 @@
+version: 1
+description: "VabHub HNR检测签名包 - 整合自acq-guardian"
+
+signatures:
+  - id: hnr_basic
+    name: "基本HNR检测"
+    category: "HNR_BASIC"
+    patterns:
+      text:
+        - "H&R"
+        - "H-R"
+        - "H R"
+        - "hit and run"
+        - "hit&run"
+        - "Hit and Run"
+        - "HnR"
+      regex:
+        - "(?ix)\\bH(?:\\s*&\\s*|[/／＆])?R\\b"
+        - "(?ix)\\bHnR\\b"
+        - "(?ix)\\bhit\\s*&?\\s*run\\b"
+    confidence: 0.9
+    penalties:
+      base: -50
+      per_level: -10
+
+  - id: h3_rule
+    name: "H3规则检测"
+    category: "HNR_LEVEL"
+    patterns:
+      text:
+        - "H3"
+        - "H-3"
+        - "H 3"
+      regex:
+        # 避免H.264/H.265/HDR10误报
+        - "(?ix)(?<!H\\.?26[45])(?<!HDR)\\bH\\s*[-/:：]?\\s*3\\b"
+    confidence: 0.8
+    penalties:
+      base: -30
+      per_level: -5
+
+  - id: h5_rule
+    name: "H5规则检测"
+    category: "HNR_LEVEL"
+    patterns:
+      text:
+        - "H5"
+        - "H-5"
+        - "H 5"
+      regex:
+        # 避免H.264/H.265/HDR10误报
+        - "(?ix)(?<!H\\.?26[45])(?<!HDR)\\bH\\s*[-/:：]?\\s*5\\b"
+    confidence: 0.8
+    penalties:
+      base: -50
+      per_level: -10
+
+  - id: h7_rule
+    name: "H7规则检测"
+    category: "HNR_LEVEL"
+    patterns:
+      text:
+        - "H7"
+        - "H-7"
+        - "H 7"
+      regex:
+        # 避免H.264/H.265/HDR10误报
+        - "(?ix)(?<!H\\.?26[45])(?<!HDR)\\bH\\s*[-/:：]?\\s*7\\b"
+    confidence: 0.85
+    penalties:
+      base: -70
+      per_level: -15
+
+  - id: h10_rule
+    name: "H10规则检测"
+    category: "HNR_LEVEL"
+    patterns:
+      text:
+        - "H10"
+        - "H-10"
+        - "H 10"
+      regex:
+        # 避免H.264/H.265/HDR10误报
+        - "(?ix)(?<!H\\.?26[45])(?<!HDR)\\bH\\s*[-/:：]?\\s*10\\b"
+    confidence: 0.85
+    penalties:
+      base: -80
+      per_level: -20
+
+  - id: seeding_requirements
+    name: "强制保种要求"
+    category: "SEEDING"
+    patterns:
+      text:
+        - "强制保种"
+        - "必须保种"
+        - "必须做种"
+        - "保种时间"
+        - "保种比例"
+      regex:
+        - "(?ix)保种\\s*[>=]?(\\d+)[天时]"
+        - "(?ix)保种\\s*[>=]?(\\d+\\.\\d+):1"
+        - "(?ix)做种\\s*[>=]?(\\d+)[天时]"
+        - "(?ix)分享率\\s*[>=]?(\\d+\\.\\d+)"
+    confidence: 0.7
+    penalties:
+      base: -20
+      duration: -3
+
+  - id: ratio_requirements
+    name: "分享率要求"
+    category: "RATIO"
+    patterns:
+      text:
+        - "分享率"
+        - "ratio"
+        - "分享比例"
+      regex:
+        - "(?ix)分享率\\s*[>=]?(\\d+\\.\\d+)"
+        - "(?ix)ratio\\s*[>=]?(\\d+\\.\\d+)"
+    confidence: 0.6
+    penalties:
+      base: -15
+
+# 站点特定规则覆盖
+site_overrides:
+  # 示例：站点A的特定规则
+  # site_a:
+  #   selectors:
+  #     - ".badge:contains('H&R')"
+  #     - ".label:contains('H5')"
+  #   rules:
+  #     - signature_id: "h5_rule"
+  #       confidence: 0.9
+

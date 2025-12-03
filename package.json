@@ -1,0 +1,13 @@
+{
+  "name": "vabhub-tooling",
+  "private": true,
+  "devDependencies": {
+    "markdownlint": "^0.32.2",
+    "markdownlint-cli": "^0.39.0"
+  },
+  "scripts": {
+    "md:lint": "markdownlint \"README*.md\" \"docs/**/*.md\" \"services/**/*.md\" --config .markdownlint.json"
+  }
+}
+
+

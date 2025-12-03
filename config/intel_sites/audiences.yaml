@@ -1,0 +1,18 @@
+site: audiences
+hr:
+  enabled: true
+  mode: "TASK_LIST"
+  disappear_semantics: "UNKNOWN"
+  max_observe_days: 90
+  hr_page_url: "https://audiences.me/hr.php"
+inbox:
+  enabled: true
+  parser: "nexusphp_inbox"
+  pm_keywords:
+    penalty: ["H&R minus", "HR-1", "H&R 扣分", "HP minus 1"]
+    delete: ["種子已被刪除", "种子被删除", "Torrent Deleted"]
+site_guard:
+  enabled: true
+  default_safe_scan_minutes: 10
+  default_safe_pages_per_hour: 120
+

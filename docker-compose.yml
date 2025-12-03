@@ -1,0 +1,101 @@
+# VabHub Docker Compose 配置
+# DOCKER-INSTALL-GUIDE-1 实现
+# 使用方法: docker compose up -d
+
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  db:
+    image: postgres:14-alpine
+    container_name: vabhub-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vabhub}
+      POSTGRES_USER: ${DB_USER:-vabhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vabhub_password}
+    volumes:
+      - vabhub_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-vabhub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: vabhub-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - vabhub_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vabhub-backend
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
+      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8092}
+      - PORT=${PORT:-8092}
+      - WORKERS=${WORKERS:-4}
+      - APP_WEB_BASE_URL=${APP_WEB_BASE_URL:-http://localhost:80}
+    volumes:
+      - vabhub_data:/app/data
+      - vabhub_logs:/app/logs
+    ports:
+      - "8092:8092"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8092/api}
+    container_name: vabhub-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+volumes:
+  vabhub_db_data:
+    name: vabhub_db_data
+  vabhub_redis_data:
+    name: vabhub_redis_data
+  vabhub_data:
+    name: vabhub_data
+  vabhub_logs:
+    name: vabhub_logs
+
+networks:
+  vabhub-internal:
+    driver: bridge
