@@ -142,3 +142,9 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [x] 所有使用 pnpm 的 workflow 都配置了 actions/setup-node@v4 + pnpm/action-setup@v4 组合
 - [x] pnpm 命令不再报 "Unable to locate executable file: pnpm" 错误
 - [x] 已为 pnpm-lock.yaml 配置了 cache-dependency-path 以提高缓存命中率
+
+## 17. 后端数据库驱动依赖检查（CI 环境）
+
+- [x] CI 使用的 requirements 文件包含 SQLite Async 模式所需的 aiosqlite 依赖
+- [x] 后端 CI 测试中，uvicorn backend.main:app 能正常启动并通过 /health 探活，不会出现 ModuleNotFoundError
+- [x] 若使用 PostgreSQL / 其他数据库，相应包含 asyncpg 等驱动

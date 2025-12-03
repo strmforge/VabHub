@@ -465,6 +465,8 @@ VabHub 系统总览（单一事实来源）
   根目录脚本归档 & scripts 目录规范化，将根目录大量 .bat/.ps1/.py 脚本迁移到 scripts/windows、scripts/python、scripts/tools 目录集中管理，根目录不再直接暴露开发/调试脚本；脚本使用被明确标记为“开发者/维护者工具”，普通用户按 Docker-only 路径即可完成部署。
 - **2025-12-04 – CI-FRONTEND-PNPM-1 完成**：
   修复 GitHub Actions 前端 pnpm 工具链问题，统一使用 pnpm/action-setup@v4 安装 pnpm，消除 "Unable to locate executable file: pnpm" 报错，优化 CI 缓存策略。
+- **2025-12-04 – CI-BACKEND-AIOSQLITE-1 完成**：
+  修复后端 CI 中缺失 aiosqlite 导致 API 启动失败的问题，补齐 SQLite AsyncEngine 所需的 aiosqlite 运行依赖，并在 CI requirements 中显式声明。
 - （此处由后续任务持续追加）
 
 ---
