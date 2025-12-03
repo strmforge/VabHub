@@ -148,3 +148,10 @@ VabHub 0.1.0-rc1 已完成 Docker 部署指南的编写和配置文件的准备�
 - [x] CI 使用的 requirements 文件包含 SQLite Async 模式所需的 aiosqlite 依赖
 - [x] 后端 CI 测试中，uvicorn backend.main:app 能正常启动并通过 /health 探活，不会出现 ModuleNotFoundError
 - [x] 若使用 PostgreSQL / 其他数据库，相应包含 asyncpg 等驱动
+
+## 18. 后端自检脚本 & 测试依赖检查
+
+- [x] 仓库根目录存在统一的开发依赖文件 requirements-dev.txt，包含 pytest 相关测试依赖
+- [x] scripts/dev_check_backend.sh 在 CI 环境下严格检查 pytest 安装，本地环境可宽松跳过
+- [x] CI 工作流中注入 VABHUB_CI=1 环境变量，确保脚本在 CI 环境下正确运行
+- [x] CI 工作流使用 requirements-dev.txt 安装所有必要依赖，确保 pytest 可用

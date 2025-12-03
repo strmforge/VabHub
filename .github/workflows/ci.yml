@@ -11,6 +11,9 @@ jobs:
     name: Backend checks
     runs-on: ubuntu-latest
     
+    env:
+      VABHUB_CI: "1"
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -22,11 +25,8 @@ jobs:
     
     - name: Install backend dependencies
       run: |
-        cd backend
         pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        fi
+        pip install -r requirements-dev.txt
     
     - name: Run backend checks
       run: |

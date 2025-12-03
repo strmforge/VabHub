@@ -1,0 +1,18 @@
+# VabHub 开发依赖
+# 包含测试、开发工具等，不用于生产环境
+
+# 基础依赖
+-r backend/requirements.txt
+
+# 测试框架
+pytest>=7.4.3,<9
+pytest-asyncio>=0.21.1,<1.0
+pytest-cov>=4.1.0,<5
+
+# 开发工具
+black>=23.11.0,<25
+flake8>=6.1.0,<8
+mypy>=1.7.1,<3
+python-dateutil>=2.8.2
+pytz>=2023.3
+pyyaml>=6.0.1

@@ -21,8 +21,14 @@ cd backend
 if command -v pytest >/dev/null 2>&1; then
     pytest -v
 else
-    echo "⚠️ 警告: pytest 未安装，跳过测试"
-    echo "请运行: pip install pytest"
+    if [ "${GITHUB_ACTIONS:-}" = "true" ] || [ "${VABHUB_CI:-0}" = "1" ]; then
+        echo "❌ 错误: pytest 未安装，CI 环境必须安装测试依赖"
+        echo "请运行: pip install -r requirements-dev.txt"
+        exit 1
+    else
+        echo "⚠️ 警告: pytest 未安装，本地环境跳过测试"
+        echo "请运行: pip install -r requirements-dev.txt"
+    fi
 fi
 
 echo ""

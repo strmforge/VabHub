@@ -467,6 +467,9 @@ VabHub 系统总览（单一事实来源）
   修复 GitHub Actions 前端 pnpm 工具链问题，统一使用 pnpm/action-setup@v4 安装 pnpm，消除 "Unable to locate executable file: pnpm" 报错，优化 CI 缓存策略。
 - **2025-12-04 – CI-BACKEND-AIOSQLITE-1 完成**：
   修复后端 CI 中缺失 aiosqlite 导致 API 启动失败的问题，补齐 SQLite AsyncEngine 所需的 aiosqlite 运行依赖，并在 CI requirements 中显式声明。
+- **2025-12-04 – CI-BACKEND-PYTEST-2 完成**：
+  后端自检脚本与 GitHub CI 测试依赖收敛，确保 CI 环境下必跑 pytest，避免"测试未运行但流水线显示通过"的情况。
+  新建 requirements-dev.txt 统一管理测试依赖，修改脚本在 CI 环境下严格检查 pytest 安装。
 - （此处由后续任务持续追加）
 
 ---
