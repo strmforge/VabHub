@@ -51,6 +51,7 @@
 2025-12  CI-BACKEND-PYTEST-3：修复 email-validator 依赖、app.main 兼容模块、测试语法错误，确保后端 pytest 能完整启动
 2025-12  CI-BACKEND-UVICORN-PSUTIL-1：补齐 psutil + 搜索扩展依赖，修复后端健康检查启动失败问题
 2025-12  CI-BACKEND-NOTIFY-GET-SESSION-1：为通知相关测试补齐 get_session 历史兼容别名，消除 ImportError，保证 pytest 可以完成收集
+2025-12  CI-BACKEND-ASYNCSESSION-FIX-1：修复 app.main 兼容模块导入错误 & FastAPI 中 AsyncSession 依赖声明错误，保证后端 pytest 能顺利完成收集
 ```
 
 ---
@@ -131,4 +132,4 @@
 
 ---
 
-*最后更新：2025-12-04 CI-BACKEND-NOTIFY-GET-SESSION-1*
+*最后更新：2025-12-04 CI-BACKEND-ASYNCSESSION-FIX-1*

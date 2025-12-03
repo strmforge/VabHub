@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from loguru import logger
 
 from app.core.database import get_session
-from app.core.auth import get_current_user, require_admin
+from app.core.auth import get_current_user
 from app.models.user import User
 from app.models.enums.notification_type import NotificationType
 from app.schemas.notify_actions import (
@@ -135,7 +135,7 @@ def build_sample_notification(event_type: str) -> dict:
 async def send_sample_notification(
     request: SendSampleRequest,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
 ):
     """
     发送样例通知到指定渠道
@@ -308,11 +308,11 @@ async def get_channel_capabilities(
 
 @router.get("/my_channels")
 async def get_my_channels(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """获取当前用户已配置的通知渠道"""
-    channels = await get_enabled_channels_for_user(session, current_user.id)
+    channels = await get_enabled_channels_for_user(db, current_user.id)
     
     return {
         "channels": [

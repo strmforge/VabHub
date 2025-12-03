@@ -133,7 +133,7 @@ from app.api import (
     user_notify_channels,  # 用户通知渠道 API
     user_telegram,  # Telegram 绑定 API
     notify_preferences,  # 通知偏好 API
-    notify_test,  # 通知测试 API
+    # notify_test,  # 通知测试 API - 暂时禁用，等待修复
     self_check,  # 自检 API
     plugin_admin,  # 插件管理 API
     plugin_config,  # 插件配置 API（PLUGIN-UX-3）
@@ -169,7 +169,7 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=["任务管理"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["仪表盘"])
 api_router.include_router(workflow.router, prefix="/workflows", tags=["工作流"])
 api_router.include_router(site.router, prefix="/sites", tags=["站点管理"])
-api_router.include_router(notification.router, prefix="/notifications", tags=["通知"])
+# api_router.include_router(notification.router, prefix="/notifications", tags=["通知"])  # 暂时禁用，等待修复
 # api_router.include_router(notifications.router, prefix="/api/notifications", tags=["用户通知"])  # 暂时禁用，存在Schema冲突
 api_router.include_router(calendar.router, prefix="/calendar", tags=["日历"])
 api_router.include_router(music.router, prefix="/music", tags=["音乐"])  # VabHub特色功能
@@ -282,7 +282,7 @@ api_router.include_router(alert_channels.router, tags=["告警渠道"])  # 告�
 api_router.include_router(user_notify_channels.router, tags=["用户通知渠道"])  # 用户通知渠道 API
 api_router.include_router(user_telegram.router, tags=["Telegram绑定"])  # Telegram 绑定 API
 api_router.include_router(notify_preferences.router, tags=["通知偏好"])  # 通知偏好 API（路由已包含前缀）
-api_router.include_router(notify_test.router, tags=["通知测试"])  # 通知测试 API（路由已包含前缀）
+# api_router.include_router(notify_test.router, tags=["通知测试"])  # 通知测试 API - 暂时禁用，等待修复
 api_router.include_router(self_check.router, tags=["自检"])  # 自检 API（路由已包含前缀）
 api_router.include_router(plugin_admin.router, tags=["插件管理"])  # 插件管理 API（路由已包含前缀）
 api_router.include_router(plugin_config.router, tags=["插件配置"])  # 插件配置 API（PLUGIN-UX-3）

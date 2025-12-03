@@ -9,9 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import require_admin
-from app.models.user import User
+from app.core.deps import CurrentUserDep, DbSessionDep
 from app.schemas.self_check import SelfCheckRunResult
 from app.services.self_check_service import run_full_self_check
 
@@ -21,8 +19,8 @@ router = APIRouter(prefix="/admin/self_check", tags=["self-check"])
 
 @router.post("/run", response_model=SelfCheckRunResult)
 async def run_self_check(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     运行完整自检
@@ -32,7 +30,7 @@ async def run_self_check(
     logger.info(f"[self-check] triggered by user {current_user.id}")
     
     try:
-        result = await run_full_self_check(session)
+        result = await run_full_self_check(db)
         return result
     except Exception as e:
         logger.error(f"[self-check] failed: {e}")
@@ -41,8 +39,8 @@ async def run_self_check(
 
 @router.get("/summary")
 async def get_self_check_summary(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     获取自检摘要（快速版本，不运行完整自检）
