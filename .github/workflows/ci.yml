@@ -35,6 +35,9 @@ jobs:
   frontend:
     name: Frontend checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     
     steps:
     - name: Checkout
@@ -54,10 +57,7 @@ jobs:
         run_install: false
     
     - name: Install frontend dependencies
-      run: |
-        cd frontend
-        pnpm install
+      run: pnpm install --frozen-lockfile
     
     - name: Run frontend checks
-      run: |
-        bash scripts/dev_check_frontend.sh
+      run: pnpm run dev_check
