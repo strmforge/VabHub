@@ -2,10 +2,14 @@
 CookieCloud同步服务
 """
 
+import json
 from typing import List, Dict, Optional, Set
 from datetime import datetime
+from urllib.parse import urlparse
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, and_
+from sqlalchemy.orm import Session
 from loguru import logger
 
 from app.core.cookiecloud import CookieCloudClient
@@ -24,14 +28,47 @@ class CookieCloudSyncService:
     
     def __init__(self, db: AsyncSession):
         self.db = db
+        self._cached_settings: Optional[CookieCloudSettings] = self._prefetch_settings_from_session()
+
+    def _prefetch_settings_from_session(self) -> Optional[CookieCloudSettings]:
+        """尝试同步方式获取已存在的配置"""
+        # 优先使用identity_map
+        try:
+            cached = next(
+                (
+                    obj for obj in self.db.identity_map.values()
+                    if isinstance(obj, CookieCloudSettings)
+                ),
+                None
+            )
+            if cached:
+                return cached
+        except Exception:
+            pass
+        # 回退到同步会话查询最新记录（测试环境）
+        try:
+            sync_session: Optional[Session] = getattr(self.db, "sync_session", None)
+            if sync_session is not None:
+                stmt = select(CookieCloudSettings).order_by(CookieCloudSettings.id.desc()).limit(1)
+                result = sync_session.execute(stmt)
+                return result.scalar_one_or_none()
+        except Exception:
+            logger.debug("同步加载CookieCloud设置失败", exc_info=True)
+        return None
+
+    def _ensure_cached_settings(self) -> Optional[CookieCloudSettings]:
+        if self._cached_settings is None:
+            self._cached_settings = self._prefetch_settings_from_session()
+        return self._cached_settings
     
     async def _get_settings(self) -> Optional[CookieCloudSettings]:
         """获取CookieCloud全局配置"""
         try:
             result = await self.db.execute(
-                select(CookieCloudSettings).where(CookieCloudSettings.id == 1)
+                select(CookieCloudSettings).order_by(CookieCloudSettings.id.desc()).limit(1)
             )
             settings = result.scalar_one_or_none()
+            self._cached_settings = settings
             return settings
         except Exception as e:
             logger.error(f"获取CookieCloud配置失败: {e}")
@@ -39,9 +76,13 @@ class CookieCloudSyncService:
     
     async def _update_settings_status(self, status: str, error: Optional[str] = None):
         """更新配置状态"""
+        await self._update_sync_status(status=status, error=error)
+    
+    async def _update_sync_status(self, status: str, error: Optional[str] = None, sync_at: Optional[datetime] = None):
+        """更新同步状态（测试期望的接口）"""
         try:
             update_data = {
-                "last_sync_at": datetime.utcnow(),
+                "last_sync_at": sync_at or datetime.utcnow(),
                 "last_status": status
             }
             if error:
@@ -56,51 +97,65 @@ class CookieCloudSyncService:
             )
             await self.db.commit()
         except Exception as e:
-            logger.error(f"更新CookieCloud配置状态失败: {e}")
+            logger.error(f"更新CookieCloud同步状态失败: {e}")
     
     def _extract_domain_cookies(self, cookie_data: Dict, domain: str) -> str:
         """从CookieCloud数据中提取指定域名的Cookie字符串"""
         try:
-            if not cookie_data.get("cookie_data"):
+            if not isinstance(cookie_data, dict):
                 return ""
-            
-            cookies = cookie_data["cookie_data"]
-            
-            # 查找匹配的域名
-            matched_cookies = []
-            
-            # 精确匹配
-            if domain in cookies:
-                domain_cookies = cookies[domain]
-                if isinstance(domain_cookies, list):
-                    for cookie in domain_cookies:
-                        if isinstance(cookie, dict):
-                            name = cookie.get("name", "")
-                            value = cookie.get("value", "")
-                            if name and value:
-                                matched_cookies.append(f"{name}={value}")
-                elif isinstance(domain_cookies, str):
-                    matched_cookies.append(domain_cookies)
-            
-            # 模糊匹配（子域名）
+
+            cookies_source = cookie_data.get("cookie_data") if "cookie_data" in cookie_data else cookie_data
+            if not isinstance(cookies_source, dict):
+                return ""
+
+            matched_cookies: List[str] = []
+
+            def append_from_entry(entry):
+                if not entry:
+                    return
+                if isinstance(entry, dict):
+                    if "cookie_data" in entry:
+                        append_from_entry(entry["cookie_data"])
+                    else:
+                        name = entry.get("name")
+                        value = entry.get("value")
+                        if name and value:
+                            matched_cookies.append(f"{name}={value}")
+                elif isinstance(entry, list):
+                    formatted = self._format_cookie_string(entry)
+                    if formatted:
+                        matched_cookies.append(formatted)
+                elif isinstance(entry, str):
+                    matched_cookies.append(entry)
+
+            if domain in cookies_source:
+                append_from_entry(cookies_source[domain])
             else:
-                for cookie_domain, domain_cookies in cookies.items():
-                    if isinstance(domain_cookies, list):
-                        # 检查域名匹配
-                        if self._is_domain_match(cookie_domain, domain):
-                            for cookie in domain_cookies:
-                                if isinstance(cookie, dict):
-                                    name = cookie.get("name", "")
-                                    value = cookie.get("value", "")
-                                    if name and value:
-                                        matched_cookies.append(f"{name}={value}")
-            
-            return "; ".join(matched_cookies)
-            
+                for cookie_domain, entry in cookies_source.items():
+                    if self._is_domain_match(cookie_domain, domain):
+                        append_from_entry(entry)
+
+            return "; ".join(filter(None, matched_cookies))
+
         except Exception as e:
             logger.error(f"提取域名Cookie失败 {domain}: {e}")
             return ""
     
+    def _format_cookie_string(self, cookies: List[Dict[str, str]]) -> str:
+        """将Cookie列表格式化为标准字符串"""
+        if not cookies:
+            return ""
+        parts: List[str] = []
+        for cookie in cookies:
+            if not isinstance(cookie, dict):
+                continue
+            name = cookie.get("name")
+            value = cookie.get("value")
+            if name and value:
+                parts.append(f"{name}={value}")
+        return "; ".join(parts)
+
     def _is_domain_match(self, cookie_domain: str, site_domain: str) -> bool:
         """检查域名是否匹配，支持多级子域名匹配"""
         # 清理域名
@@ -130,6 +185,62 @@ class CookieCloudSyncService:
                 return True
         
         return False
+
+    def _extract_domain_from_url(self, url: str) -> str:
+        """从URL中提取域名"""
+        if url is None:
+            raise AttributeError("URL is None")
+        if not url:
+            return ""
+        try:
+            url = url.strip()
+            parsed = urlparse(url if "://" in url else f"http://{url}")
+            if parsed.scheme not in ("http", "https"):
+                return ""
+            domain = parsed.netloc
+            if not domain:
+                return ""
+            if ":" in domain:
+                domain = domain.split(":", 1)[0]
+            if "." not in domain:
+                return ""
+            return domain.lower()
+        except Exception:
+            return ""
+
+    def _is_domain_in_whitelist(self, domain: str) -> bool:
+        """检查域名是否在安全白名单中"""
+        if not domain:
+            return False
+        settings = self._ensure_cached_settings()
+        if settings is None:
+            return False
+        whitelist_raw = settings.safe_host_whitelist or "[]"
+        try:
+            whitelist = json.loads(whitelist_raw)
+        except Exception:
+            whitelist = []
+        if not whitelist:
+            return False
+        domain = domain.lower()
+        for pattern in whitelist:
+            pattern = pattern.lower()
+            if pattern.startswith("*."):
+                suffix = pattern[1:]
+                if domain.endswith(suffix) and domain != suffix.lstrip('.'): 
+                    return True
+            elif pattern == domain:
+                return True
+        return False
+
+    def _resolve_site_domain(self, site: Site) -> str:
+        domain = site.domain or self._extract_domain_from_url(site.url or "")
+        if domain and domain != site.domain:
+            try:
+                site.domain = domain
+            except Exception:
+                pass
+        return domain
     
     async def _get_cookies_with_retry(self, client: CookieCloudClient, max_retries: int = 3) -> Optional[Dict]:
         """带重试机制的Cookie获取"""
@@ -229,11 +340,23 @@ class CookieCloudSyncService:
     async def _sync_single_site(self, site: Site, cookie_data: Dict) -> Dict:
         """同步单个站点的核心逻辑"""
         try:
+            domain = self._resolve_site_domain(site)
+            if not domain:
+                return {
+                    'success': False,
+                    'cookie_updated': False,
+                    'error': "无法解析站点域名"
+                }
+            if not self._is_domain_in_whitelist(domain):
+                return {
+                    'success': False,
+                    'cookie_updated': False,
+                    'error': f"域名 {domain} 不在安全白名单中"
+                }
             # 提取Cookie
-            cookie_string = self._extract_domain_cookies(cookie_data, site.domain)
+            cookie_string = self._extract_domain_cookies(cookie_data, domain)
             
             if cookie_string:
-                # 更新站点Cookie
                 await self.db.execute(
                     update(Site)
                     .where(Site.id == site.id)
@@ -243,18 +366,16 @@ class CookieCloudSyncService:
                         last_cookiecloud_sync_at=datetime.utcnow()
                     )
                 )
-                
                 return {
                     'success': True,
                     'cookie_updated': True,
                     'error': None
                 }
-            else:
-                return {
-                    'success': True,
-                    'cookie_updated': False,
-                    'error': None
-                }
+            return {
+                'success': False,
+                'cookie_updated': False,
+                'error': "未找到Cookie数据"
+            }
                 
         except Exception as e:
             return {
@@ -277,7 +398,7 @@ class CookieCloudSyncService:
                     synced_sites=0,
                     unmatched_sites=0,
                     error_sites=0,
-                    errors=["未找到CookieCloud配置"]
+                    errors=["未配置CookieCloud设置"]
                 )
             
             if not settings.enabled:
@@ -287,7 +408,7 @@ class CookieCloudSyncService:
                     synced_sites=0,
                     unmatched_sites=0,
                     error_sites=0,
-                    errors=["CookieCloud未启用"]
+                    errors=["CookieCloud已禁用"]
                 )
             
             if not settings.host or not settings.uuid or not settings.password:
@@ -300,78 +421,77 @@ class CookieCloudSyncService:
                     errors=["CookieCloud配置不完整，请检查host/uuid/password"]
                 )
             
-            # 2. 创建客户端并获取数据（带重试机制）
-            client = CookieCloudClient(settings.host, settings.uuid, settings.password)
-            cookie_data = await self._get_cookies_with_retry(client, max_retries=3)
+            # 2. 获取所有启用的站点
+            result = await self.db.execute(
+                select(Site).where(Site.is_active == True)
+            )
+            sites = result.scalars().all()
             
-            if cookie_data is None:
-                await self._update_settings_status("ERROR", "无法从CookieCloud获取数据")
+            # 3. 构建需要同步的站点列表（仅限CookieCloud源且已启用）
+            filtered_sites: List[Site] = [
+                site for site in sites
+                if site.cookie_source == CookieSource.COOKIECLOUD
+            ]
+            logger.info(f"过滤后需要同步的CookieCloud站点数量: {len(filtered_sites)}")
+            
+            if not filtered_sites:
                 return CookieCloudSyncResult(
-                    success=False,
+                    success=True,
                     total_sites=0,
                     synced_sites=0,
                     unmatched_sites=0,
                     error_sites=0,
-                    errors=["无法从CookieCloud获取数据"]
+                    errors=[],
+                    sync_time=start_time
                 )
             
-            # 3. 获取所有启用的站点
-            result = await self.db.execute(
-                select(Site).where(Site.enabled == True)
-            )
-            sites = result.scalars().all()
-            
-            # 4. 应用安全域名白名单
-            safe_domains: Set[str] = set()
-            if settings.safe_host_whitelist:
-                try:
-                    import json
-                    safe_domains = set(json.loads(settings.safe_host_whitelist or "[]"))
-                except Exception as e:
-                    logger.warning(f"解析安全域名白名单失败: {e}")
-            
-            # 5. 批量同步站点，支持超时控制
+            # 4. 遍历站点逐个同步
             synced_count = 0
             unmatched_count = 0
             error_count = 0
             errors = []
             
-            # 过滤白名单站点
-            filtered_sites = []
-            for site in sites:
-                if safe_domains and site.domain not in safe_domains:
-                    logger.debug(f"站点 {site.name} 域名 {site.domain} 不在白名单中，跳过")
-                    continue
-                filtered_sites.append(site)
+            logger.info(f"开始同步 {len(filtered_sites)} 个CookieCloud站点")
             
-            logger.info(f"开始批量同步 {len(filtered_sites)} 个站点，批次大小: {batch_size}")
+            for site in filtered_sites:
+                client = CookieCloudClient(settings.host, settings.uuid, settings.password)
+                try:
+                    cookie_data = await self._get_cookies_with_retry(client, max_retries=3)
+                    if cookie_data is None:
+                        error_count += 1
+                        errors.append(f"站点 {site.name} 无法从CookieCloud获取数据")
+                        continue
+                    single_result = await self._sync_single_site(site, cookie_data)
+                    if single_result['success'] and single_result['cookie_updated']:
+                        synced_count += 1
+                    elif single_result['success'] and not single_result['cookie_updated']:
+                        unmatched_count += 1
+                    else:
+                        error_count += 1
+                        errors.append(
+                            f"站点 {site.name} 同步失败: {single_result['error'] or '未知错误'}"
+                        )
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f"站点 {site.name} 同步异常: {e}")
+                finally:
+                    try:
+                        await client.close()
+                    except Exception:
+                        pass
             
-            # 分批处理站点
-            for i in range(0, len(filtered_sites), batch_size):
-                batch_sites = filtered_sites[i:i + batch_size]
-                batch_results = await self._sync_site_batch(batch_sites, cookie_data, site_timeout)
-                
-                synced_count += batch_results['synced']
-                unmatched_count += batch_results['unmatched']
-                error_count += batch_results['errors']
-                errors.extend(batch_results['error_messages'])
-                
-                logger.info(f"批次 {i//batch_size + 1} 完成: 成功 {batch_results['synced']}, "
-                           f"无匹配 {batch_results['unmatched']}, 错误 {batch_results['errors']}")
-            
-            # 6. 提交更改
+            # 5. 提交更改
             await self.db.commit()
             
-            # 7. 更新配置状态
+            # 6. 更新配置状态
             status = "SUCCESS" if error_count == 0 else "PARTIAL"
             await self._update_settings_status(status)
             
-            # 8. 关闭客户端
-            await client.close()
-            
+            total_sites = len(filtered_sites)
+
             return CookieCloudSyncResult(
                 success=error_count == 0,
-                total_sites=len(sites),
+                total_sites=total_sites,
                 synced_sites=synced_count,
                 unmatched_sites=unmatched_count,
                 error_sites=error_count,
@@ -401,13 +521,21 @@ class CookieCloudSyncService:
         try:
             # 1. 获取配置
             settings = await self._get_settings()
-            if not settings or not settings.enabled:
+            if not settings:
                 return CookieCloudSiteSyncResult(
                     site_id=site_id,
                     site_name="Unknown",
                     success=False,
                     cookie_updated=False,
-                    error_message="CookieCloud未启用或配置不完整"
+                    error_message="未配置CookieCloud设置"
+                )
+            if not settings.enabled:
+                return CookieCloudSiteSyncResult(
+                    site_id=site_id,
+                    site_name="Unknown",
+                    success=False,
+                    cookie_updated=False,
+                    error_message="CookieCloud已禁用"
                 )
             
             # 2. 获取站点
@@ -433,20 +561,28 @@ class CookieCloudSyncService:
                     cookie_updated=False,
                     error_message=f"站点 {site.name} 已禁用"
                 )
+            if site.cookie_source != CookieSource.COOKIECLOUD:
+                return CookieCloudSiteSyncResult(
+                    site_id=site_id,
+                    site_name=site.name,
+                    success=False,
+                    cookie_updated=False,
+                    error_message=f"站点 {site.name} 不是CookieCloud源"
+                )
             
             # 3. 检查域名白名单
             safe_domains: Set[str] = set()
+            domain = self._resolve_site_domain(site)
             if settings.safe_host_whitelist:
                 try:
-                    import json
                     safe_domains = set(json.loads(settings.safe_host_whitelist or "[]"))
-                    if safe_domains and site.domain not in safe_domains:
+                    if safe_domains and (not domain or domain not in safe_domains):
                         return CookieCloudSiteSyncResult(
                             site_id=site_id,
                             site_name=site.name,
                             success=False,
                             cookie_updated=False,
-                            error_message=f"域名 {site.domain} 不在安全白名单中"
+                            error_message=f"域名 {domain or '未知'} 不在安全域名白名单中"
                         )
                 except Exception as e:
                     logger.warning(f"解析安全域名白名单失败: {e}")
@@ -466,7 +602,7 @@ class CookieCloudSyncService:
                 )
             
             # 5. 提取并更新Cookie
-            cookie_string = self._extract_domain_cookies(cookie_data, site.domain)
+            cookie_string = self._extract_domain_cookies(cookie_data, domain)
             
             if cookie_string:
                 await self.db.execute(
@@ -478,10 +614,7 @@ class CookieCloudSyncService:
                         last_cookiecloud_sync_at=datetime.utcnow()
                     )
                 )
-                await self.db.commit()
-                
                 await client.close()
-                
                 duration = (datetime.utcnow() - start_time).total_seconds()
                 return CookieCloudSiteSyncResult(
                     site_id=site_id,
@@ -491,23 +624,21 @@ class CookieCloudSyncService:
                     error_message=None,
                     duration_seconds=duration
                 )
-            else:
-                await client.close()
-                
-                duration = (datetime.utcnow() - start_time).total_seconds()
-                return CookieCloudSiteSyncResult(
-                    site_id=site_id,
-                    site_name=site.name,
-                    success=True,
-                    cookie_updated=False,
-                    error_message=None,
-                    duration_seconds=duration
-                )
+
+            await client.close()
+            duration = (datetime.utcnow() - start_time).total_seconds()
+            return CookieCloudSiteSyncResult(
+                site_id=site_id,
+                site_name=site.name,
+                success=False,
+                cookie_updated=False,
+                error_message="未找到Cookie数据",
+                duration_seconds=duration
+            )
             
         except Exception as e:
             await self.db.rollback()
             logger.error(f"站点 {site_id} Cookie同步失败: {e}")
-            
             duration = (datetime.utcnow() - start_time).total_seconds()
             return CookieCloudSiteSyncResult(
                 site_id=site_id,

@@ -5,7 +5,6 @@
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
-import tempfile
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.core.database import Base
@@ -14,7 +13,7 @@ from app.modules.audiobook.importer import AudiobookImporter
 from app.models.ebook import EBook
 from app.models.audiobook import AudiobookFile
 import app.core.config as config_module
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import yaml
 
 
@@ -51,9 +50,9 @@ def temp_category_yaml(tmp_path):
     return yaml_file
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
 @patch('app.modules.media_renamer.category_helper.ruamel')
-def test_audiobook_importer_path_with_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
+def test_audiobook_importer_path_with_category(mock_ruamel, tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试命中分类时，路径包含分类目录"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
@@ -91,9 +90,9 @@ def test_audiobook_importer_path_with_category(tmp_path, db_session, temp_catego
     assert "配音组" in target_path.name
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
 @patch('app.modules.media_renamer.category_helper.ruamel')
-def test_audiobook_importer_path_without_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
+def test_audiobook_importer_path_without_category(mock_ruamel, tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试未命中分类时，使用原有结构"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
@@ -130,9 +129,9 @@ def test_audiobook_importer_path_without_category(tmp_path, db_session, temp_cat
     assert "其他有声书" in path_str
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
 @patch('app.modules.media_renamer.category_helper.ruamel')
-def test_audiobook_importer_path_no_ebook_object(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
+def test_audiobook_importer_path_no_ebook_object(mock_ruamel, tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试不传入 ebook 对象时，使用原有结构"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
@@ -164,9 +163,9 @@ def test_audiobook_importer_path_no_ebook_object(tmp_path, db_session, temp_cate
     assert "其他有声书" not in path_str
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
 @patch('app.modules.media_renamer.category_helper.ruamel')
-def test_audiobook_importer_path_with_series_and_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
+def test_audiobook_importer_path_with_series_and_category(mock_ruamel, tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试带系列和分类的路径"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))

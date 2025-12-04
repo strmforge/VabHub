@@ -28,6 +28,8 @@ class Site(Base):
     cookiecloud_uuid = Column(String(100), nullable=True)
     cookiecloud_password = Column(String(100), nullable=True)
     cookiecloud_server = Column(String(500), nullable=True)  # CookieCloud服务器地址
+    cookie_source = Column(String(32), nullable=True, default="MANUAL", comment="Cookie来源: MANUAL/COOKIECLOUD/API")
+    last_cookiecloud_sync_at = Column(DateTime, nullable=True, comment="最近CookieCloud同步时间")
     is_active = Column(Boolean, default=True)  # 保持原字段，enabled作为别名
     user_data = Column(JSON, nullable=True)  # 用户数据（上传量、下载量等）
     last_checkin = Column(DateTime, nullable=True)  # 最后签到时间

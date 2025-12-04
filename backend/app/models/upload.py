@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any
 from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, JSON, Index, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 import uuid
 
 from app.core.database import Base
@@ -32,7 +33,7 @@ class UploadTask(Base):
     """上传任务模型"""
     __tablename__ = "upload_tasks"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(255), nullable=True, index=True)  # 用户ID（单用户系统可为空）
     
     # 文件信息
@@ -142,8 +143,8 @@ class UploadProgress(Base):
     """上传进度记录（用于持久化和恢复）"""
     __tablename__ = "upload_progress"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    task_id = Column(UUID(as_uuid=True), ForeignKey("upload_tasks.id"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    task_id = Column(String(36), ForeignKey("upload_tasks.id"), nullable=False, index=True)
     
     # 进度信息
     uploaded_bytes = Column(Integer, nullable=False, default=0)  # 已上传字节数

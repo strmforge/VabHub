@@ -3,15 +3,17 @@ CookieCloud API路由
 提供CookieCloud设置管理、同步控制、状态查询等API端点
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+import json
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 import asyncio
 from loguru import logger
 
-from app.core.deps import DbSessionDep, CurrentUserDep
+from app.core.deps import DbSessionDep
+from app.api.auth import get_current_user as auth_get_current_user
 from app.schemas.cookiecloud import (
     CookieCloudSettingsRead, 
     CookieCloudSettingsUpdate,
@@ -21,6 +23,7 @@ from app.schemas.cookiecloud import (
 )
 from app.modules.cookiecloud.service import CookieCloudSyncService
 from app.models.cookiecloud import CookieCloudSettings
+from app.models.user import User
 from app.schemas.common import ApiResponse, PaginationResponse
 
 router = APIRouter(prefix="/cookiecloud", tags=["CookieCloud"])
@@ -51,10 +54,53 @@ def check_rate_limit(user_id: str = "default", max_requests: int = 1, window_min
     return True
 
 
+def _parse_whitelist(raw_value: Optional[Any]) -> List[str]:
+    if not raw_value:
+        return []
+    if isinstance(raw_value, list):
+        return raw_value
+    if isinstance(raw_value, str):
+        try:
+            value = json.loads(raw_value)
+            return value if isinstance(value, list) else []
+        except Exception:
+            return []
+    return []
+
+
+def _serialize_whitelist(value: Optional[Any]) -> str:
+    if not value:
+        return "[]"
+    if isinstance(value, str):
+        return value
+    try:
+        return json.dumps(value)
+    except Exception:
+        return "[]"
+
+
+def _build_settings_read(settings: CookieCloudSettings) -> CookieCloudSettingsRead:
+    whitelist = _parse_whitelist(settings.safe_host_whitelist)
+    return CookieCloudSettingsRead(
+        id=settings.id,
+        enabled=settings.enabled,
+        host=settings.host,
+        uuid=settings.uuid,
+        password=settings.password,
+        sync_interval_minutes=settings.sync_interval_minutes,
+        safe_host_whitelist=whitelist,
+        last_sync_at=settings.last_sync_at,
+        last_status=settings.last_status,
+        last_error=settings.last_error,
+        created_at=settings.created_at,
+        updated_at=settings.updated_at,
+    )
+
+
 @router.get("/settings", response_model=ApiResponse[CookieCloudSettingsRead])
 async def get_cookiecloud_settings(
     db: DbSessionDep,
-    current_user: CurrentUserDep
+    current_user: User = Depends(auth_get_current_user)
 ):
     """获取CookieCloud设置"""
     try:
@@ -62,23 +108,9 @@ async def get_cookiecloud_settings(
         settings = await sync_service._get_settings()
         
         if not settings:
-            # 返回默认设置
-            default_settings = CookieCloudSettingsRead(
-                enabled=False,
-                host="",
-                uuid="",
-                password="",
-                sync_interval_minutes=60,
-                safe_host_whitelist="[]",
-                last_sync_at=None,
-                last_status="NEVER",
-                last_error=None,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
-            )
-            return ApiResponse(success=True, data=default_settings, message="获取默认设置")
+            return ApiResponse(success=True, data=None, message="尚未配置CookieCloud")
         
-        settings_read = CookieCloudSettingsRead.from_orm(settings)
+        settings_read = _build_settings_read(settings)
         # 隐藏密码信息
         settings_read.password = "***" if settings_read.password else ""
         
@@ -93,7 +125,7 @@ async def get_cookiecloud_settings(
 async def update_cookiecloud_settings(
     settings_update: CookieCloudSettingsUpdate,
     db: DbSessionDep,
-    current_user: CurrentUserDep
+    current_user: User = Depends(auth_get_current_user)
 ):
     """更新CookieCloud设置"""
     try:
@@ -110,7 +142,7 @@ async def update_cookiecloud_settings(
                 uuid=settings_update.uuid,
                 password=settings_update.password,
                 sync_interval_minutes=settings_update.sync_interval_minutes or 60,
-                safe_host_whitelist=settings_update.safe_host_whitelist or "[]",
+                safe_host_whitelist=_serialize_whitelist(settings_update.safe_host_whitelist),
                 last_status="NEVER",
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow()
@@ -124,6 +156,8 @@ async def update_cookiecloud_settings(
             # 如果密码是***，保持原密码不变
             if settings_update.password == "***":
                 update_data.pop("password", None)
+            if "safe_host_whitelist" in update_data:
+                update_data["safe_host_whitelist"] = _serialize_whitelist(update_data["safe_host_whitelist"])
             
             for field, value in update_data.items():
                 setattr(existing_settings, field, value)
@@ -151,7 +185,7 @@ async def update_cookiecloud_settings(
         
         # 获取更新后的设置
         updated_settings = await sync_service._get_settings()
-        settings_read = CookieCloudSettingsRead.from_orm(updated_settings)
+        settings_read = _build_settings_read(updated_settings)
         settings_read.password = "***" if settings_read.password else ""
         
         return ApiResponse(success=True, data=settings_read, message="设置更新成功")
@@ -166,7 +200,7 @@ async def update_cookiecloud_settings(
 async def trigger_cookiecloud_sync(
     background_tasks: BackgroundTasks,
     db: DbSessionDep,
-    current_user: CurrentUserDep,
+    current_user: User = Depends(auth_get_current_user),
     user_id: str = "default",
     batch_size: Optional[int] = 10,
     site_timeout: Optional[int] = 30
@@ -221,7 +255,7 @@ async def trigger_cookiecloud_sync(
 @router.post("/sync-immediate", response_model=ApiResponse[CookieCloudSyncResult])
 async def trigger_cookiecloud_sync_immediate(
     db: DbSessionDep,
-    current_user: CurrentUserDep,
+    current_user: User = Depends(auth_get_current_user),
     batch_size: Optional[int] = 10,
     site_timeout: Optional[int] = 30
 ):
@@ -245,7 +279,7 @@ async def trigger_site_cookiecloud_sync(
     site_id: int,
     background_tasks: BackgroundTasks,
     db: DbSessionDep,
-    current_user: CurrentUserDep
+    current_user: User = Depends(auth_get_current_user)
 ):
     """触发单个站点的CookieCloud同步"""
     try:
@@ -286,11 +320,20 @@ async def trigger_site_cookiecloud_sync(
 
 @router.post("/test-connection", response_model=ApiResponse[CookieCloudTestResult])
 async def test_cookiecloud_connection(
-    db: DbSessionDep
+    db: DbSessionDep,
+    current_user: User = Depends(auth_get_current_user)
 ):
     """测试CookieCloud连接"""
     try:
         sync_service = CookieCloudSyncService(db)
+        settings = await sync_service._get_settings()
+        if not settings:
+            test_result = CookieCloudTestResult(
+                success=False,
+                message="连接测试异常：未配置CookieCloud",
+                details={"error": "NO_SETTINGS"}
+            )
+            return ApiResponse(success=True, data=test_result, message="连接测试完成")
         connection_ok = await sync_service.test_connection()
         
         test_result = CookieCloudTestResult(
@@ -316,7 +359,8 @@ async def test_cookiecloud_connection(
 
 @router.get("/status", response_model=ApiResponse[Dict[str, Any]])
 async def get_cookiecloud_status(
-    db: DbSessionDep
+    db: DbSessionDep,
+    current_user: User = Depends(auth_get_current_user)
 ):
     """获取CookieCloud状态概览"""
     try:
@@ -352,6 +396,7 @@ async def get_cookiecloud_status(
             )
             cookiecloud_sites = cookiecloud_sites_result.scalar() or 0
             
+            whitelist = _parse_whitelist(settings.safe_host_whitelist)
             status_data = {
                 "enabled": settings.enabled,
                 "configured": bool(settings.host and settings.uuid and settings.password),
@@ -361,7 +406,7 @@ async def get_cookiecloud_status(
                 "sync_interval_minutes": settings.sync_interval_minutes,
                 "total_sites": total_sites,
                 "cookiecloud_sites": cookiecloud_sites,
-                "safe_domains": len(settings.safe_host_whitelist or "[]") - 2 if settings.safe_host_whitelist else 0  # 简单计算
+                "safe_domains": len(whitelist)
             }
         
         return ApiResponse(success=True, data=status_data, message="状态获取成功")

@@ -22,7 +22,7 @@ from app.models.cache import CacheEntry  # L3数据库缓存
 from app.models.identification_history import IdentificationHistory  # 媒体识别历史记录
 from app.models.cloud_storage import CloudStorage, CloudStorageAuth  # 云存储
 from app.models.rss_subscription import RSSSubscription, RSSItem  # RSS订阅
-from app.models.rsshub_simple import RSSHubSource, RSSHubComposite, UserRSSHubSubscription  # RSSHub集成（简化版本）
+from app.models.rsshub_simple import RSSHubSourceTemp, RSSHubCompositeTemp, UserRSSHubSubscriptionTemp  # RSSHub集成（简化版本）
 from app.models.subtitle import Subtitle, SubtitleDownloadHistory  # 字幕
 from app.models.multimodal_metrics import (
     MultimodalPerformanceMetric,
@@ -145,9 +145,9 @@ __all__ = [
     "DashboardWidget",  # 仪表盘组件
     "BackupRecord",  # 备份记录
     "TransferHistory",  # 转移历史记录
-    "RSSHubSource",  # RSSHub源
-    "RSSHubComposite",  # RSSHub组合订阅
-    "UserRSSHubSubscription",  # 用户RSSHub订阅状态
+    "RSSHubSourceTemp",  # RSSHub源（临时版本）
+    "RSSHubCompositeTemp",  # RSSHub组合订阅（临时版本）
+    "UserRSSHubSubscriptionTemp",  # 用户RSSHub订阅状态（临时版本）
     "SiteIcon",  # 站点图标
     "SiteDomainConfig",  # 站点域名配置
     "SubscriptionHistory",  # 订阅历史记录

@@ -80,7 +80,7 @@ async def init_db():
     from app.models.identification_history import IdentificationHistory  # 媒体识别历史记录
     from app.models.cloud_storage import CloudStorage, CloudStorageAuth  # 云存储
     from app.models.rss_subscription import RSSSubscription, RSSItem  # RSS订阅
-    from app.models.rsshub_simple import RSSHubSource, RSSHubComposite, UserRSSHubSubscription  # RSSHub集成（简化版本）
+    from app.models.rsshub_simple import RSSHubSourceTemp, RSSHubCompositeTemp, UserRSSHubSubscriptionTemp  # RSSHub集成（简化版本）
     from app.models.subtitle import Subtitle, SubtitleDownloadHistory  # 字幕
     from app.models.multimodal_metrics import (
         MultimodalPerformanceMetric,

@@ -19,7 +19,7 @@ rsshub_composite_source_temp = Table(
 )
 
 
-class RSSHubSource(Base):
+class RSSHubSourceTemp(Base):
     """RSSHub源表（简化版本，临时表名）"""
     __tablename__ = 'rsshub_source_temp'
     
@@ -35,7 +35,7 @@ class RSSHubSource(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False, comment='更新时间')
 
 
-class RSSHubComposite(Base):
+class RSSHubCompositeTemp(Base):
     """RSSHub组合订阅表（简化版本，临时表名）"""
     __tablename__ = 'rsshub_composite_temp'
     
@@ -48,7 +48,7 @@ class RSSHubComposite(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False, comment='更新时间')
 
 
-class UserRSSHubSubscription(Base):
+class UserRSSHubSubscriptionTemp(Base):
     """用户RSSHub订阅状态表（简化版本，临时表名）"""
     __tablename__ = 'user_rsshub_subscription_temp'
     

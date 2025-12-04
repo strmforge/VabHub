@@ -12,14 +12,15 @@ from loguru import logger
 if TYPE_CHECKING:
     from app.modules.media_renamer.classifier import MediaCategory
 
+ruamel = None
 try:
-    import ruamel.yaml
-    from ruamel.yaml import CommentedMap
+    import ruamel.yaml  # type: ignore
+    from ruamel.yaml import CommentedMap  # type: ignore
+    ruamel = ruamel  # type: ignore  # 暴露模块以便测试 monkeypatch
     RUAMEL_YAML_AVAILABLE = True
 except ImportError:
     RUAMEL_YAML_AVAILABLE = False
-    # 定义CommentedMap为dict的别名，以便类型注解
-    CommentedMap = dict
+    CommentedMap = dict  # type: ignore
     logger.warning("ruamel.yaml库未安装，无法使用YAML分类配置。请运行: pip install ruamel.yaml")
 
 

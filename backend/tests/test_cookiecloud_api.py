@@ -9,6 +9,7 @@ from datetime import datetime
 
 from main import app
 from app.core.database import get_db
+from app.core.dependencies import get_current_user as deps_get_current_user
 from app.models.user import User
 from app.models.cookiecloud import CookieCloudSettings
 
@@ -41,6 +42,7 @@ class TestCookieCloudAPI:
         # Import get_current_user dependency
         from app.api.auth import get_current_user
         app.dependency_overrides[get_current_user] = override_get_current_user
+        app.dependency_overrides[deps_get_current_user] = override_get_current_user
         
         yield
         

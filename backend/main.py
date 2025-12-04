@@ -275,8 +275,9 @@ async def get_graphql_context():
 
 
 # 注册API / GraphQL 路由
-# 注意：漫画路由器已经包含了完整的前缀（如/api/manga/...），所以这里使用空字符串
-app.include_router(api_router, prefix="")
+# 注意：漫画路由器已经包含了完整的前缀（如/api/manga/...），所以这里使用全局API前缀
+api_prefix = getattr(settings, "API_PREFIX", "") or ""
+app.include_router(api_router, prefix=api_prefix)
 graphql_app = GraphQLRouter(graphql_schema, context_getter=get_graphql_context)
 app.include_router(graphql_app, prefix="/graphql")
 

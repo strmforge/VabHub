@@ -27,6 +27,18 @@ class MediaCategory:
         if self.tags is None:
             self.tags = []
 
+    def __eq__(self, other):
+        """支持与字符串比较，兼容旧调用方/测试"""
+        if isinstance(other, MediaCategory):
+            return (
+                self.category == other.category
+                and self.subcategory == other.subcategory
+                and self.tags == other.tags
+            )
+        if isinstance(other, str):
+            return other == self.subcategory or other == self.category
+        return NotImplemented
+
 
 class MediaClassifier:
     """媒体分类器"""

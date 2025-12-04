@@ -6,6 +6,7 @@ TTS 设置管理 API（只读）
 
 from fastapi import APIRouter, Depends
 from typing import Dict, Any, List, Optional, Tuple
+from collections import defaultdict
 from datetime import datetime, timedelta
 from loguru import logger
 from sqlalchemy import func, select
@@ -27,6 +28,7 @@ from app.models.audiobook import AudiobookFile
 from app.models.ebook import EBook
 from app.models.tts_work_profile import TTSWorkProfile
 from app.models.tts_voice_preset import TTSVoicePreset
+from app.modules.tts.storage_service import scan_storage, build_overview
 
 router = APIRouter()
 
@@ -149,41 +151,49 @@ async def _compute_preset_usage(db: AsyncSession) -> List[TTSVoicePresetUsage]:
         if not presets:
             return []
         
-        # 2. 按 preset_id 聚合作品数量
-        bound_counts_result = await db.execute(
-            select(
-                TTSWorkProfile.preset_id,
-                func.count(func.distinct(TTSWorkProfile.ebook_id)).label("cnt")
-            )
-            .where(TTSWorkProfile.preset_id.isnot(None))
-            .group_by(TTSWorkProfile.preset_id)
-        )
-        bound_counts = {row.preset_id: row.cnt for row in bound_counts_result.all()}
+        # 2. 取出所有 profile，确定每个 ebook 的“激活” profile（最近更新的）用于 TTS 归属
+        profiles_result = await db.execute(select(TTSWorkProfile))
+        profiles = profiles_result.scalars().all()
+        active_profiles: Dict[int, TTSWorkProfile] = {}
+        bound_sets: Dict[int, set[int]] = defaultdict(set)
+        for profile in profiles:
+            if profile.preset_id is None:
+                continue
+            # 记录绑定作品（每个 preset 内按 ebook 去重）
+            bound_sets[profile.preset_id].add(profile.ebook_id)
+            existing = active_profiles.get(profile.ebook_id)
+            if not existing:
+                active_profiles[profile.ebook_id] = profile
+                continue
+            existing_ts = existing.updated_at or existing.created_at
+            current_ts = profile.updated_at or profile.created_at
+            if current_ts > existing_ts or (current_ts == existing_ts and profile.id > existing.id):
+                active_profiles[profile.ebook_id] = profile
         
-        # 3. 按 preset_id 聚合"已生成 TTS 的作品数" & last_used_at
-        tts_stats_result = await db.execute(
-            select(
-                TTSWorkProfile.preset_id,
-                func.count(func.distinct(AudiobookFile.ebook_id)).label("cnt"),
-                func.max(AudiobookFile.created_at).label("last_used_at")
-            )
-            .join(
-                AudiobookFile,
-                AudiobookFile.ebook_id == TTSWorkProfile.ebook_id
-            )
-            .where(
-                TTSWorkProfile.preset_id.isnot(None),
-                AudiobookFile.is_tts_generated == True
-            )
-            .group_by(TTSWorkProfile.preset_id)
-        )
+        bound_counts: Dict[int, int] = {pid: len(ebooks) for pid, ebooks in bound_sets.items()}
         
-        tts_counts = {}
-        last_used_map = {}
-        for row in tts_stats_result.all():
-            preset_id = row.preset_id
-            tts_counts[preset_id] = row.cnt or 0
-            last_used_map[preset_id] = row.last_used_at
+        # 3. 聚合每个 ebook 的 TTS 生成情况，并映射到激活 profile
+        tts_counts: Dict[int, int] = defaultdict(int)
+        last_used_map: Dict[int, Optional[datetime]] = {}
+        if active_profiles:
+            tts_stats_result = await db.execute(
+                select(
+                    AudiobookFile.ebook_id,
+                    func.max(AudiobookFile.created_at).label("last_used_at")
+                )
+                .where(AudiobookFile.is_tts_generated == True)
+                .group_by(AudiobookFile.ebook_id)
+            )
+            for row in tts_stats_result.all():
+                profile = active_profiles.get(row.ebook_id)
+                if not profile or profile.preset_id is None:
+                    continue
+                preset_id = profile.preset_id
+                tts_counts[preset_id] += 1
+                if row.last_used_at:
+                    existing_last = last_used_map.get(preset_id)
+                    if not existing_last or row.last_used_at > existing_last:
+                        last_used_map[preset_id] = row.last_used_at
         
         # 4. 组装 TTSVoicePresetUsage 列表并计算热度
         usages: List[TTSVoicePresetUsage] = []
@@ -336,8 +346,6 @@ async def get_tts_settings(
         # 5. 获取存储概览
         storage_overview: Optional[TTSStorageOverviewSummary] = None
         try:
-            from app.modules.tts.storage_service import scan_storage, build_overview
-            
             root = Path(settings.SMART_TTS_OUTPUT_ROOT)
             if not root.exists():
                 storage_overview = TTSStorageOverviewSummary(
@@ -356,6 +364,12 @@ async def get_tts_settings(
                 
                 # 基于阈值计算 warning
                 size_gb = total_size_bytes / (1024**3) if total_size_bytes else 0
+                logger.debug(
+                    "TTS storage overview: size_gb=%.2f, warn_threshold=%.2f, critical_threshold=%.2f",
+                    size_gb,
+                    getattr(settings, 'SMART_TTS_STORAGE_WARN_SIZE_GB', 10.0),
+                    getattr(settings, 'SMART_TTS_STORAGE_CRITICAL_SIZE_GB', 30.0),
+                )
                 warn_threshold = getattr(settings, 'SMART_TTS_STORAGE_WARN_SIZE_GB', 10.0)
                 critical_threshold = getattr(settings, 'SMART_TTS_STORAGE_CRITICAL_SIZE_GB', 30.0)
                 
