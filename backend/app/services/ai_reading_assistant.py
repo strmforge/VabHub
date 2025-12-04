@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.ai_reading_assistant import ReadingPlanDraft
 from app.core.ai_orchestrator.service import AIOrchestratorService, OrchestratorMode
 from app.core.ai_orchestrator.tools.base import OrchestratorContext
-from app.core.ai_orchestrator.llm_client import get_llm_client
+from app.core.ai_orchestrator.factory import get_llm_client
 
 
 class AIReadingAssistantService:

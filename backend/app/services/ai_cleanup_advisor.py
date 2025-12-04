@@ -17,7 +17,7 @@ from app.schemas.ai_cleanup_advisor import (
 )
 from app.core.ai_orchestrator.service import AIOrchestratorService, OrchestratorMode
 from app.core.ai_orchestrator.tools.base import OrchestratorContext
-from app.core.ai_orchestrator.llm_client import get_llm_client
+from app.core.ai_orchestrator.factory import get_llm_client
 
 
 class AICleanupAdvisorService:

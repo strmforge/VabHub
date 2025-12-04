@@ -4,15 +4,14 @@ TTS Jobs Dev API
 提供 TTS Job 管理的 Dev 接口
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Path as PathParam, Query
+from fastapi import APIRouter, HTTPException, Path as PathParam, Query
 from typing import Optional, List, Dict, Any
 from loguru import logger
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.deps import DbSessionDep
 from app.models.tts_job import TTSJob
 from app.models.ebook import EBook
 from app.schemas.tts import TTSJobResponse, RunBatchJobsRequest, TTSBatchJobsResponse
@@ -28,8 +27,8 @@ router = APIRouter()
 
 @router.post("/enqueue-for-work/{ebook_id}", response_model=TTSJobResponse, summary="为作品创建 TTS Job")
 async def enqueue_job_for_work(
-    ebook_id: int = PathParam(..., description="电子书 ID"),
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep,
+    ebook_id: int = PathParam(..., description="电子书 ID")
 ) -> TTSJobResponse:
     """
     为指定作品创建 TTS Job（入队）
@@ -69,7 +68,7 @@ async def enqueue_job_for_work(
 
 @router.post("/run-next", summary="执行下一个待处理的 Job")
 async def run_next_job(
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep
 ) -> Dict[str, Any]:
     """
     执行下一个待处理的 TTS Job
@@ -124,10 +123,10 @@ async def run_next_job(
 
 @router.get("", response_model=List[TTSJobResponse], summary="获取 TTS Job 列表")
 async def list_jobs(
+    db: DbSessionDep,
     status: Optional[str] = Query(None, description="按状态筛选"),
     ebook_id: Optional[int] = Query(None, description="按作品 ID 筛选"),
-    limit: int = Query(50, ge=1, le=200, description="返回数量限制"),
-    db: AsyncSession = Depends(get_db)
+    limit: int = Query(50, ge=1, le=200, description="返回数量限制")
 ) -> List[TTSJobResponse]:
     """
     获取 TTS Job 列表
@@ -169,8 +168,8 @@ async def list_jobs(
 
 @router.get("/{job_id}", response_model=TTSJobResponse, summary="获取 TTS Job 详情")
 async def get_job(
-    job_id: int = PathParam(..., description="Job ID"),
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep,
+    job_id: int = PathParam(..., description="Job ID")
 ) -> TTSJobResponse:
     """
     获取 TTS Job 详情
@@ -203,7 +202,7 @@ async def get_job(
 @router.post("/run-batch", response_model=TTSBatchJobsResponse, summary="批量执行 TTS Job")
 async def run_batch_jobs_api(
     payload: RunBatchJobsRequest,
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep
 ) -> TTSBatchJobsResponse:
     """
     批量执行 TTS Job

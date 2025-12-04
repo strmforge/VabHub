@@ -7,15 +7,12 @@ PLUGIN-UX-3 实现
 """
 
 from typing import Any, Callable, Awaitable, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import require_admin
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentAdminUserDep
 from app.services.plugin_registry import get_plugin_registry
 
 
@@ -34,13 +31,14 @@ class PluginRoute(BaseModel):
     "/{plugin_id}/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE"],
     summary="插件 API 代理",
+    response_model=None,
 )
 async def plugin_api_proxy(
     plugin_id: str,
     path: str,
     request: Request,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     代理插件 API 请求
@@ -86,9 +84,9 @@ async def plugin_api_proxy(
         # 准备上下文
         ctx = {
             "request": request,
-            "user_id": current_user.id,
-            "username": current_user.username,
-            "session": session,
+            "user_id": current_admin.id,
+            "username": current_admin.username,
+            "session": db,
         }
         
         # 获取请求数据
@@ -119,10 +117,11 @@ async def plugin_api_proxy(
 @router.get(
     "/{plugin_id}",
     summary="列出插件 API 路由",
+    response_model=None,
 )
 async def list_plugin_routes(
     plugin_id: str,
-    current_user: User = Depends(require_admin),
+    current_admin: CurrentAdminUserDep,
 ):
     """
     列出插件注册的所有 API 路由

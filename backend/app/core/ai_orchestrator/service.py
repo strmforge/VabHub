@@ -25,6 +25,7 @@ class OrchestratorMode(str, Enum):
     SUBS_ADVISOR = "subs_advisor"
     DIAGNOSE = "diagnose"
     CLEANUP_ADVISOR = "cleanup_advisor"
+    READING_ASSISTANT = "reading_assistant"
 
 
 class PlannedToolCall(BaseModel):

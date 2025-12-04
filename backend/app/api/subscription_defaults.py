@@ -3,19 +3,16 @@
 """
 
 from typing import Dict, List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.core.deps import DbSessionDep, CurrentUserDep
 from app.core.schemas import BaseResponse
-from app.core.security import get_current_user
-from app.models.user import User
 from app.modules.subscription.defaults import (
     DefaultSubscriptionConfig,
     DefaultSubscriptionConfigService
 )
-from app.core.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 router = APIRouter(prefix="/subscriptions/default-config", tags=["subscription-defaults"])
@@ -69,8 +66,8 @@ class AllConfigsResponse(BaseModel):
 @router.get("/{media_type}", response_model=BaseResponse[DefaultSubscriptionConfigResponse])
 async def get_default_subscription_config(
     media_type: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     获取指定媒体类型的默认订阅配置
@@ -115,8 +112,8 @@ async def get_default_subscription_config(
 async def save_default_subscription_config(
     media_type: str,
     data: DefaultSubscriptionConfigRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     保存指定媒体类型的默认订阅配置
@@ -164,8 +161,8 @@ async def save_default_subscription_config(
 @router.delete("/{media_type}", response_model=BaseResponse[DefaultSubscriptionConfigResponse])
 async def reset_default_subscription_config(
     media_type: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     重置指定媒体类型的默认订阅配置为内置值
@@ -208,8 +205,8 @@ async def reset_default_subscription_config(
 
 @router.get("", response_model=BaseResponse[AllConfigsResponse])
 async def get_all_default_subscription_configs(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     获取所有媒体类型的默认订阅配置
@@ -251,8 +248,8 @@ async def get_all_default_subscription_configs(
 
 @router.get("/media-types", response_model=BaseResponse[List[str]])
 async def get_supported_media_types(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     获取支持的媒体类型列表
@@ -284,8 +281,8 @@ async def get_supported_media_types(
 async def apply_default_config_to_subscription(
     media_type: str,
     subscription_data: dict,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
     """
     将默认配置应用到订阅数据（供创建订阅时使用）

@@ -1002,6 +1002,10 @@ async def get_plugin_readme(plugin: RemotePluginInfo) -> Optional[str]:
     return None
 
 
+# 兼容性别名：get_multi_hub_index -> get_all_plugins
+get_multi_hub_index = get_all_plugins
+
+
 # ============== PLUGIN-SAFETY-1：轻量级自动更新检测 ==============
 
 async def check_plugin_updates_lightweight(

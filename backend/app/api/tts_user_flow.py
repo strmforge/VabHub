@@ -5,14 +5,13 @@
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy import select, desc, func
 from sqlalchemy.orm import selectinload
 from loguru import logger
 
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.deps import DbSessionDep
 from app.schemas.tts import (
     UserWorkTTSStatus,
     UserTTSJobEnqueueResponse,
@@ -39,7 +38,7 @@ def _check_tts_enabled():
 @router.post("/jobs/enqueue-for-work/{ebook_id}", response_model=UserTTSJobEnqueueResponse)
 async def enqueue_tts_job_for_work(
     ebook_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep
 ):
     """
     为用户作品创建 TTS Job
@@ -113,7 +112,7 @@ async def enqueue_tts_job_for_work(
 @router.get("/jobs/status/by-ebook/{ebook_id}", response_model=UserWorkTTSStatus)
 async def get_tts_status_by_ebook(
     ebook_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: DbSessionDep
 ):
     """
     查询指定作品的 TTS 状态
@@ -186,9 +185,9 @@ async def get_tts_status_by_ebook(
 
 @router.get("/jobs/overview", response_model=List[UserTTSJobOverviewItem])
 async def get_tts_jobs_overview(
+    db: DbSessionDep,
     limit: int = Query(50, ge=1, le=200, description="返回数量限制"),
-    status_filter: Optional[str] = Query(None, alias="status", description="状态过滤，逗号分隔，如: queued,running,partial"),
-    db: AsyncSession = Depends(get_db)
+    status_filter: Optional[str] = Query(None, alias="status", description="状态过滤，逗号分隔，如: queued,running,partial")
 ):
     """
     获取用户版 TTS Job 概览列表

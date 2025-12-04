@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from app.db.session import get_db
+from app.core.deps import DbSessionDep
 from app.core.ai_orchestrator.service import (
     AIOrchestratorService,
     OrchestratorMode,
@@ -91,7 +91,7 @@ async def check_orchestrator_enabled():
         )
 
 
-async def get_current_user_optional(db: AsyncSession = Depends(get_db)):
+async def get_current_user_optional(db: DbSessionDep):
     """
     获取当前用户（可选）
     
@@ -144,7 +144,7 @@ async def get_orchestrator_status():
 )
 async def create_plan(
     request: OrchestratorPlanRequest,
-    db: AsyncSession = Depends(get_db),
+    db: DbSessionDep,
     user = Depends(get_current_user_optional),
 ):
     """
@@ -200,7 +200,7 @@ async def create_plan(
 )
 async def execute_orchestrator(
     request: OrchestratorExecuteRequest,
-    db: AsyncSession = Depends(get_db),
+    db: DbSessionDep,
     user = Depends(get_current_user_optional),
 ):
     """

@@ -7,15 +7,12 @@ PLUGIN-UX-3 扩展：Dashboard DSL
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import get_current_user, require_admin
-from app.core.response import BaseResponse
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentUserDep, CurrentAdminUserDep
+from app.schemas.response import BaseResponse
 from app.models.plugin import Plugin, PluginStatus
 from app.schemas.plugin import (
     PluginPanelPlacement,
@@ -33,9 +30,9 @@ router = APIRouter(prefix="/plugin_panels", tags=["plugin-panels"])
 
 @router.get("", response_model=list[PluginPanelWithPlugin])
 async def list_panels_by_placement(
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
     placement: PluginPanelPlacement = Query(..., description="面板位置"),
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
 ):
     """
     按位置列出插件面板
@@ -44,7 +41,7 @@ async def list_panels_by_placement(
     """
     # 获取所有已启用的插件
     stmt = select(Plugin).where(Plugin.status == PluginStatus.ENABLED)
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     plugins = result.scalars().all()
     
     panels: list[PluginPanelWithPlugin] = []
@@ -80,8 +77,8 @@ async def list_panels_by_placement(
 async def get_panel_data(
     plugin_id: str,
     panel_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
 ):
     """
     获取面板数据
@@ -93,7 +90,7 @@ async def get_panel_data(
         Plugin.name == plugin_id,
         Plugin.status == PluginStatus.ENABLED
     )
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     plugin = result.scalar_one_or_none()
     
     if not plugin:
@@ -142,8 +139,8 @@ async def get_panel_data(
 )
 async def get_plugin_dashboard(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取插件 Dashboard
@@ -156,7 +153,7 @@ async def get_plugin_dashboard(
         Plugin.name == plugin_id,
         Plugin.status == PluginStatus.ENABLED
     )
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     plugin = result.scalar_one_or_none()
     
     if not plugin:

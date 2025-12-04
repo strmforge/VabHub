@@ -6,13 +6,10 @@ DEV-SDK-1 实现
 """
 
 import time
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import require_admin
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentAdminUserDep
 from app.schemas.plugin import (
     WorkflowExtensionInfo,
     WorkflowRunRequest,
@@ -26,8 +23,8 @@ router = APIRouter(prefix="/dev/workflows", tags=["workflow-extensions"])
 
 @router.get("", response_model=list[WorkflowExtensionInfo])
 async def list_workflows(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     列出所有插件注册的 Workflow
@@ -52,8 +49,8 @@ async def list_workflows(
 async def run_workflow(
     workflow_id: str,
     body: WorkflowRunRequest,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     执行 Workflow
@@ -75,7 +72,7 @@ async def run_workflow(
     start = time.monotonic()
     
     try:
-        output = await workflow.run(session, body.payload)
+        output = await workflow.run(db, body.payload)
         duration_ms = int((time.monotonic() - start) * 1000)
         
         logger.info(f"[workflow-api] {workflow_id} completed in {duration_ms}ms")

@@ -3,7 +3,7 @@ CookieCloud API路由
 提供CookieCloud设置管理、同步控制、状态查询等API端点
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Any, Optional
@@ -11,8 +11,7 @@ from datetime import datetime, timedelta
 import asyncio
 from loguru import logger
 
-from app.core.database import get_async_session
-from app.core.auth import get_current_user
+from app.core.deps import DbSessionDep, CurrentUserDep
 from app.schemas.cookiecloud import (
     CookieCloudSettingsRead, 
     CookieCloudSettingsUpdate,
@@ -54,8 +53,8 @@ def check_rate_limit(user_id: str = "default", max_requests: int = 1, window_min
 
 @router.get("/settings", response_model=ApiResponse[CookieCloudSettingsRead])
 async def get_cookiecloud_settings(
-    db: AsyncSession = Depends(get_async_session),
-    current_user = Depends(get_current_user)
+    db: DbSessionDep,
+    current_user: CurrentUserDep
 ):
     """获取CookieCloud设置"""
     try:
@@ -93,8 +92,8 @@ async def get_cookiecloud_settings(
 @router.put("/settings", response_model=ApiResponse[CookieCloudSettingsRead])
 async def update_cookiecloud_settings(
     settings_update: CookieCloudSettingsUpdate,
-    db: AsyncSession = Depends(get_async_session),
-    current_user = Depends(get_current_user)
+    db: DbSessionDep,
+    current_user: CurrentUserDep
 ):
     """更新CookieCloud设置"""
     try:
@@ -166,11 +165,11 @@ async def update_cookiecloud_settings(
 @router.post("/sync", response_model=ApiResponse[CookieCloudSyncResult])
 async def trigger_cookiecloud_sync(
     background_tasks: BackgroundTasks,
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
     user_id: str = "default",
     batch_size: Optional[int] = 10,
-    site_timeout: Optional[int] = 30,
-    db: AsyncSession = Depends(get_async_session),
-    current_user = Depends(get_current_user)
+    site_timeout: Optional[int] = 30
 ):
     """触发CookieCloud同步（带速率限制）"""
     try:
@@ -221,10 +220,10 @@ async def trigger_cookiecloud_sync(
 
 @router.post("/sync-immediate", response_model=ApiResponse[CookieCloudSyncResult])
 async def trigger_cookiecloud_sync_immediate(
+    db: DbSessionDep,
+    current_user: CurrentUserDep,
     batch_size: Optional[int] = 10,
-    site_timeout: Optional[int] = 30,
-    db: AsyncSession = Depends(get_async_session),
-    current_user = Depends(get_current_user)
+    site_timeout: Optional[int] = 30
 ):
     """立即触发CookieCloud同步（同步执行，用于测试）"""
     try:
@@ -245,8 +244,8 @@ async def trigger_cookiecloud_sync_immediate(
 async def trigger_site_cookiecloud_sync(
     site_id: int,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_async_session),
-    current_user = Depends(get_current_user)
+    db: DbSessionDep,
+    current_user: CurrentUserDep
 ):
     """触发单个站点的CookieCloud同步"""
     try:
@@ -287,7 +286,7 @@ async def trigger_site_cookiecloud_sync(
 
 @router.post("/test-connection", response_model=ApiResponse[CookieCloudTestResult])
 async def test_cookiecloud_connection(
-    db: AsyncSession = Depends(get_async_session)
+    db: DbSessionDep
 ):
     """测试CookieCloud连接"""
     try:
@@ -317,7 +316,7 @@ async def test_cookiecloud_connection(
 
 @router.get("/status", response_model=ApiResponse[Dict[str, Any]])
 async def get_cookiecloud_status(
-    db: AsyncSession = Depends(get_async_session)
+    db: DbSessionDep
 ):
     """获取CookieCloud状态概览"""
     try:
@@ -372,11 +371,11 @@ async def get_cookiecloud_status(
         raise HTTPException(status_code=500, detail=f"获取状态失败: {e}")
 
 
-@router.get("/sync-history", response_model=ApiResponse[PaginationResponse[CookieCloudSyncHistory]])
+@router.get("/sync-history", response_model=ApiResponse[PaginationResponse[Dict[str, Any]]])
 async def get_cookiecloud_sync_history(
+    db: DbSessionDep,
     page: int = 1,
-    size: int = 20,
-    db: AsyncSession = Depends(get_async_session)
+    size: int = 20
 ):
     """获取同步历史记录（简化实现）"""
     try:

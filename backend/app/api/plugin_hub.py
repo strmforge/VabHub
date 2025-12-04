@@ -6,14 +6,11 @@ PLUGIN-HUB-1 & PLUGIN-HUB-2 & PLUGIN-HUB-4 实现
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, Query
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import require_admin
 from app.core.config import settings, PluginHubSourceConfig
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentAdminUserDep
 from app.schemas.plugin_hub import (
     RemotePluginWithLocalStatus,
     PluginHubIndexResponse,
@@ -50,7 +47,7 @@ router = APIRouter(prefix="/dev/plugin_hub", tags=["plugin-hub"])
 
 @router.get("/config")
 async def get_plugin_hub_config_api(
-    current_user: User = Depends(require_admin),
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取 Plugin Hub 配置信息
@@ -70,18 +67,18 @@ async def get_plugin_hub_config_api(
 
 @router.get("/hubs", response_model=List[PluginHubSourcePublic])
 async def get_plugin_hub_sources_api(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取插件 Hub 源列表
     
     返回当前配置的所有插件市场源
     """
-    logger.info(f"[plugin-hub-api] Hub sources requested by user {current_user.id}")
+    logger.info(f"[plugin-hub-api] Hub sources requested by user {current_admin.id}")
     
     try:
-        sources = await load_runtime_hub_sources(session)
+        sources = await load_runtime_hub_sources(db)
         return [hub_source_to_public(s) for s in sources]
     except Exception as e:
         logger.error(f"[plugin-hub-api] Failed to get hub sources: {e}")
@@ -94,15 +91,15 @@ async def get_plugin_hub_sources_api(
 @router.put("/hubs", response_model=List[PluginHubSourcePublic])
 async def update_plugin_hub_sources_api(
     payload: PluginHubSourceUpdateRequest,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     更新插件 Hub 源列表
     
     注意：更新后会清除所有缓存，需要重新获取索引
     """
-    logger.info(f"[plugin-hub-api] Hub sources update by user {current_user.id}, count={len(payload.sources)}")
+    logger.info(f"[plugin-hub-api] Hub sources update by user {current_admin.id}, count={len(payload.sources)}")
     
     try:
         # 校验和标准化 URL
@@ -121,7 +118,7 @@ async def update_plugin_hub_sources_api(
             sources.append(source)
         
         # 保存到 DB
-        await save_runtime_hub_sources(session, sources)
+        await save_runtime_hub_sources(db, sources)
         
         # 返回更新后的列表
         return [hub_source_to_public(s) for s in sources]
@@ -140,14 +137,14 @@ async def update_plugin_hub_sources_api(
 
 @router.get("", response_model=List[RemotePluginWithLocalStatus])
 async def get_plugin_hub_index_api(
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
     force_refresh: bool = Query(False, description="强制刷新（忽略缓存）"),
     channel: Optional[str] = Query(None, description="频道过滤：official / community"),
     include_community: bool = Query(True, description="是否包含社区插件"),
     hub_id: Optional[str] = Query(None, description="限定某个 Hub"),
     installed_only: bool = Query(False, description="仅返回已安装插件"),
     not_installed_only: bool = Query(False, description="仅返回未安装插件"),
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
 ):
     """
     获取 Plugin Hub 插件列表（多 Hub 聚合）
@@ -164,7 +161,7 @@ async def get_plugin_hub_index_api(
     注意：installed_only 和 not_installed_only 不能同时为 True
     """
     logger.info(
-        f"[plugin-hub-api] Index requested by user {current_user.id}, "
+        f"[plugin-hub-api] Index requested by user {current_admin.id}, "
         f"force_refresh={force_refresh}, channel={channel}, hub_id={hub_id}, "
         f"installed_only={installed_only}, not_installed_only={not_installed_only}"
     )
@@ -179,7 +176,7 @@ async def get_plugin_hub_index_api(
     try:
         # 使用多 Hub 聚合函数
         plugins = await get_multi_hub_index(
-            session,
+            db,
             force_refresh=force_refresh,
             hub_ids=[hub_id] if hub_id else None,
             channel=channel,
@@ -199,15 +196,15 @@ async def get_plugin_hub_index_api(
 @router.get("/{plugin_id}", response_model=RemotePluginWithLocalStatus)
 async def get_plugin_detail_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取单个远程插件详情
     
     - **plugin_id**: 插件 ID
     """
-    plugin = await get_remote_plugin_detail(session, plugin_id)
+    plugin = await get_remote_plugin_detail(db, plugin_id)
     
     if not plugin:
         raise HTTPException(
@@ -221,8 +218,8 @@ async def get_plugin_detail_api(
 @router.get("/{plugin_id}/readme")
 async def get_plugin_readme_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取远程插件的 README 内容
@@ -231,7 +228,7 @@ async def get_plugin_readme_api(
     
     返回 Markdown 格式的 README 文本
     """
-    plugin = await get_remote_plugin_detail(session, plugin_id)
+    plugin = await get_remote_plugin_detail(db, plugin_id)
     
     if not plugin:
         raise HTTPException(
@@ -250,15 +247,15 @@ async def get_plugin_readme_api(
 @router.get("/{plugin_id}/install_guide")
 async def get_plugin_install_guide_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取插件安装指南
     
     返回手动安装的命令行指令
     """
-    plugin = await get_remote_plugin_detail(session, plugin_id)
+    plugin = await get_remote_plugin_detail(db, plugin_id)
     
     if not plugin:
         raise HTTPException(
@@ -337,7 +334,7 @@ async def get_plugin_install_guide_api(
 # ==================== PLUGIN-HUB-2 & 3：一键操作 ====================
 
 async def check_community_install_allowed(
-    session: AsyncSession,
+    db: DbSessionDep,
     plugin_id: str,
 ) -> None:
     """
@@ -353,7 +350,7 @@ async def check_community_install_allowed(
         return
     
     # 获取插件详情检查 channel
-    plugin = await get_remote_plugin_detail(session, plugin_id)
+    plugin = await get_remote_plugin_detail(db, plugin_id)
     if not plugin:
         return  # 插件不存在，让后续逻辑处理
     
@@ -371,8 +368,8 @@ async def check_community_install_allowed(
 @router.post("/{plugin_id}/install", response_model=RemotePluginWithLocalStatus)
 async def install_plugin_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     从 Plugin Hub 一键安装插件
@@ -383,13 +380,13 @@ async def install_plugin_api(
     
     注意：如果服务器配置禁用了社区插件一键安装，社区插件将返回 403。
     """
-    logger.info(f"[plugin-hub-api] Install requested for {plugin_id} by user {current_user.id}")
+    logger.info(f"[plugin-hub-api] Install requested for {plugin_id} by user {current_admin.id}")
     
     # 检查社区插件安装权限（PLUGIN-HUB-3）
-    await check_community_install_allowed(session, plugin_id)
+    await check_community_install_allowed(db, plugin_id)
     
     try:
-        result = await install_plugin_from_hub(session, plugin_id)
+        result = await install_plugin_from_hub(db, plugin_id)
         return result
     except RepoNotAllowedError as e:
         logger.warning(f"[plugin-hub-api] Repo not allowed: {e}")
@@ -414,8 +411,8 @@ async def install_plugin_api(
 @router.post("/{plugin_id}/update", response_model=RemotePluginWithLocalStatus)
 async def update_plugin_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     从 Plugin Hub 更新已安装的插件
@@ -426,13 +423,13 @@ async def update_plugin_api(
     
     注意：如果服务器配置禁用了社区插件一键更新，社区插件将返回 403。
     """
-    logger.info(f"[plugin-hub-api] Update requested for {plugin_id} by user {current_user.id}")
+    logger.info(f"[plugin-hub-api] Update requested for {plugin_id} by user {current_admin.id}")
     
     # 检查社区插件更新权限（PLUGIN-HUB-3）
-    await check_community_install_allowed(session, plugin_id)
+    await check_community_install_allowed(db, plugin_id)
     
     try:
-        result = await update_plugin_from_hub(session, plugin_id)
+        result = await update_plugin_from_hub(db, plugin_id)
         return result
     except PluginUpdateError as e:
         logger.error(f"[plugin-hub-api] Update failed: {e}")
@@ -451,8 +448,8 @@ async def update_plugin_api(
 @router.post("/{plugin_id}/uninstall")
 async def uninstall_plugin_api(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     卸载插件
@@ -463,10 +460,10 @@ async def uninstall_plugin_api(
     
     ⚠️ 警告：此操作不可逆，插件目录将被完全删除。
     """
-    logger.info(f"[plugin-hub-api] Uninstall requested for {plugin_id} by user {current_user.id}")
+    logger.info(f"[plugin-hub-api] Uninstall requested for {plugin_id} by user {current_admin.id}")
     
     try:
-        success = await uninstall_plugin(session, plugin_id)
+        success = await uninstall_plugin(db, plugin_id)
         return {
             "success": success,
             "plugin_id": plugin_id,

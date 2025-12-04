@@ -3,16 +3,13 @@
 """
 
 from typing import Dict, List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.schemas import BaseResponse
-from app.core.security import get_current_user
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentUserDep
 from app.modules.filter_rule_group.service import FilterRuleGroupService
-from app.core.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 router = APIRouter(prefix="/filter-rule-groups", tags=["filter-rule-groups"])
@@ -62,22 +59,18 @@ class ValidateResponse(BaseModel):
     errors: Optional[List[str]] = None
 
 
-# 依赖注入
-async def get_service(db: AsyncSession = Depends(get_db)) -> FilterRuleGroupService:
-    return FilterRuleGroupService(db)
-
-
 # API端点
 @router.get("/", response_model=BaseResponse[FilterRuleGroupListResponse])
 async def list_filter_rule_groups(
+    current_user: CurrentUserDep,
+    db: DbSessionDep,
     page: int = Query(1, ge=1, description="页码"),
     size: int = Query(20, ge=1, le=100, description="每页数量"),
     media_type: Optional[str] = Query(None, description="媒体类型过滤"),
     enabled: Optional[bool] = Query(None, description="启用状态过滤"),
-    search: Optional[str] = Query(None, description="搜索关键词"),
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    search: Optional[str] = Query(None, description="搜索关键词")
 ):
+    service = FilterRuleGroupService(db)
     """
     获取过滤规则组列表
     """
@@ -119,9 +112,10 @@ async def list_filter_rule_groups(
 @router.get("/{group_id}", response_model=BaseResponse[FilterRuleGroupResponse])
 async def get_filter_rule_group(
     group_id: int,
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     获取单个过滤规则组
     """
@@ -144,9 +138,10 @@ async def get_filter_rule_group(
 @router.post("/", response_model=BaseResponse[FilterRuleGroupResponse])
 async def create_filter_rule_group(
     data: FilterRuleGroupRequest,
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     创建过滤规则组
     """
@@ -168,9 +163,10 @@ async def create_filter_rule_group(
 async def update_filter_rule_group(
     group_id: int,
     data: FilterRuleGroupRequest,
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     更新过滤规则组
     """
@@ -202,9 +198,10 @@ async def update_filter_rule_group(
 @router.delete("/{group_id}", response_model=BaseResponse[dict])
 async def delete_filter_rule_group(
     group_id: int,
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     删除过滤规则组
     """
@@ -230,9 +227,10 @@ async def delete_filter_rule_group(
 @router.delete("/", response_model=BaseResponse[dict])
 async def delete_filter_rule_groups_batch(
     ids: List[int],
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     批量删除过滤规则组
     """
@@ -258,9 +256,10 @@ async def delete_filter_rule_groups_batch(
 async def toggle_filter_rule_group(
     group_id: int,
     enabled: bool,
-    service: FilterRuleGroupService = Depends(get_service),
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDep,
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     启用/禁用过滤规则组
     """
@@ -302,8 +301,9 @@ async def get_media_types():
 @router.post("/validate", response_model=BaseResponse[ValidateResponse])
 async def validate_rule_group(
     data: FilterRuleGroupRequest,
-    service: FilterRuleGroupService = Depends(get_service)
+    db: DbSessionDep
 ):
+    service = FilterRuleGroupService(db)
     """
     验证规则组配置
     """

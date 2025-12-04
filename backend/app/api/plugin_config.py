@@ -6,15 +6,12 @@ PLUGIN-UX-3 实现
 """
 
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from app.core.database import get_session
-from app.core.auth import require_admin
-from app.core.response import BaseResponse
-from app.models.user import User
+from app.core.deps import DbSessionDep, CurrentAdminUserDep
+from app.schemas.response import BaseResponse
 from app.models.plugin import Plugin
 from app.models.plugin_config import PluginConfig
 from app.schemas.plugin import PluginConfigSchema, PluginConfigUpdate
@@ -117,8 +114,8 @@ def _get_default_config(schema: dict[str, Any] | None) -> dict[str, Any]:
 )
 async def get_plugin_config(
     plugin_id: str,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     获取插件当前配置
@@ -128,7 +125,7 @@ async def get_plugin_config(
     """
     # 验证插件存在
     stmt = select(Plugin).where(Plugin.name == plugin_id)
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     plugin = result.scalar_one_or_none()
     
     if not plugin:
@@ -136,7 +133,7 @@ async def get_plugin_config(
     
     # 获取配置
     stmt = select(PluginConfig).where(PluginConfig.plugin_id == plugin_id)
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     config_record = result.scalar_one_or_none()
     
     if config_record:
@@ -170,8 +167,8 @@ async def get_plugin_config(
 async def update_plugin_config(
     plugin_id: str,
     body: PluginConfigUpdate,
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_admin),
+    db: DbSessionDep,
+    current_admin: CurrentAdminUserDep,
 ):
     """
     更新插件配置
@@ -181,7 +178,7 @@ async def update_plugin_config(
     """
     # 验证插件存在
     stmt = select(Plugin).where(Plugin.name == plugin_id)
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     plugin = result.scalar_one_or_none()
     
     if not plugin:
@@ -194,7 +191,7 @@ async def update_plugin_config(
     
     # 查找或创建配置记录
     stmt = select(PluginConfig).where(PluginConfig.plugin_id == plugin_id)
-    result = await session.execute(stmt)
+    result = await db.execute(stmt)
     config_record = result.scalar_one_or_none()
     
     if config_record:
@@ -204,10 +201,10 @@ async def update_plugin_config(
             plugin_id=plugin_id,
             config=body.config,
         )
-        session.add(config_record)
+        db.add(config_record)
     
-    await session.commit()
-    await session.refresh(config_record)
+    await db.commit()
+    await db.refresh(config_record)
     
     logger.info(f"[plugin-config] Updated config for {plugin_id}")
     
