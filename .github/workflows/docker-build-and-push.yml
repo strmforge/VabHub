@@ -1,24 +1,21 @@
-# VabHub Docker Build & Push CI
-# DOCKER-CI-1 实现
+# [DEPRECATED] VabHub Docker Build & Push CI
+# 此 workflow 已废弃，Docker 构建已合并到主 CI (ci.yml)
+# CI-DOCKER-ONE-IMAGE-1: 保留文件仅供参考，不再触发
 #
-# 触发条件: push 到 main 分支、push 版本 tag、手动触发
-# 流程: 后端 CI ✅ + 前端 CI ✅ → Docker 构建 & 推送到 GHCR
+# 新的 Docker 构建流程见: ci.yml -> docker-build job
+# 新的镜像: ghcr.io/strmforge/vabhub:latest (All-in-One)
 
-name: Docker Build & Push
+name: "[DEPRECATED] Docker Build & Push"
 
+# 不再触发 - 仅保留 workflow_dispatch 供历史参考
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      skip_ci:
-        description: 'Skip CI checks (use with caution)'
-        required: false
-        default: false
-        type: boolean
+      deprecated_warning:
+        description: '⚠️ This workflow is deprecated. Use VabHub CI instead.'
+        required: true
+        default: 'I understand this is deprecated'
+        type: string
 
 env:
   REGISTRY: ghcr.io

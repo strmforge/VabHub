@@ -306,16 +306,51 @@ if media_root.exists():
     logger.info(f"媒体文件目录已挂载: {media_root}")
 
 
-@app.get("/")
-async def root():
-    """根路径"""
-    return {
-        "name": "VabHub",
-        "version": "1.0.0",
-        "description": "新一代智能媒体管理平台",
-        "docs": "/docs",
-        "api": f"{settings.API_PREFIX}"
-    }
+# All-in-One 模式：挂载前端静态文件
+# 当 FRONTEND_DIST_PATH 环境变量存在且目录有效时，提供前端 SPA 服务
+import os
+frontend_dist_path = os.getenv("FRONTEND_DIST_PATH", "")
+if frontend_dist_path and Path(frontend_dist_path).exists():
+    from starlette.responses import FileResponse
+    
+    # 挂载前端静态资源（js/css/assets等）
+    app.mount("/assets", StaticFiles(directory=f"{frontend_dist_path}/assets"), name="frontend_assets")
+    
+    # SPA 回退路由 - 所有非 API/静态资源请求返回 index.html
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """SPA 回退路由"""
+        # 排除 API 和已有静态资源路径
+        excluded_prefixes = ["api", "docs", "redoc", "graphql", "health", "healthz", "metrics", "static", "media", "openapi.json"]
+        if any(full_path.startswith(prefix) for prefix in excluded_prefixes):
+            return JSONResponse(content={"error": "Not found"}, status_code=404)
+        
+        index_path = Path(frontend_dist_path) / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        return JSONResponse(content={"error": "Frontend not found"}, status_code=404)
+    
+    @app.get("/")
+    async def serve_index():
+        """根路径返回前端首页"""
+        index_path = Path(frontend_dist_path) / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        return JSONResponse(content={"error": "Frontend not found"}, status_code=404)
+    
+    logger.info(f"All-in-One 模式：前端静态文件已挂载 ({frontend_dist_path})")
+else:
+    # 非 All-in-One 模式：返回 API 信息
+    @app.get("/")
+    async def root():
+        """根路径"""
+        return {
+            "name": "VabHub",
+            "version": "1.0.0",
+            "description": "新一代智能媒体管理平台",
+            "docs": "/docs",
+            "api": f"{settings.API_PREFIX}"
+        }
 
 
 @app.get("/health")

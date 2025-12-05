@@ -488,6 +488,8 @@ VabHub 系统总览（单一事实来源）
   后端 pytest 全绿（0 failed, 447 passed, 111 skipped），Ruff + mypy 0 error，建立集成测试 skipif 环境变量机制。
 - **2025-12-05 – DOCKER-CI-1 完成**：
   CI 通过后自动构建并推送 Docker 镜像到 GHCR（ghcr.io/strmforge/vabhub-backend + frontend），docker-compose.yml 添加 image 字段支持 `docker compose pull` 升级。
+- **2025-12-05 – CI-DOCKER-ONE-IMAGE-1 完成**：
+  单流水线 CI + 单应用镜像架构。合并多个 workflow 为唯一主 CI (VabHub CI)，将 backend/frontend 双镜像改为 All-in-One 单镜像 `ghcr.io/strmforge/vabhub:latest`，docker-compose 简化为 3 服务架构。
 - （此处由后续任务持续追加）
 
 ---

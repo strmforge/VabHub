@@ -1,11 +1,11 @@
 name: Backend Regression
 
+# CI-DOCKER-ONE-IMAGE-1: 改为仅手动/定时触发，不再阻塞常规 CI
 on:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
+  workflow_dispatch:
+  schedule:
+    # 每天 UTC 2:00 (北京时间 10:00) 运行夜间回归
+    - cron: '0 2 * * *'
 
 jobs:
   test:

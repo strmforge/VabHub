@@ -1,63 +1,181 @@
+# VabHub CI - 主流水线
+# CI-DOCKER-ONE-IMAGE-1 实现
+#
+# 触发条件: push (所有分支) / pull_request / 手动触发
+# 流程: 后端 CI ✅ + 前端 CI ✅ → Docker 构建 & 推送 (仅 main/tags)
+
 name: VabHub CI
 
 on:
   push:
-    branches: [ "*" ]
+    branches: ["*"]
+    tags:
+      - 'v*'
   pull_request:
-    branches: [ "*" ]
+    branches: ["*"]
+  workflow_dispatch:
+    inputs:
+      skip_ci:
+        description: 'Skip CI checks (use with caution)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/strmforge/vabhub
 
 jobs:
-  backend:
-    name: Backend checks
+  # ============== 后端 CI 检查 ==============
+  backend-ci:
+    name: Backend CI
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_ci != true }}
     
     env:
       VABHUB_CI: "1"
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install backend dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements-dev.txt
-    
-    - name: Run backend checks
-      run: |
-        bash scripts/dev_check_backend.sh
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install backend dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      
+      - name: Run backend dev_check
+        run: |
+          bash scripts/dev_check_backend.sh
 
-  frontend:
-    name: Frontend checks
+  # ============== 前端 CI 检查 ==============
+  frontend-ci:
+    name: Frontend CI
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_ci != true }}
     defaults:
       run:
         working-directory: frontend
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run frontend dev_check
+        run: pnpm run dev_check
+
+  # ============== Docker 构建 & 推送 (仅 main/tags) ==============
+  docker-build:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]
+    # 仅在 push main 或 push tag 时执行
+    if: |
+      always() &&
+      (needs.backend-ci.result == 'success' && needs.frontend-ci.result == 'success') &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     
-    - name: Set up Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'pnpm'
-        cache-dependency-path: frontend/pnpm-lock.yaml
+    permissions:
+      contents: read
+      packages: write
     
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 9.15.0
-        run_install: false
-    
-    - name: Install frontend dependencies
-      run: pnpm install --frozen-lockfile
-    
-    - name: Run frontend checks
-      run: pnpm run dev_check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 计算 Docker 标签
+      - name: Generate Docker tags
+        id: tags
+        run: |
+          # 基础标签
+          TAGS="${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          
+          # 如果是 main 分支，添加 latest 标签
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:latest"
+          fi
+          
+          # 如果是版本 tag，添加版本标签
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${{ github.ref_name }}"
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${VERSION}"
+          fi
+          
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "Docker tags: ${TAGS}"
+      
+      # 构建并推送 All-in-One 镜像
+      - name: Build & Push VabHub Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=vabhub
+          cache-to: type=gha,mode=max,scope=vabhub
+          labels: |
+            org.opencontainers.image.source=https://github.com/strmforge/VabHub
+            org.opencontainers.image.description=VabHub All-in-One Application
+            org.opencontainers.image.revision=${{ github.sha }}
+      
+      # 输出构建结果
+      - name: Build Summary
+        run: |
+          echo "## Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### VabHub All-in-One Image" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull Command" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

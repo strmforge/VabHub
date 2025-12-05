@@ -38,14 +38,40 @@ cp .env.docker.example .env.docker
 
 ### 步骤 3：Docker Compose 配置
 
-VabHub 使用 Docker Compose 管理所有服务。以下是完整的 `docker-compose.yml` 示例，与仓库中提供的配置保持一致：
+VabHub 使用 Docker Compose 管理所有服务。采用 **All-in-One 单镜像架构**，只需配置一个主应用服务即可：
 
 ```yaml
-# VabHub Docker Compose 配置
+# VabHub Docker Compose 配置 (All-in-One 架构)
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库：存储应用数据
+  # VabHub 主应用 (前端 + 后端合一)
+  vabhub:
+    image: ghcr.io/strmforge/vabhub:latest
+    container_name: vabhub
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
+      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8080}
+      - TZ=Asia/Shanghai
+    volumes:
+      - vabhub_data:/app/data
+      - vabhub_logs:/app/logs
+    ports:
+      - "${VABHUB_PORT:-8080}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # PostgreSQL 数据库
   db:
     image: postgres:14-alpine
     container_name: vabhub-db
@@ -64,7 +90,7 @@ services:
       - vabhub-internal
     restart: unless-stopped
 
-  # Redis 缓存：提高应用性能
+  # Redis 缓存
   redis:
     image: redis:7-alpine
     container_name: vabhub-redis
@@ -76,52 +102,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - vabhub-internal
-    restart: unless-stopped
-
-  # 后端服务：处理核心业务逻辑
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: vabhub-backend
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
-      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
-      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8092}
-      - PORT=${PORT:-8092}
-      - WORKERS=${WORKERS:-4}
-      - APP_WEB_BASE_URL=${APP_WEB_BASE_URL:-http://localhost:80}
-    volumes:
-      - vabhub_data:/app/data
-      - vabhub_logs:/app/logs
-    ports:
-      - "8092:8092"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - vabhub-internal
-    restart: unless-stopped
-
-  # 前端服务：提供用户界面
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8092/api}
-    container_name: vabhub-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
     networks:
       - vabhub-internal
     restart: unless-stopped
@@ -160,15 +140,16 @@ docker compose logs -f
 
 等待服务启动完成（约 30 秒），然后在浏览器中访问：
 
-- **前端页面**：http://<宿主机 IP>:80
-- **后端 API**：http://<宿主机 IP>:8092
-- **API 文档**：http://<宿主机 IP>:8092/docs
+- **应用首页**：http://<宿主机 IP>:8080
+- **API 文档**：http://<宿主机 IP>:8080/docs
+
+> 默认端口为 8080，可通过环境变量 `VABHUB_PORT` 修改。
 
 ### 步骤 6：创建初始用户
 
 首次部署后，通过以下方式创建初始用户：
 
-1. 访问 API 文档：http://<宿主机 IP>:8092/docs
+1. 访问 API 文档：http://<宿主机 IP>:8080/docs
 2. 找到 `/api/auth/register` 接口
 3. 点击 "Try it out" 按钮
 4. 填写用户名、邮箱和密码
@@ -178,37 +159,34 @@ docker compose logs -f
 
 ### 2.1 核心服务说明
 
+VabHub 采用 **All-in-One 单镜像架构**，前端和后端合并在一个容器中：
+
 | 服务 | 镜像 | 端口 | 功能 |
 |------|------|------|------|
-| `db` | `postgres:14-alpine` | 无（内部网络） | PostgreSQL 数据库，存储所有应用数据 |
-| `redis` | `redis:7-alpine` | 无（内部网络） | Redis 缓存，提高应用性能 |
-| `backend` | 本地构建 | 8092 | 后端服务，处理核心业务逻辑 |
-| `frontend` | 本地构建 | 80 | 前端服务，提供用户界面 |
+| `vabhub` | `ghcr.io/strmforge/vabhub:latest` | 8080:8000 | 主应用（前端 + 后端） |
+| `db` | `postgres:14-alpine` | 无（内部网络） | PostgreSQL 数据库 |
+| `redis` | `redis:7-alpine` | 无（内部网络） | Redis 缓存 |
 
 ### 2.2 自定义配置选项
 
 #### 2.2.1 自定义端口
 
-如果需要修改服务端口，可以编辑 `docker-compose.yml` 文件中的 `ports` 配置：
-
-```yaml
-# 修改前端端口为 8080
-frontend:
-  ports:
-    - "8080:80"
-
-# 修改后端端口为 9000
-backend:
-  ports:
-    - "9000:8092"
-```
-
-同时需要修改 `.env.docker` 中的相应环境变量：
+修改 `.env.docker` 中的端口配置：
 
 ```bash
-APP_BASE_URL=http://localhost:9000
-APP_WEB_BASE_URL=http://localhost:8080
-VITE_API_BASE_URL=http://localhost:9000/api
+# 修改应用端口
+VABHUB_PORT=8080
+
+# 修改应用基础 URL
+APP_BASE_URL=http://localhost:8080
+```
+
+或直接修改 `docker-compose.yml`：
+
+```yaml
+vabhub:
+  ports:
+    - "9000:8000"  # 宿主机端口:容器端口
 ```
 
 #### 2.2.2 自定义挂载路径
