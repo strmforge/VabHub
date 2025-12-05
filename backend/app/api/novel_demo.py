@@ -348,6 +348,12 @@ async def upload_txt_novel(
         ebook_id = result.ebook.id if result.ebook else None
         audiobook_files_count = len(result.audiobook_files) if result.audiobook_files else 0
         
+        # 根据是否成功写入电子书库，生成不同的提示消息
+        if ebook_id is not None:
+            result_message = f"成功导入小说《{metadata.title}》到电子书库"
+        else:
+            result_message = f"已生成 EPUB 文件《{metadata.title}》（未写入正式电子书库，可能是数据库未初始化或仅作 DEMO 使用）"
+        
         # 发送电子书导入完成通知（演示用，使用默认用户ID 1）
         if result.ebook:
             try:
@@ -375,7 +381,7 @@ async def upload_txt_novel(
                 logger.warning(f"Failed to create ebook import notification: {notify_err}")
                 # 不影响主流程
         
-        logger.info(f"TXT 小说上传并导入成功: {result.epub_path}, EBook ID: {ebook_id}, 有声书文件数: {audiobook_files_count}")
+        logger.info(f"TXT 小说处理完成: {result.epub_path}, EBook ID: {ebook_id}, 有声书文件数: {audiobook_files_count}")
         
         return UploadTxtNovelResponse(
             success=True,
@@ -383,7 +389,7 @@ async def upload_txt_novel(
             ebook_id=ebook_id,
             audiobook_created=audiobook_files_count > 0,
             audiobook_files_count=audiobook_files_count,
-            message=f"成功导入小说《{metadata.title}》"
+            message=result_message
         )
         
     except HTTPException:

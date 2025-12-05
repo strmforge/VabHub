@@ -197,7 +197,8 @@ VabHub 系统总览（单一事实来源）
 - **小说 / 电子书 / 有声书中心** – [DONE]  
   - TXT/EPUB → EBook → TTS → 有声书整链路（NovelToEbookPipeline + TTS Runner）。  
   - 小说中心 v2：统一展示电子书列表、TTS 状态、听书进度。  
-  - 有声书播放器 + `UserAudiobookProgress`：精确进度管理。
+  - 有声书播放器 + `UserAudiobookProgress`：精确进度管理。  
+  - 开发阶段可通过 `/dev/novel/upload-txt` 快速验证 TXT→EPUB 流水线，该接口不保证写入正式电子书库（详见 `docs/novel/NOVEL_UPLOAD_DEV_API.md`）。
 - **漫画中心 + 第三方源接入** – [DONE]  
   - MangaSource 适配框架：支持接入 Komga / Kavita / OPDS / Suwayomi 等自建服务。  
   - `UserMangaFollow` + 追更 Runner + `MANGA_UPDATED` 通知已打通。  
