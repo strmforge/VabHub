@@ -51,6 +51,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **[frontend] 修复 Docker 构建时缺失 downloads 组件导致的前端打包失败**
+  - 根因：`.gitignore` 中 `downloads/` 规则过于宽泛，意外忽略了 `frontend/src/components/downloads/` 目录
+  - 修复：将规则改为 `/downloads/` 只匹配根目录
+  - 受影响组件：SpeedLimitDialog.vue, DownloadList.vue, DownloadProgressCard.vue
+  - 详见 `docs/dev-notes/FRONTEND-DOWNLOADS-SPEEDLIMIT-1.md`
+
 ### Planned
 
 - 收紧 CI 要求（TypeScript 严格模式）

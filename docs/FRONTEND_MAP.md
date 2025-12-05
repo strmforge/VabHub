@@ -22,6 +22,7 @@
 ⬇️ 下载 & 订阅
 ├── 搜索            /search                Search [NOW]
 ├── 下载管理        /downloads             Downloads [NOW]
+│   └── 支持下载限速弹窗（SpeedLimitDialog），可设置单任务/批量/全局限速
 ├── 订阅管理（展开）
 │   ├── 电影订阅    /subscriptions/movies  MovieSubscriptions [NOW]
 │   ├── 电视剧订阅  /subscriptions/tv      TvSubscriptions [NOW]
@@ -168,4 +169,4 @@
 
 ---
 
-*最后更新：2025-12-03 NAV-STRUCTURE-CLEANUP-1 + UI-LAYOUT-TUNING-1 + PRE-RELEASE-CHECK-1 + RELEASE-NOTES-RC1-1 + DOCKER-INSTALL-GUIDE-1*
+*最后更新：2025-12-06 FRONTEND-DOWNLOADS-SPEEDLIMIT-1（修复 downloads 组件 gitignore 问题，添加限速弹窗说明）*
