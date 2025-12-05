@@ -234,9 +234,10 @@ import { filterRuleGroupsApi, subscriptionDefaultsApi } from '@/api/index'
 
 const { showError } = useToast()
 
-interface RSSSubscription {
+// Dialog 组件接收的订阅类型（可以是部分字段）
+interface RSSSubscriptionInput {
   id?: number
-  user_id: number  // 用户ID
+  user_id?: number  // 用户ID（可选，新建时不需要）
   name: string
   url: string
   site_id?: number
@@ -244,13 +245,19 @@ interface RSSSubscription {
   interval: number
   filter_rules?: any
   download_rules?: any
-  filter_group_ids: number[]  // 过滤规则组ID列表
+  filter_group_ids?: number[]  // 过滤规则组ID列表（可选）
   description?: string
+}
+
+// 保存时发出的完整类型
+interface RSSSubscription extends RSSSubscriptionInput {
+  user_id: number
+  filter_group_ids: number[]
 }
 
 interface Props {
   modelValue: boolean
-  subscription?: RSSSubscription | null
+  subscription?: RSSSubscriptionInput | null
 }
 
 const props = defineProps<Props>()
@@ -293,7 +300,7 @@ const downloadRulesText = ref('')
 // 监听props变化，初始化表单
 watch(() => props.subscription, (newVal) => {
   if (newVal) {
-    form.value = { ...newVal }
+    form.value = { user_id: 1, filter_group_ids: [], ...newVal }
     downloadRules.value = {
       auto_download: newVal.download_rules?.auto_download || false
     }
@@ -313,7 +320,7 @@ watch(() => props.modelValue, (newVal) => {
   if (!newVal) {
     resetForm()
   } else if (props.subscription) {
-    form.value = { ...props.subscription }
+    form.value = { user_id: 1, filter_group_ids: [], ...props.subscription }
     downloadRules.value = {
       auto_download: props.subscription.download_rules?.auto_download || false
     }

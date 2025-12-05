@@ -77,7 +77,7 @@
         color="primary"
         variant="text"
         size="small"
-        @click="$emit('view-files', storage)"
+        @click="emit('viewFiles', storage)"
       >
         查看文件
       </v-btn>

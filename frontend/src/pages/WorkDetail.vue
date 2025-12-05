@@ -462,20 +462,20 @@
           >
             <template v-slot:item.format="{ item }">
               <v-chip size="small" color="primary" variant="flat">
-                {{ item.format?.toUpperCase() || '-' }}
+                {{ asEBookFile(item).format?.toUpperCase() || '-' }}
               </v-chip>
             </template>
             <template v-slot:item.file_size_mb="{ item }">
-              {{ item.file_size_mb ? `${item.file_size_mb.toFixed(2)} MB` : '-' }}
+              {{ asEBookFile(item).file_size_mb ? `${asEBookFile(item).file_size_mb?.toFixed(2)} MB` : '-' }}
             </template>
             <template v-slot:item.source_site_id="{ item }">
-              <v-chip v-if="item.source_site_id" size="small" variant="outlined">
-                {{ item.source_site_id }}
+              <v-chip v-if="asEBookFile(item).source_site_id" size="small" variant="outlined">
+                {{ asEBookFile(item).source_site_id }}
               </v-chip>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
             <template v-slot:item.created_at="{ item }">
-              {{ formatDate(item.created_at) }}
+              {{ formatDate(asEBookFile(item).created_at) }}
             </template>
           </v-data-table>
         </v-card-text>
@@ -789,38 +789,38 @@
           >
             <template v-slot:item.format="{ item }">
               <v-chip size="small" color="orange" variant="flat">
-                {{ item.format?.toUpperCase() || '-' }}
+                {{ asAudiobookFile(item).format?.toUpperCase() || '-' }}
               </v-chip>
             </template>
             <template v-slot:item.duration_seconds="{ item }">
-              {{ item.duration_seconds ? formatDuration(item.duration_seconds) : '-' }}
+              {{ asAudiobookFile(item).duration_seconds ? formatDuration(asAudiobookFile(item).duration_seconds!) : '-' }}
             </template>
             <template v-slot:item.audio_quality="{ item }">
               <span class="text-caption">
                 {{ formatAudioQuality({
-                  bitrate_kbps: item.bitrate_kbps,
-                  sample_rate_hz: item.sample_rate_hz,
-                  channels: item.channels
+                  bitrate_kbps: asAudiobookFile(item).bitrate_kbps,
+                  sample_rate_hz: asAudiobookFile(item).sample_rate_hz,
+                  channels: asAudiobookFile(item).channels
                 }) }}
               </span>
             </template>
             <template v-slot:item.file_size_mb="{ item }">
-              {{ item.file_size_mb ? `${item.file_size_mb.toFixed(2)} MB` : '-' }}
+              {{ asAudiobookFile(item).file_size_mb ? `${asAudiobookFile(item).file_size_mb?.toFixed(2)} MB` : '-' }}
             </template>
             <template v-slot:item.narrator="{ item }">
-              <v-chip v-if="item.narrator" size="small" variant="outlined">
-                {{ item.narrator }}
+              <v-chip v-if="asAudiobookFile(item).narrator" size="small" variant="outlined">
+                {{ asAudiobookFile(item).narrator }}
               </v-chip>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
             <template v-slot:item.source_site_id="{ item }">
-              <v-chip v-if="item.source_site_id" size="small" variant="outlined">
-                {{ item.source_site_id }}
+              <v-chip v-if="asAudiobookFile(item).source_site_id" size="small" variant="outlined">
+                {{ asAudiobookFile(item).source_site_id }}
               </v-chip>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
             <template v-slot:item.created_at="{ item }">
-              {{ formatDate(item.created_at) }}
+              {{ formatDate(asAudiobookFile(item).created_at) }}
             </template>
           </v-data-table>
         </v-card-text>
@@ -991,33 +991,33 @@
             no-data-text="暂无相关视频"
           >
             <template v-slot:item.media_type="{ item }">
-              <v-chip size="small" :color="getMediaTypeColor(item.media_type)" variant="flat">
-                <v-icon start size="small">{{ getMediaTypeIcon(item.media_type) }}</v-icon>
-                {{ getMediaTypeLabel(item.media_type) }}
+              <v-chip size="small" :color="getMediaTypeColor(asVideoItem(item).media_type)" variant="flat">
+                <v-icon start size="small">{{ getMediaTypeIcon(asVideoItem(item).media_type) }}</v-icon>
+                {{ getMediaTypeLabel(asVideoItem(item).media_type) }}
               </v-chip>
             </template>
             <template v-slot:item.title="{ item }">
               <div>
-                <div class="text-body-2 font-weight-medium">{{ item.title }}</div>
-                <div v-if="item.original_title" class="text-caption text-medium-emphasis">
-                  {{ item.original_title }}
+                <div class="text-body-2 font-weight-medium">{{ asVideoItem(item).title }}</div>
+                <div v-if="asVideoItem(item).original_title" class="text-caption text-medium-emphasis">
+                  {{ asVideoItem(item).original_title }}
                 </div>
               </div>
             </template>
             <template v-slot:item.year="{ item }">
-              {{ item.year || '-' }}
+              {{ asVideoItem(item).year || '-' }}
             </template>
             <template v-slot:item.rating="{ item }">
-              <div v-if="item.rating" class="d-flex align-center">
+              <div v-if="asVideoItem(item).rating" class="d-flex align-center">
                 <v-icon size="small" color="warning" class="mr-1">mdi-star</v-icon>
-                <span>{{ item.rating.toFixed(1) }}</span>
+                <span>{{ asVideoItem(item).rating?.toFixed(1) }}</span>
               </div>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
             <template v-slot:item.poster_url="{ item }">
               <v-img
-                v-if="item.poster_url"
-                :src="item.poster_url"
+                v-if="asVideoItem(item).poster_url"
+                :src="asVideoItem(item).poster_url || ''"
                 width="60"
                 height="90"
                 cover
@@ -1029,7 +1029,7 @@
             <template v-if="isDevMode" v-slot:item.actions="{ item }">
               <div class="d-flex align-center gap-1">
                 <v-chip
-                  v-if="isIncluded('video', item.id)"
+                  v-if="isIncluded('video', asVideoItem(item).id)"
                   size="small"
                   color="success"
                   variant="flat"
@@ -1037,7 +1037,7 @@
                   已关联
                 </v-chip>
                 <v-chip
-                  v-else-if="isExcluded('video', item.id)"
+                  v-else-if="isExcluded('video', asVideoItem(item).id)"
                   size="small"
                   color="grey"
                   variant="flat"
@@ -1045,29 +1045,29 @@
                   已忽略
                 </v-chip>
                 <v-btn
-                  v-if="!isIncluded('video', item.id) && !isExcluded('video', item.id)"
+                  v-if="!isIncluded('video', asVideoItem(item).id) && !isExcluded('video', asVideoItem(item).id)"
                   size="x-small"
                   color="success"
                   variant="outlined"
-                  @click="handleLinkAction('include', 'video', item.id)"
+                  @click="handleLinkAction('include', 'video', asVideoItem(item).id)"
                 >
                   标记关联
                 </v-btn>
                 <v-btn
-                  v-if="!isIncluded('video', item.id) && !isExcluded('video', item.id)"
+                  v-if="!isIncluded('video', asVideoItem(item).id) && !isExcluded('video', asVideoItem(item).id)"
                   size="x-small"
                   color="grey"
                   variant="outlined"
-                  @click="handleLinkAction('exclude', 'video', item.id)"
+                  @click="handleLinkAction('exclude', 'video', asVideoItem(item).id)"
                 >
                   忽略
                 </v-btn>
                 <v-btn
-                  v-if="isIncluded('video', item.id) || isExcluded('video', item.id)"
+                  v-if="isIncluded('video', asVideoItem(item).id) || isExcluded('video', asVideoItem(item).id)"
                   size="x-small"
                   color="error"
                   variant="text"
-                  @click="handleLinkAction('delete', 'video', item.id)"
+                  @click="handleLinkAction('delete', 'video', asVideoItem(item).id)"
                 >
                   取消
                 </v-btn>
@@ -1099,23 +1099,23 @@
             no-data-text="暂无相关音乐"
           >
             <template v-slot:item.title="{ item }">
-              <div class="text-body-2 font-weight-medium">{{ item.title }}</div>
+              <div class="text-body-2 font-weight-medium">{{ asMusicItem(item).title }}</div>
             </template>
             <template v-slot:item.artist="{ item }">
-              <v-chip v-if="item.artist" size="small" variant="outlined">
-                {{ item.artist }}
+              <v-chip v-if="asMusicItem(item).artist" size="small" variant="outlined">
+                {{ asMusicItem(item).artist }}
               </v-chip>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
             <template v-slot:item.album="{ item }">
-              {{ item.album || '-' }}
+              {{ asMusicItem(item).album || '-' }}
             </template>
             <template v-slot:item.year="{ item }">
-              {{ item.year || '-' }}
+              {{ asMusicItem(item).year || '-' }}
             </template>
             <template v-slot:item.genre="{ item }">
-              <v-chip v-if="item.genre" size="small" variant="outlined" color="teal">
-                {{ item.genre }}
+              <v-chip v-if="asMusicItem(item).genre" size="small" variant="outlined" color="teal">
+                {{ asMusicItem(item).genre }}
               </v-chip>
               <span v-else class="text-medium-emphasis">-</span>
             </template>
@@ -1123,7 +1123,7 @@
             <template v-if="isDevMode" v-slot:item.actions="{ item }">
               <div class="d-flex align-center gap-1">
                 <v-chip
-                  v-if="isIncluded('music', item.id)"
+                  v-if="isIncluded('music', asMusicItem(item).id)"
                   size="small"
                   color="success"
                   variant="flat"
@@ -1131,7 +1131,7 @@
                   已关联
                 </v-chip>
                 <v-chip
-                  v-else-if="isExcluded('music', item.id)"
+                  v-else-if="isExcluded('music', asMusicItem(item).id)"
                   size="small"
                   color="grey"
                   variant="flat"
@@ -1139,29 +1139,29 @@
                   已忽略
                 </v-chip>
                 <v-btn
-                  v-if="!isIncluded('music', item.id) && !isExcluded('music', item.id)"
+                  v-if="!isIncluded('music', asMusicItem(item).id) && !isExcluded('music', asMusicItem(item).id)"
                   size="x-small"
                   color="success"
                   variant="outlined"
-                  @click="handleLinkAction('include', 'music', item.id)"
+                  @click="handleLinkAction('include', 'music', asMusicItem(item).id)"
                 >
                   标记关联
                 </v-btn>
                 <v-btn
-                  v-if="!isIncluded('music', item.id) && !isExcluded('music', item.id)"
+                  v-if="!isIncluded('music', asMusicItem(item).id) && !isExcluded('music', asMusicItem(item).id)"
                   size="x-small"
                   color="grey"
                   variant="outlined"
-                  @click="handleLinkAction('exclude', 'music', item.id)"
+                  @click="handleLinkAction('exclude', 'music', asMusicItem(item).id)"
                 >
                   忽略
                 </v-btn>
                 <v-btn
-                  v-if="isIncluded('music', item.id) || isExcluded('music', item.id)"
+                  v-if="isIncluded('music', asMusicItem(item).id) || isExcluded('music', asMusicItem(item).id)"
                   size="x-small"
                   color="error"
                   variant="text"
-                  @click="handleLinkAction('delete', 'music', item.id)"
+                  @click="handleLinkAction('delete', 'music', asMusicItem(item).id)"
                 >
                   取消
                 </v-btn>
@@ -1178,7 +1178,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { workApi, workLinksApi, devTTSApi, devTTSJobsApi, devTTSWorkProfileApi, devTTSVoicePresetsApi, ttsUserApi, userNotificationsApi, audiobookUserApi } from '@/services/api'
-import type { WorkComicFile, WorkLink, WorkTargetType } from '@/types/work'
+import type { WorkComicFile, WorkLink, WorkTargetType, WorkDetailResponse, WorkVideoItem, WorkMusicItem, WorkEBookFile, WorkAudiobookFile } from '@/types/work'
 import type { TTSJob, TTSWorkProfile, TTSVoicePreset, UserWorkTTSStatus, UserWorkAudiobookStatus, UserAudiobookChapter } from '@/types/tts'
 import type { UserNotificationItem } from '@/types/notify'
 import { formatDuration, formatAudioQuality, formatRelativeTime } from '@/utils/formatters'
@@ -1193,8 +1193,14 @@ const router = useRouter()
 // 状态
 const loading = ref(false)
 const error = ref<string | null>(null)
-// 为了兼容后端返回的 videos/music/links 等扩展字段，这里使用 any 放宽类型
-const workDetail = ref<any | null>(null)
+// 使用正确类型
+const workDetail = ref<WorkDetailResponse | null>(null)
+
+// 类型断言辅助函数（用于 v-data-table slots 的 item）
+const asVideoItem = (item: unknown): WorkVideoItem => item as WorkVideoItem
+const asMusicItem = (item: unknown): WorkMusicItem => item as WorkMusicItem
+const asEBookFile = (item: unknown): WorkEBookFile => item as WorkEBookFile
+const asAudiobookFile = (item: unknown): WorkAudiobookFile => item as WorkAudiobookFile
 const links = ref<WorkLink[]>([])
 const regenLoading = ref(false)
 const snackbar = ref(false)

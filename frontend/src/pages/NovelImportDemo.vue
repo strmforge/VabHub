@@ -193,13 +193,14 @@ const handleSubmit = async () => {
     const response = await novelApi.uploadTxtNovel(formData)
     
     // 处理响应（根据实际响应格式调整）
-    if (response.data) {
-      if (typeof response.data === 'object' && 'success' in response.data) {
-        result.value = response.data as any
-      } else if (response.data.data) {
-        result.value = response.data.data as any
+    const responseData = response.data as Record<string, unknown> | undefined
+    if (responseData) {
+      if (typeof responseData === 'object' && 'success' in responseData) {
+        result.value = responseData as unknown as typeof result.value
+      } else if (responseData.data) {
+        result.value = responseData.data as unknown as typeof result.value
       } else {
-        result.value = response.data as any
+        result.value = responseData as unknown as typeof result.value
       }
     }
   } catch (err: any) {

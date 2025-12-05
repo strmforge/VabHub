@@ -36,6 +36,9 @@ export interface LibraryPreviewItem {
     // Audiobook 特有
     narrator?: string
     duration_seconds?: number
+    bitrate_kbps?: number
+    sample_rate_hz?: number
+    channels?: number
     
     // Comic 特有
     volume_index?: number | string

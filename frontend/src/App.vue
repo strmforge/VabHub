@@ -13,7 +13,7 @@
     </template>
     
     <!-- 全局加载遮罩 -->
-    <LoadingOverlay v-if="loading" />
+    <LoadingOverlay :model-value="loading" />
     
     <!-- 全局通知 -->
     <NotificationSystem />

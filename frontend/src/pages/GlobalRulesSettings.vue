@@ -669,7 +669,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import PageHeader from '@/components/common/PageHeader.vue'
-import { globalRulesApi } from '@/api/globalRules'
+import { globalRulesApi, type GlobalRulesSettings } from '@/api/globalRules'
 
 
 // 响应式数据
@@ -679,7 +679,7 @@ const resetting = ref(false)
 const showCModeDialog = ref(false)
 const pendingMode = ref<string | null>(null)
 
-const settings = reactive({
+const settings = reactive<GlobalRulesSettings>({
   hr_mode: 'B_BALANCED',
   hr_policy: 'SAFE_SKIP',
   resolution_policy: 'AUTO',
@@ -829,7 +829,7 @@ const refreshSettings = async () => {
 }
 
 // HR模式切换处理
-const selectHrMode = (mode: string) => {
+const selectHrMode = (mode: GlobalRulesSettings['hr_mode']) => {
   // 如果切换到C档且当前不是C档，显示确认对话框
   if (mode === 'C_PRO' && settings.hr_mode !== 'C_PRO') {
     pendingMode.value = mode
@@ -843,7 +843,7 @@ const selectHrMode = (mode: string) => {
 // 确认切换到C档
 const confirmCModeSwitch = () => {
   if (pendingMode.value) {
-    settings.hr_mode = pendingMode.value
+    settings.hr_mode = pendingMode.value as GlobalRulesSettings['hr_mode']
   }
   showCModeDialog.value = false
   pendingMode.value = null

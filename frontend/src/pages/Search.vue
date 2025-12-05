@@ -204,6 +204,7 @@ interface Filters {
   source: string | null
   sites: number[] | null
   hr_filter: string | null  // Phase 9: HR 过滤
+  index_source: string | null  // Phase EXT-4: 索引来源
 }
 
 const filters = ref<Filters>({
@@ -222,7 +223,8 @@ const filters = ref<Filters>({
   encoding: null,
   source: null,
   sites: null,
-  hr_filter: null  // Phase 9: HR 过滤
+  hr_filter: null,  // Phase 9: HR 过滤
+  index_source: null  // Phase EXT-4: 索引来源
 })
 
 const searchResults = ref({

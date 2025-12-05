@@ -110,7 +110,11 @@
         <!-- 音频质量（有声书）- 可选显示 -->
         <div v-if="item.media_type === 'audiobook' && hasAudioQuality(item.extra)" class="d-flex align-center text-caption text-medium-emphasis">
           <v-icon size="x-small" class="mr-1">mdi-information-outline</v-icon>
-          <span>{{ formatAudioQuality(item.extra) }}</span>
+          <span>{{ formatAudioQuality({
+            bitrate_kbps: item.extra?.bitrate_kbps,
+            sample_rate_hz: item.extra?.sample_rate_hz,
+            channels: item.extra?.channels
+          }) }}</span>
         </div>
 
         <!-- 评分（Movie/TV/Anime） -->

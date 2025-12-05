@@ -331,7 +331,8 @@ const handleCheck = async (subscription: RSSSubscription) => {
   }
 }
 
-const handleSaved = async (subscription: RSSSubscription) => {
+// 接收 Dialog 组件返回的订阅对象（类型可能与本地定义有差异）
+const handleSaved = async (subscription: Partial<RSSSubscription> & { name: string; url: string }) => {
   try {
     if (editingSubscription.value?.id) {
       // 更新
