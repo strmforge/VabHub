@@ -145,9 +145,9 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         params: filter
       })
       
-      if (response.data.success) {
+      if (response.success) {
         // Convert health_status strings to enum values
-        sites.value = response.data.data.map(site => ({
+        sites.value = response.data.map(site => ({
           ...site,
           stats: site.stats ? {
             ...site.stats,
@@ -155,7 +155,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
           } : undefined
         }))
       } else {
-        throw new Error(response.data.message || '获取站点列表失败')
+        throw new Error(response.message || '获取站点列表失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -175,9 +175,9 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<SiteDetail> = await api.get(`/api/sites/${siteId}`)
       
-      if (response.data.success) {
+      if (response.success) {
         // Convert health_status strings to enum values
-        const siteData = response.data.data
+        const siteData = response.data
         currentSite.value = {
           ...siteData,
           stats: siteData.stats ? {
@@ -186,7 +186,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
           } : undefined
         }
       } else {
-        throw new Error(response.data.message || '获取站点详情失败')
+        throw new Error(response.message || '获取站点详情失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -203,13 +203,13 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<SiteBrief> = await api.put(`/api/sites/${siteId}`, payload)
       
-      if (response.data.success) {
+      if (response.success) {
         // Convert health_status strings to enum values
         const updatedSite = {
-          ...response.data.data,
-          stats: response.data.data.stats ? {
-            ...response.data.data.stats,
-            health_status: stringToHealthStatus(response.data.data.stats.health_status)
+          ...response.data,
+          stats: response.data.stats ? {
+            ...response.data.stats,
+            health_status: stringToHealthStatus(response.data.stats.health_status)
           } : undefined
         }
         
@@ -226,7 +226,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         
         return updatedSite
       } else {
-        throw new Error(response.data.message || '更新站点失败')
+        throw new Error(response.message || '更新站点失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -242,13 +242,13 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<SiteDetail> = await api.put(`/api/sites/${siteId}/access-config`, payload)
       
-      if (response.data.success) {
+      if (response.success) {
         // Convert health_status strings to enum values
         const updatedSite = {
-          ...response.data.data,
-          stats: response.data.data.stats ? {
-            ...response.data.data.stats,
-            health_status: stringToHealthStatus(response.data.data.stats.health_status)
+          ...response.data,
+          stats: response.data.stats ? {
+            ...response.data.stats,
+            health_status: stringToHealthStatus(response.data.stats.health_status)
           } : undefined
         }
         
@@ -259,7 +259,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         
         return updatedSite
       } else {
-        throw new Error(response.data.message || '更新访问配置失败')
+        throw new Error(response.message || '更新访问配置失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -275,7 +275,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<boolean> = await api.delete(`/api/sites/${siteId}`)
       
-      if (response.data.success) {
+      if (response.success) {
         // 从本地列表中移除
         const index = sites.value.findIndex((site: SiteBrief) => site.id === siteId)
         if (index !== -1) {
@@ -289,7 +289,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         
         return true
       } else {
-        throw new Error(response.data.message || '删除站点失败')
+        throw new Error(response.message || '删除站点失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -307,10 +307,10 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         params: { check_type: checkType }
       })
       
-      if (response.data.success) {
+      if (response.success) {
         const result = {
-          ...response.data.data,
-          status: stringToHealthStatus(response.data.data.status)
+          ...response.data,
+          status: stringToHealthStatus(response.data.status)
         }
         
         // 更新本地站点统计
@@ -330,7 +330,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         
         return result
       } else {
-        throw new Error(response.data.message || '健康检查失败')
+        throw new Error(response.message || '健康检查失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -348,10 +348,10 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         params: { check_type: checkType }
       })
       
-      if (response.data.success) {
+      if (response.success) {
         const result = {
-          ...response.data.data,
-          results: response.data.data.results.map(healthResult => ({
+          ...response.data,
+          results: response.data.results.map((healthResult: any) => ({
             ...healthResult,
             status: stringToHealthStatus(healthResult.status)
           }))
@@ -369,7 +369,7 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         
         return result
       } else {
-        throw new Error(response.data.message || '批量健康检查失败')
+        throw new Error(response.message || '批量健康检查失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -385,12 +385,12 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<ImportResult> = await api.post('/api/sites/import', { items })
       
-      if (response.data.success) {
+      if (response.success) {
         // 刷新站点列表
         await fetchSites()
-        return response.data.data
+        return response.data
       } else {
-        throw new Error(response.data.message || '导入站点失败')
+        throw new Error(response.message || '导入站点失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -407,10 +407,10 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
       const params = siteIds ? { site_ids: siteIds.join(',') } : {}
       const response: ApiResponse<SiteExportItem[]> = await api.get('/api/sites/export', { params })
       
-      if (response.data.success) {
-        return response.data.data
+      if (response.success) {
+        return response.data
       } else {
-        throw new Error(response.data.message || '导出站点失败')
+        throw new Error(response.message || '导出站点失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
@@ -426,10 +426,10 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
     try {
       const response: ApiResponse<Array<{key: string, name: string, icon: string}>> = await api.get('/api/sites/categories/list')
       
-      if (response.data.success) {
-        categories.value = response.data.data
+      if (response.success) {
+        categories.value = response.data
       } else {
-        throw new Error(response.data.message || '获取分类列表失败')
+        throw new Error(response.message || '获取分类列表失败')
       }
     } catch (err) {
       console.error('获取分类列表失败:', err)
@@ -449,10 +449,10 @@ export const useSiteManagerStore = defineStore('siteManager', () => {
         category_stats: Record<string, number>
       }> = await api.get('/api/sites/stats/summary')
       
-      if (response.data.success) {
-        stats.value = response.data.data
+      if (response.success) {
+        stats.value = response.data
       } else {
-        throw new Error(response.data.message || '获取统计摘要失败')
+        throw new Error(response.message || '获取统计摘要失败')
       }
     } catch (err) {
       console.error('获取统计摘要失败:', err)

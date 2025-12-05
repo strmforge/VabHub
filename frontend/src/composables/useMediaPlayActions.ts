@@ -139,7 +139,7 @@ export function useMediaPlayActions() {
    * 打开本地播放器
    * TODO: 实现本地播放逻辑
    */
-  const openLocalPlayer = (workId: number) => {
+  const openLocalPlayer = (_workId: number) => {
     // 暂时显示提示，后续可以实现本地播放器
     toast.info('本地播放功能开发中')
     // 未来可能的实现：
@@ -177,10 +177,10 @@ export function useMediaPlayActions() {
     label: string
     available: boolean
   }> => {
-    return [
-      { type: '115', label: '115播放', available: source.has_115 },
-      { type: 'local', label: '本地播放', available: source.has_local }
-    ].filter(s => s.available)
+    return ([
+      { type: '115' as const, label: '115播放', available: source.has_115 },
+      { type: 'local' as const, label: '本地播放', available: source.has_local }
+    ] as const).filter(s => s.available)
   }
 
   /**
@@ -188,7 +188,7 @@ export function useMediaPlayActions() {
    * 根据可用源和偏好选择最合适的播放方式
    */
   const play = (options: PlayActionOptions) => {
-    const { workId, source, status, preferredSource = 'auto' } = options
+    const { workId, source, status: _status, preferredSource = 'auto' } = options
     
     // 检查是否有可用的播放源
     const availableSources = getAvailableSources(source)
