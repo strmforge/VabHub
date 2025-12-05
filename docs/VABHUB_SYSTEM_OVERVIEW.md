@@ -492,6 +492,8 @@ VabHub 系统总览（单一事实来源）
   单流水线 CI + 单应用镜像架构。合并多个 workflow 为唯一主 CI (VabHub CI)，将 backend/frontend 双镜像改为 All-in-One 单镜像 `ghcr.io/strmforge/vabhub:latest`，docker-compose 简化为 3 服务架构。
 - **2025-12-05 – DEPLOY-UPGRADE-1 完成**：
   端口策略（默认 52180）+ 升级引擎 v1 + 插件运行模型对齐。实现 UI 一键升级（docker.sock）、版本检查 API、明确插件为进程内模块而非外部容器。
+- **2025-12-05 – BACKEND-CI-4 完成**：
+  确认 6 个边角测试（SafetyPolicyEngine + Novel Demo + TTS JobRunner）均已通过，后端 CI 持续全绿（447 passed, 0 failed）。
 - （此处由后续任务持续追加）
 
 ---

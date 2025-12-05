@@ -160,3 +160,25 @@ docker compose pull
 # 重启服务
 docker compose up -d
 ```
+
+---
+
+## BACKEND-CI-4 承接说明
+
+**Date**: 2025-12-05
+
+BACKEND-CI-4 是在 BACKEND-CI-3 基础上的收尾确认任务，目标是验证并修复以下 6 个边角测试：
+
+1. `test_unknown_action_allowed` - SafetyPolicyEngine 未知 action 处理
+2. `test_import_local_txt_api_success` - Novel Demo API httpx 兼容
+3. `test_import_local_txt_api_file_not_found` - 文件不存在处理
+4. `test_import_local_txt_api_invalid_file` - 无效文件处理
+5. `test_upload_txt_novel_success` - 小说上传 DB 注入
+6. `test_run_batch_jobs_updates_status_counts_correctly` - TTS 批处理
+
+**结果**: 所有 6 个测试在当前代码库中**均已通过**，无需额外修复。
+
+后端 `dev_check_backend` 在 CI 环境下持续保持全绿状态：
+- Ruff: ✅ All checks passed
+- mypy: ✅ 0 issues in 1140 files  
+- pytest: ✅ 447 passed, 111 skipped, 0 failed
