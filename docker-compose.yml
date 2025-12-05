@@ -1,41 +1,37 @@
 # VabHub Docker Compose 配置
-# CI-DOCKER-ONE-IMAGE-1 + DEPLOY-UPGRADE-1 实现
+# 简化版 - 类似 MoviePilot 的简洁风格
 # 使用方法: docker compose up -d
 #
-# 架构: 单一 All-in-One 应用镜像 + PostgreSQL + Redis
-# 默认端口: 52180 (避开 8080/7878/8989/9091 等常见下载器端口)
+# 安全密钥会自动生成并保存到 /app/data/.vabhub_secrets.json
+# 如需自定义密钥，可在 .env 中设置 SECRET_KEY / JWT_SECRET_KEY
 
 version: '3.8'
 
 services:
-  # ============== VabHub 主应用 (All-in-One) ==============
+  # ============== VabHub 主应用 ==============
   vabhub:
     image: ghcr.io/strmforge/vabhub:latest
     container_name: vabhub
     environment:
-      # 数据库连接
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
-      # Redis 连接
-      - REDIS_URL=redis://redis:6379/0
-      # 安全密钥 (生产环境必须修改)
-      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
-      # 应用配置
-      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
-      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:52180}
+      # ---------- 基础配置 ----------
       - VABHUB_PORT=${VABHUB_PORT:-52180}
-      - WORKERS=${WORKERS:-4}
-      # 容器信息 (用于升级引擎)
-      - VABHUB_CONTAINER_NAME=vabhub
-      # 时区
-      - TZ=Asia/Shanghai
+      - TZ=${TZ:-Asia/Shanghai}
+      # ---------- 数据库 ----------
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      # ---------- 初始管理员 (首次启动有效) ----------
+      - SUPERUSER_NAME=${SUPERUSER_NAME:-admin}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-}
+      # ---------- 可选配置 ----------
+      # - APP_BASE_URL=http://your-domain.com:52180
+      # - TMDB_API_KEY=your-tmdb-key
     volumes:
-      - vabhub_data:/app/data
-      - vabhub_logs:/app/logs
-      # Docker Socket - 用于 UI 升级/重启功能
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      # 可选: 挂载配置目录
-      # - ./config:/config
+      - vabhub_data:/app/data        # 数据 + 自动生成的密钥
+      - vabhub_logs:/app/logs        # 日志
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # UI 升级功能
+      # 媒体目录 (按需挂载)
+      # - /path/to/media:/media
+      # - /path/to/downloads:/downloads
     ports:
       - "${VABHUB_PORT:-52180}:${VABHUB_PORT:-52180}"
     depends_on:

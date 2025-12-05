@@ -3,11 +3,15 @@
 """
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from pathlib import Path
 import tempfile
 
 from app.main import app
+
+
+# ASGITransport 用于 httpx 0.28+ 兼容
+_transport = ASGITransport(app=app)
 
 
 @pytest.fixture
@@ -31,7 +35,7 @@ def temp_txt_file():
 @pytest.mark.asyncio
 async def test_import_local_txt_api_success(temp_txt_file):
     """测试本地 TXT 导入 API（成功场景）"""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=_transport, base_url="http://test") as ac:
         response = await ac.post(
             "/api/dev/novel/import-local-txt",
             json={
@@ -62,7 +66,7 @@ async def test_import_local_txt_api_success(temp_txt_file):
 @pytest.mark.asyncio
 async def test_import_local_txt_api_file_not_found():
     """测试本地 TXT 导入 API（文件不存在）"""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=_transport, base_url="http://test") as ac:
         response = await ac.post(
             "/api/dev/novel/import-local-txt",
             json={
@@ -81,7 +85,7 @@ async def test_import_local_txt_api_invalid_file():
     temp_dir = Path(tf.mkdtemp())
     
     try:
-        async with AsyncClient(app=app, base_url="http://test") as ac:
+        async with AsyncClient(transport=_transport, base_url="http://test") as ac:
             response = await ac.post(
                 "/api/dev/novel/import-local-txt",
                 json={

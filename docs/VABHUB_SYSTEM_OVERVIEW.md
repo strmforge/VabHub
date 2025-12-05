@@ -494,6 +494,8 @@ VabHub 系统总览（单一事实来源）
   端口策略（默认 52180）+ 升级引擎 v1 + 插件运行模型对齐。实现 UI 一键升级（docker.sock）、版本检查 API、明确插件为进程内模块而非外部容器。
 - **2025-12-05 – BACKEND-CI-4 完成**：
   确认 6 个边角测试（SafetyPolicyEngine + Novel Demo + TTS JobRunner）均已通过，后端 CI 持续全绿（447 passed, 0 failed）。
+- **2025-12-05 – DEPLOY-YAML-2 + BACKEND-CI-5 完成**：
+  docker-compose 精简化（类似 MoviePilot 风格），密钥自动生成机制，CI 环境对齐（ruff 安装、httpx ASGITransport 适配、TTS JobRunner 去重）。
 - （此处由后续任务持续追加）
 
 ---

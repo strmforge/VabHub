@@ -54,10 +54,20 @@ class SafetyPolicyEngine:
             site_settings = await self._settings_service.get_site(ctx.site_key) if ctx.site_key else None
             sub_settings = await self._settings_service.get_subscription(ctx.subscription_id) if ctx.subscription_id else None
             
-            # 获取HR状态
+            # 获取HR状态 (容错处理：如果 HR 表不存在则视为无 HR 数据)
             hr_case = ctx.hr_case
             if ctx.site_key and ctx.torrent_id and not hr_case:
-                hr_case = await self._hr_repo.get_by_site_and_torrent(ctx.site_key, ctx.torrent_id)
+                try:
+                    hr_case = await self._hr_repo.get_by_site_and_torrent(ctx.site_key, ctx.torrent_id)
+                except Exception as hr_err:
+                    # HR 表可能不存在（测试环境或新部署），视为无 HR 数据
+                    err_msg = str(hr_err).lower()
+                    if "no such table" in err_msg or "does not exist" in err_msg:
+                        self._logger.debug(f"HR 表不存在，跳过 HR 检查: {hr_err}")
+                        hr_case = None
+                    else:
+                        # 其他错误重新抛出
+                        raise
             
             # 按操作类型评估
             if ctx.action == "download":

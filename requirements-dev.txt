@@ -10,6 +10,7 @@ pytest-asyncio>=0.21.1,<1.0
 pytest-cov>=4.1.0,<5
 
 # 开发工具
+ruff>=0.1.0,<1.0  # Linter (替代 flake8)
 black>=23.11.0,<25
 flake8>=6.1.0,<8
 mypy>=1.7.1,<3

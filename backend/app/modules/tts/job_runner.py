@@ -10,7 +10,7 @@ from loguru import logger
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.tts.job_service import find_next_queued_job, run_job
+from app.modules.tts.job_service import find_next_pending_job, run_job
 from app.core.config import Settings
 
 
@@ -59,10 +59,13 @@ async def run_batch_jobs(
         last_job_id=None
     )
     
+    # 跟踪已处理的 Job ID，避免在同一批次中重复处理
+    processed_job_ids: set[int] = set()
+    
     # 循环处理 Job
     for i in range(max_jobs):
-        # 查找下一个待处理的 Job
-        job = await find_next_queued_job(db)
+        # 查找下一个待处理的 Job（排除已处理的）
+        job = await find_next_pending_job(db, exclude_ids=processed_job_ids)
         
         if not job:
             # 没有更多 Job 了
@@ -71,6 +74,7 @@ async def run_batch_jobs(
         
         result.total_jobs += 1
         initial_status = job.status  # 记录初始状态
+        processed_job_ids.add(job.id)  # 标记为已处理
         
         try:
             # 执行 Job

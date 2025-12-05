@@ -333,3 +333,30 @@ async def find_next_queued_job(
     )
     return result.scalar_one_or_none()
 
+
+async def find_next_pending_job(
+    db: AsyncSession,
+    exclude_ids: Optional[set[int]] = None,
+) -> Optional[TTSJob]:
+    """
+    找到下一个待执行的 Job（按 requested_at ASC），支持排除已处理的 ID
+    
+    包含 queued 和 partial 状态的 Job
+    
+    Args:
+        db: 数据库会话
+        exclude_ids: 要排除的 Job ID 集合
+    
+    Returns:
+        Optional[TTSJob]: 下一个待执行的 Job，如果没有则返回 None
+    """
+    query = select(TTSJob).where(TTSJob.status.in_(["queued", "partial"]))
+    
+    if exclude_ids:
+        query = query.where(~TTSJob.id.in_(exclude_ids))
+    
+    query = query.order_by(TTSJob.requested_at.asc()).limit(1)
+    
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
+
