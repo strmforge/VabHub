@@ -18,7 +18,7 @@ services:
       - VABHUB_PORT=${VABHUB_PORT:-52180}
       - TZ=${TZ:-Asia/Shanghai}
       # ---------- 数据库 ----------
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:?Please set DB_PASSWORD in .env.docker}@db:5432/${DB_NAME:-vabhub}
       - REDIS_URL=redis://redis:6379/0
       # ---------- 初始管理员 (首次启动有效) ----------
       - SUPERUSER_NAME=${SUPERUSER_NAME:-admin}
@@ -57,7 +57,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-vabhub}
       POSTGRES_USER: ${DB_USER:-vabhub}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-vabhub_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env.docker}
     volumes:
       - vabhub_db_data:/var/lib/postgresql/data
     healthcheck:

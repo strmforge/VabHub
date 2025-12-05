@@ -51,7 +51,7 @@ services:
     image: ghcr.io/strmforge/vabhub:latest
     container_name: vabhub
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}  # ⚠️ 在 .env.docker 中设置 DB_PASSWORD
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
@@ -82,7 +82,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-vabhub}
       POSTGRES_USER: ${DB_USER:-vabhub}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-vabhub_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}  # ⚠️ 必须在 .env.docker 中设置
     volumes:
       - vabhub_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -339,7 +339,7 @@ backend:
 |--------|------|--------|------|
 | `SECRET_KEY` | 是 | - | 应用密钥，首次启动会自动生成 |
 | `JWT_SECRET_KEY` | 是 | - | JWT 密钥，首次启动会自动生成 |
-| `DB_PASSWORD` | 是 | `vabhub_password` | 数据库密码 |
+| `DB_PASSWORD` | 是 | - | ⚠️ 数据库密码（必须自行设置，禁止使用默认值） |
 | `TMDB_API_KEY` | 是 | - | TMDB API Key，用于获取影视元数据 |
 | `APP_BASE_URL` | 否 | `http://localhost:8092` | 应用基础 URL |
 | `PORT` | 否 | `8092` | 后端服务端口 |

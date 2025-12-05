@@ -55,40 +55,36 @@ cp .env.docker.example .env.docker
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库：存储应用数据
+  # VabHub 主应用 (All-in-One 单镜像)
+  vabhub:
+    image: ghcr.io/strmforge/vabhub:latest
+    environment:
+      - DATABASE_URL=postgresql://vabhub:${DB_PASSWORD}@db:5432/vabhub
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - vabhub_data:/app/data
+    ports:
+      - "52180:52180"
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL 数据库
   db:
     image: postgres:14-alpine
     environment:
       POSTGRES_DB: vabhub
       POSTGRES_USER: vabhub
-      POSTGRES_PASSWORD: vabhub_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD}  # ⚠️ 在 .env.docker 中设置
     volumes:
       - vabhub_db_data:/var/lib/postgresql/data
 
-  # Redis 缓存：提高应用性能
+  # Redis 缓存
   redis:
     image: redis:7-alpine
     command: redis-server --appendonly yes
     volumes:
       - vabhub_redis_data:/data
-
-  # 后端服务：处理核心业务逻辑
-  backend:
-    build: ./backend
-    environment:
-      - DATABASE_URL=postgresql://vabhub:vabhub_password@db:5432/vabhub
-      - REDIS_URL=redis://redis:6379/0
-    volumes:
-      - vabhub_data:/app/data
-      - vabhub_logs:/app/logs
-    ports:
-      - "8092:8092"
-
-  # 前端服务：提供用户界面
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"
 ```
 
 #### 4. 启动服务

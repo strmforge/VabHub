@@ -507,6 +507,8 @@ VabHub 系统总览（单一事实来源）
   修复 docker-build-and-push.yml 的 context 访问警告，移除未定义的 skip_ci 引用，保证废弃 workflow 语法合法。
 - **2025-12-06 – DOCKER-IMAGE-RELEASE-1 完成**：
   0.0.1-rc1 官方 Docker 镜像发布（GHCR + docker-compose.prod），统一 All-in-One 架构，提供官方镜像拉取部署路线。
+- **2025-12-06 – SECRET-HYGIENE-1 完成**：
+  GitGuardian 报警收尾 & 配置脱敏：移除所有硬编码默认密码，改用必填环境变量；添加 secret 扫描脚本；创建安全策略文档。
 - （此处由后续任务持续追加）
 
 ---
