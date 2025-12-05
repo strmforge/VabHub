@@ -284,6 +284,7 @@ interface Filters {
   source: string | null
   sites: number[] | null
   hr_filter: string | null  // Phase 9: HR 过滤
+  index_source: string | null  // Phase EXT-4: 索引来源
 }
 
 const props = defineProps<{
@@ -317,7 +318,8 @@ const filters = reactive<Filters>({
   encoding: null,
   source: null,
   sites: null,
-  hr_filter: null  // Phase 9: HR 过滤
+  hr_filter: null,  // Phase 9: HR 过滤
+  index_source: null  // Phase EXT-4: 索引来源
 })
 
 const hrFilterOptions = [
@@ -410,6 +412,13 @@ const sourceOptions = [
   { title: 'HDTV', value: 'HDTV' },
   { title: 'DVD', value: 'DVD' },
   { title: 'Remux', value: 'Remux' }
+]
+
+// Phase EXT-4: 索引来源过滤选项
+const indexSourceOptions = [
+  { title: '全部', value: null },
+  { title: '本地索引', value: 'local' },
+  { title: '外部索引', value: 'external' }
 ]
 
 const resetFilters = () => {

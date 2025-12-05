@@ -303,8 +303,8 @@ const loadDomainConfig = async () => {
   loading.value = true
   try {
     const response = await api.get(`/sites/${props.siteId}/domains/`)
-    if (response.success && response.data) {
-      domainConfig.value = response.data
+    if (response.data?.success && response.data?.data) {
+      domainConfig.value = response.data.data
     }
   } catch (error: any) {
     console.error('加载域名配置失败:', error)
@@ -398,11 +398,11 @@ const detectAndSwitch = async () => {
   detecting.value = true
   try {
     const response = await api.post(`/sites/${props.siteId}/domains/detect`)
-    if (response.success) {
-      if (response.data.switched) {
-        showSuccess(`域名已自动切换到: ${response.data.to}`)
+    if (response.data?.success) {
+      if (response.data?.data?.switched) {
+        showSuccess(`域名已自动切换到: ${response.data.data.to}`)
       } else {
-        showSuccess(response.data.reason || '检测完成')
+        showSuccess(response.data?.data?.reason || '检测完成')
       }
       await loadDomainConfig()
     }

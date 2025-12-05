@@ -10,12 +10,17 @@ import type { PluginOptions } from 'vue-toastification'
 type ToastOptions = PluginOptions
 type ToastID = number | string
 
+type ToastType = 'success' | 'error' | 'warning' | 'info'
+
 interface ToastHandler {
   // 简洁别名（全局大量使用 toast.success/error/warning/info）
   success(message: string, options?: ToastOptions): ToastID
   error(message: string, options?: ToastOptions): ToastID
   warning(message: string, options?: ToastOptions): ToastID
   info(message: string, options?: ToastOptions): ToastID
+
+  // 通用方法（支持 showToast(message, type) 调用方式）
+  showToast(message: string, type?: ToastType, options?: ToastOptions): ToastID
 
   // 显式命名方法（原有导出）
   showSuccess(message: string, options?: ToastOptions): ToastID
@@ -77,6 +82,21 @@ export function useToast(): ToastHandler {
     ;(toast as any).dismiss(toastId)
   }
 
+  // 通用 showToast 方法，支持 showToast(message, type) 调用方式
+  const showToast = (message: string, type: ToastType = 'info', options?: ToastOptions): ToastID => {
+    switch (type) {
+      case 'success':
+        return showSuccess(message, options)
+      case 'error':
+        return showError(message, options)
+      case 'warning':
+        return showWarning(message, options)
+      case 'info':
+      default:
+        return showInfo(message, options)
+    }
+  }
+
   // 提供简洁别名，保持现有调用习惯（toast.success/error/...）
   const success = showSuccess
   const error = showError
@@ -88,6 +108,7 @@ export function useToast(): ToastHandler {
     error,
     warning,
     info,
+    showToast,
     showSuccess,
     showError,
     showWarning,

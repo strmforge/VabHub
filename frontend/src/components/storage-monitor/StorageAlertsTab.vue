@@ -79,6 +79,7 @@ const emit = defineEmits<{
   resolve: [id: number]
 }>()
 
+// Vuetify DataTable headers - 使用 as const 满足 readonly 类型要求
 const headers = [
   { title: '目录路径', key: 'path', sortable: true },
   { title: '预警类型', key: 'alert_type', sortable: true },
@@ -86,8 +87,8 @@ const headers = [
   { title: '预警阈值', key: 'threshold', sortable: true },
   { title: '消息', key: 'message', sortable: false },
   { title: '创建时间', key: 'created_at', sortable: true },
-  { title: '操作', key: 'actions', sortable: false, align: 'end' }
-]
+  { title: '操作', key: 'actions', sortable: false, align: 'end' as const }
+] as const
 
 // 获取预警类型颜色
 const getAlertTypeColor = (type: string): string => {

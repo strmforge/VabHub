@@ -82,7 +82,7 @@ const remainingHeight = computed(() => {
 })
 
 // 滚动容器样式
-const scrollContainerStyle = computed(() => {
+const scrollContainerStyle = computed((): Record<string, string> => {
   return {
     height: `${props.containerHeight}px`,
     overflowY: 'auto',

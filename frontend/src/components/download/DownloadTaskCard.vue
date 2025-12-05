@@ -118,9 +118,9 @@
         <!-- 详细信息 -->
         <div class="d-flex justify-space-between align-center text-caption">
           <div class="progress-info">
-            <span>{{ formatSize(task.downloaded_size || task.downloaded_gb * 1024 || 0) }} / {{ formatSize(task.total_size || task.size_gb * 1024 || 0) }}</span>
+            <span>{{ formatSize(task.downloaded_size ?? (task.downloaded_gb ?? 0) * 1024) }} / {{ formatSize(task.total_size ?? (task.size_gb ?? 0) * 1024) }}</span>
             <span v-if="task.eta && task.status === 'downloading'" class="ml-2">
-              剩余 {{ formatETA(task.eta) }}
+              剩余 {{ formatETA(typeof task.eta === 'number' ? task.eta : 0) }}
             </span>
           </div>
           
@@ -250,9 +250,18 @@ interface DownloadTask {
   title?: string
   status: string
   progress?: number
+  // 大小字段（兼容不同格式）
   size_gb?: number
+  total_size?: number
   downloaded_gb?: number
+  downloaded_size?: number
+  // 速度字段
   speed_mbps?: number
+  download_speed?: number
+  upload_speed?: number
+  // 时间估算
+  eta?: number | string
+  // 站点和标签
   site_name?: string
   hr_level?: string
   is_short_drama?: boolean

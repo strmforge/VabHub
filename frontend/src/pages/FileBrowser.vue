@@ -498,6 +498,19 @@ const getStorageName = (storage: string): string => {
   return option?.title || storage
 }
 
+// 格式化时间
+const formatTime = (time: string | number | null | undefined): string => {
+  if (!time) return '-'
+  const date = new Date(typeof time === 'number' ? time * 1000 : time)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 // 获取存储图标
 const getStorageIcon = (storage: string): string => {
   const icons: Record<string, string> = {
@@ -608,7 +621,7 @@ const navigateToPathItem = (item: any) => {
   if (item.path === '/') {
     pathStack.value = []
   } else {
-    const parts = item.path.split('/').filter(p => p)
+    const parts = item.path.split('/').filter((p: string) => p)
     pathStack.value = []
     let path = ''
     parts.forEach((part: string) => {

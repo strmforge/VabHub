@@ -453,7 +453,7 @@ const loadItems = async () => {
     
     const response = await audiobookCenterApi.getList(params)
     
-    let resultItems = response.data?.items || []
+    let resultItems = response.items || []
     
     // 前端排序
     if (filters.value.sort_by) {
@@ -481,10 +481,10 @@ const loadItems = async () => {
     }
     
     items.value = resultItems
-    total.value = response.data?.total || 0
-    page.value = response.data?.page || 1
-    pageSize.value = response.data?.page_size || 20
-    totalPages.value = response.data?.total_pages || 0
+    total.value = response.total || 0
+    page.value = response.page || 1
+    pageSize.value = response.page_size || 20
+    totalPages.value = Math.ceil((response.total || 0) / (response.page_size || 20))
   } catch (err: any) {
     console.error('加载有声书中心列表失败:', err)
     toast.error(err.response?.data?.detail || err.message || '加载失败')

@@ -98,8 +98,8 @@ const emit = defineEmits<{
   preview: [sourceId: string, sourceName: string]
 }>()
 
-const handleToggle = (value: boolean) => {
-  emit('toggle', props.source.id, value)
+const handleToggle = (value: boolean | null) => {
+  emit('toggle', props.source.id, !!value)
 }
 
 const handlePreview = () => {

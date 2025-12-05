@@ -134,13 +134,13 @@
 <script setup lang="ts">
 import type { PlayerWallWorkSummary, PlayerWallSourceInfo, PlayerWallStatusInfo } from '@/types/playerWall'
 
-defineProps<{
+const props = defineProps<{
   work: PlayerWallWorkSummary
   source: PlayerWallSourceInfo
   status: PlayerWallStatusInfo
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   click: []
   play: []
 }>()

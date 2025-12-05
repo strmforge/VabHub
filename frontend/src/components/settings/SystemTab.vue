@@ -108,8 +108,8 @@ const moviePilotAutoUpdate = computed({
   }
 })
 
-const handleAutoUpdateChange = (val: boolean) => {
-  moviePilotAutoUpdate.value = val
+const handleAutoUpdateChange = (val: boolean | null) => {
+  moviePilotAutoUpdate.value = !!val
 }
 </script>
 

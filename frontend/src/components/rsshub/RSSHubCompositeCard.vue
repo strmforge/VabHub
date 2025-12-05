@@ -108,8 +108,8 @@ const emit = defineEmits<{
   toggle: [compositeId: string, enabled: boolean]
 }>()
 
-const handleToggle = (value: boolean) => {
-  emit('toggle', props.composite.id, value)
+const handleToggle = (value: boolean | null) => {
+  emit('toggle', props.composite.id, !!value)
 }
 
 const getTypeText = (type: string) => {

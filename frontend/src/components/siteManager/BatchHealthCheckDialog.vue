@@ -210,7 +210,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useSiteManagerStore } from '@/stores/siteManager'
-import type { SiteBrief, CheckType, BatchHealthCheckResult, SiteHealthResult, HealthStatus } from '@/types/siteManager'
+import type { SiteBrief, BatchHealthCheckResult, SiteHealthResult, HealthStatus } from '@/types/siteManager'
+import { CheckType } from '@/types/siteManager'
 
 interface Props {
   modelValue: boolean

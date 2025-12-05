@@ -457,7 +457,7 @@
                 <v-row>
                   <v-col cols="12">
                     <v-autocomplete
-                      v-model="form.filter_groups"
+                      v-model="form.filter_group_ids"
                       :items="filterGroupOptions"
                       label="优先级规则组"
                       variant="outlined"
@@ -779,7 +779,7 @@ watch(() => props.subscription, (newVal) => {
       search_imdbid: newVal.search_imdbid || false,
       include: newVal.include || '',
       exclude: newVal.exclude || '',
-      filter_groups: newVal.filter_groups || [],
+      filter_group_ids: newVal.filter_group_ids || [],
       // 安全策略（VIDEO-AUTOLOOP-1）
       allow_hr: newVal.allow_hr !== undefined ? newVal.allow_hr : false,
       allow_h3h5: newVal.allow_h3h5 !== undefined ? newVal.allow_h3h5 : false,
@@ -812,7 +812,7 @@ watch(() => props.subscription, (newVal) => {
       search_imdbid: false,
       include: '',
       exclude: '',
-      filter_groups: [],
+      filter_group_ids: [],
       // 安全策略（VIDEO-AUTOLOOP-1）
       allow_hr: false,
       allow_h3h5: false,

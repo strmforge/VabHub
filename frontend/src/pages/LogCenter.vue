@@ -220,7 +220,7 @@ const sourceOptions = [
 ]
 
 let ws: WebSocket | null = null
-let reconnectTimer: NodeJS.Timeout | null = null
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 const maxLogs = 1000
 
 // 构建WebSocket URL

@@ -36,14 +36,14 @@
       size="small"
       variant="text"
       icon="mdi-content-copy"
-      @click="copyText(currentQuery.value, 'Query')"
+      @click="copyText(currentQuery, 'Query')"
       :disabled="!currentQuery"
     />
     <v-btn
       size="small"
       variant="text"
       icon="mdi-code-json"
-      @click="copyText(currentVariables.value, 'Variables')"
+      @click="copyText(currentVariables, 'Variables')"
       :disabled="!currentVariables"
     />
   </div>
@@ -114,7 +114,7 @@
     variant="text"
     prepend-icon="mdi-content-copy"
     :disabled="!result"
-    @click="copyText(formattedResult.value, 'Result')"
+    @click="copyText(formattedResult, 'Result')"
   >
     复制结果
   </v-btn>
