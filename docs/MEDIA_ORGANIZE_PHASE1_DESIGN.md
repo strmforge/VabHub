@@ -212,7 +212,7 @@ class ManualTransferRequest(BaseModel):
 
 ### 5.2 ManualTransferDialog 设计
 
-**布局参考**：MoviePilot 的手动整理弹窗
+**布局设计**：标准媒体整理弹窗布局
 
 **表单分区**：
 1. **目的配置**：存储类型、操作模式、目标路径

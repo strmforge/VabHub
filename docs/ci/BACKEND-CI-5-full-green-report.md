@@ -74,7 +74,7 @@ for i in range(max_jobs):
 **变更后**: 
 - 移除安全密钥配置（自动生成）
 - 添加初始管理员配置
-- 简化为类似 MoviePilot 的风格
+- 简化为简洁单文件风格
 
 ```yaml
 environment:

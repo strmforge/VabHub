@@ -8,14 +8,17 @@
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 
 > **当前状态**: VabHub 处于 `0.0.1-rc1` 试用阶段，推荐通过 Docker 部署体验。  
-> **官方镜像**: `ghcr.io/strmforge/vabhub:0.0.1-rc1`  
+> **官方镜像**:  
+> - Docker Hub: `strmforge/vabhub:latest`（推荐）  
+> - GHCR: `ghcr.io/strmforge/vabhub:latest`  
+> 
 > 简要步骤：参考 [`docs/releases/0.0.1-rc1.md`](docs/releases/0.0.1-rc1.md) 与 [`docs/user/DEPLOY_WITH_DOCKER.md`](docs/user/DEPLOY_WITH_DOCKER.md)。
 
 ## 🎯 项目简介
 
 VabHub 是面向 **NAS/PT 玩家** 的本地优先媒体自动化中枢，打通 PT 站点 → 下载器 → 云盘 → 媒体库 → 阅读/听书 → 通知的完整链路。
 
-对标 MoviePilot，更强调 **Local-first、自托管、站点 AI 适配**。
+核心理念：**Local-first、自托管、站点 AI 适配**。
 
 ## 🌟 核心特色
 

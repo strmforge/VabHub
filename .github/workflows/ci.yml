@@ -24,6 +24,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/strmforge/vabhub
+  DOCKERHUB_IMAGE: strmforge/vabhub
 
 jobs:
   # ============== 后端 CI 检查 ==============
@@ -128,22 +129,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      # 计算 Docker 标签
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # 计算 Docker 标签 (GHCR + Docker Hub)
       - name: Generate Docker tags
         id: tags
         run: |
-          # 基础标签
+          # 基础标签 (GHCR + Docker Hub)
           TAGS="${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:${{ github.sha }}"
           
           # 如果是 main 分支，添加 latest 标签
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             TAGS="${TAGS},${{ env.IMAGE_NAME }}:latest"
+            TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:latest"
           fi
           
           # 如果是版本 tag，添加版本标签
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${{ github.ref_name }}"
             TAGS="${TAGS},${{ env.IMAGE_NAME }}:${VERSION}"
+            TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:${VERSION}"
           fi
           
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
@@ -175,7 +186,11 @@ jobs:
           echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Pull Command" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull Commands" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# From GHCR (GitHub Container Registry)" >> $GITHUB_STEP_SUMMARY
           echo "docker pull ${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# From Docker Hub" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.DOCKERHUB_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

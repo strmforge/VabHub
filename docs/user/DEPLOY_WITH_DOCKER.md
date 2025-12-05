@@ -161,7 +161,14 @@ docker compose logs -f
 
 ## §1.5 使用官方镜像部署（生产环境推荐）
 
-对于生产环境，推荐使用 `docker-compose.prod.yml` 配合 GHCR 官方镜像：
+对于生产环境，推荐使用 `docker-compose.prod.yml` 配合官方镜像：
+
+**官方镜像地址（二选一）**：
+
+| Registry | 镜像地址 | 说明 |
+|----------|----------|------|
+| **Docker Hub** | `strmforge/vabhub:latest` | 推荐普通用户使用，国内访问速度更快 |
+| **GHCR** | `ghcr.io/strmforge/vabhub:latest` | 与 GitHub 源码绑定，适合开发者 |
 
 ### 步骤 1：配置环境变量
 
@@ -179,6 +186,13 @@ VABHUB_VERSION=0.0.1-rc1
 ### 步骤 2：拉取官方镜像
 
 ```bash
+# 从 Docker Hub 拉取（推荐）
+docker pull strmforge/vabhub:latest
+
+# 或从 GHCR 拉取
+docker pull ghcr.io/strmforge/vabhub:latest
+
+# 使用 compose 拉取
 docker compose -f docker-compose.prod.yml --env-file .env.docker pull
 ```
 
@@ -362,9 +376,9 @@ docker compose pull
 docker compose up -d
 ```
 
-镜像地址：
-- 后端：`ghcr.io/strmforge/vabhub-backend:latest`
-- 前端：`ghcr.io/strmforge/vabhub-frontend:latest`
+镜像地址（二选一）：
+- **Docker Hub**：`strmforge/vabhub:latest`（推荐，访问速度快）
+- **GHCR**：`ghcr.io/strmforge/vabhub:latest`（与源码绑定）
 
 ### 升级 VabHub（本地构建）
 

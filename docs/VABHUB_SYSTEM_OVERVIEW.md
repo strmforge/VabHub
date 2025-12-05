@@ -62,9 +62,9 @@ VabHub 系统总览（单一事实来源）
   - 提供闭环自动化：  
     搜索 → 订阅 → 下载 → 整理入库 → 媒体浏览 / 阅读 / 听书 / 追更 → 通知与远程控制。
 - **愿景**：
-  - 对标并超越 MoviePilot：  
-    更强调 **Local-first、自托管、不依赖单一外部服务**，  
+  - 打造更强调 **Local-first、自托管、不依赖单一外部服务** 的媒体自动化平台，  
     提供站点 AI 适配、本地智能大脑、插件生态等扩展能力。
+  - **官方镜像**：Docker Hub (`strmforge/vabhub`) 与 GHCR (`ghcr.io/strmforge/vabhub`) 同步发布。
 
 ---
 
@@ -496,7 +496,7 @@ VabHub 系统总览（单一事实来源）
 - **2025-12-05 – BACKEND-CI-4 完成**：
   确认 6 个边角测试（SafetyPolicyEngine + Novel Demo + TTS JobRunner）均已通过，后端 CI 持续全绿（447 passed, 0 failed）。
 - **2025-12-05 – DEPLOY-YAML-2 + BACKEND-CI-5 完成**：
-  docker-compose 精简化（类似 MoviePilot 风格），密钥自动生成机制，CI 环境对齐（ruff 安装、httpx ASGITransport 适配、TTS JobRunner 去重）。
+  docker-compose 精简化（简洁单文件风格），密钥自动生成机制，CI 环境对齐（ruff 安装、httpx ASGITransport 适配、TTS JobRunner 去重）。
 - **2025-12-05 – FRONTEND-DOCKER-BUILD-FIX-1 完成**：
   修复前端 TypeScript 编译错误 113→70（43 个已修），确保 `pnpm run build` 在 Docker 环境中通过，剩余 Vuetify slot 类型问题为上游已知问题。
 - **2025-12-05 – DOCKER-SMOKE-RUN-1 完成**：
@@ -509,6 +509,8 @@ VabHub 系统总览（单一事实来源）
   0.0.1-rc1 官方 Docker 镜像发布（GHCR + docker-compose.prod），统一 All-in-One 架构，提供官方镜像拉取部署路线。
 - **2025-12-06 – SECRET-HYGIENE-1 完成**：
   GitGuardian 报警收尾 & 配置脱敏：移除所有硬编码默认密码，改用必填环境变量；添加 secret 扫描脚本；创建安全策略文档。
+- **2025-12-06 – DOCKER-HUB-INTEGRATION-1 完成**：
+  CI 支持同时推送 GHCR + Docker Hub 镜像，文档更新双镜像源说明。
 - （此处由后续任务持续追加）
 
 ---

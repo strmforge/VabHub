@@ -96,9 +96,8 @@ class DownloadTaskResponse(BaseModel):
 # config.py 新增配置
 VABHUB_TORRENT_LABELS: List[str] = [
     "vabhub",      # VabHub 默认标签
-    "moviepilot",  # MoviePilot 兼容
     "auto",        # 自动添加标签
-    # 管理员可扩展
+    # 管理员可扩展，支持自定义标签
 ]
 
 # DownloadTask 模型新增字段
@@ -392,7 +391,6 @@ CREATE INDEX idx_download_tasks_organize_status ON download_tasks(organize_statu
 # config.py 新增
 VABHUB_TORRENT_LABELS: List[str] = [
     "vabhub",
-    "moviepilot", 
     "auto"
 ]
 ```

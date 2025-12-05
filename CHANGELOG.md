@@ -51,6 +51,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **[ci] CI 支持同时推送 Docker Hub 镜像**
+  - 新增 `strmforge/vabhub` 镜像（Docker Hub）
+  - 保持 `ghcr.io/strmforge/vabhub` 镜像（GHCR）
+  - 两个 Registry 的 tag 保持同步（latest / sha / version）
+  - 详见 `docs/dev-notes/DOCKER-HUB-INTEGRATION-1.md`
+
 ### Fixed
 
 - **[frontend] 修复 Docker 构建时缺失 downloads 组件导致的前端打包失败**
@@ -58,6 +66,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - 修复：将规则改为 `/downloads/` 只匹配根目录
   - 受影响组件：SpeedLimitDialog.vue, DownloadList.vue, DownloadProgressCard.vue
   - 详见 `docs/dev-notes/FRONTEND-DOWNLOADS-SPEEDLIMIT-1.md`
+
+### Changed
+
+- **[docs] 文档清理：使用 VabHub 自身定位**
+  - README.md、VABHUB_SYSTEM_OVERVIEW.md 改为 VabHub 自身定位描述
+  - 部署文档增加 Docker Hub 镜像拉取说明
 
 ### Planned
 
