@@ -48,7 +48,7 @@ version: '3.8'
 services:
   # VabHub 主应用 (前端 + 后端合一)
   vabhub:
-    image: ghcr.io/strmforge/vabhub:latest
+    image: strmforge/vabhub:latest  # Docker Hub（推荐）或 ghcr.io/strmforge/vabhub:latest
     container_name: vabhub
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}  # ⚠️ 在 .env.docker 中设置 DB_PASSWORD

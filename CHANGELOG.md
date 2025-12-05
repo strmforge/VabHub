@@ -73,6 +73,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - README.md、VABHUB_SYSTEM_OVERVIEW.md 改为 VabHub 自身定位描述
   - 部署文档增加 Docker Hub 镜像拉取说明
 
+- **[docs] Docker 镜像文档收尾**
+  - README 添加 Docker Hub badge，示例配置改用 Docker Hub 镜像
+  - DEPLOY_WITH_DOCKER 示例配置改为 Docker Hub 优先
+  - Release Notes 更新镜像地址说明
+
 ### Planned
 
 - 收紧 CI 要求（TypeScript 严格模式）

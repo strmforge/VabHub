@@ -6,6 +6,7 @@
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![Vue](https://img.shields.io/badge/vue-3.0+-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-strmforge%2Fvabhub-blue?logo=docker)](https://hub.docker.com/r/strmforge/vabhub)
 
 > **当前状态**: VabHub 处于 `0.0.1-rc1` 试用阶段，推荐通过 Docker 部署体验。  
 > **官方镜像**:  
@@ -60,7 +61,7 @@ version: '3.8'
 services:
   # VabHub 主应用 (All-in-One 单镜像)
   vabhub:
-    image: ghcr.io/strmforge/vabhub:latest
+    image: strmforge/vabhub:latest  # 或 ghcr.io/strmforge/vabhub:latest
     environment:
       - DATABASE_URL=postgresql://vabhub:${DB_PASSWORD}@db:5432/vabhub
       - REDIS_URL=redis://redis:6379/0
