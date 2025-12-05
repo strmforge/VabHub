@@ -83,17 +83,19 @@ ENV PYTHONUNBUFFERED=1 \
     APP_ENV=production \
     TZ=Asia/Shanghai \
     # 前端静态文件路径
-    FRONTEND_DIST_PATH=/app/frontend_dist
+    FRONTEND_DIST_PATH=/app/frontend_dist \
+    # 默认端口 (避开常见下载器端口)
+    VABHUB_PORT=52180
 
-# 暴露端口
-EXPOSE 8000
+# 暴露端口 (默认 52180，可通过环境变量覆盖)
+EXPOSE ${VABHUB_PORT:-52180}
 
-# 健康检查
+# 健康检查 (使用环境变量端口)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${VABHUB_PORT:-52180}/health || exit 1
 
 # 工作目录切换到 backend
 WORKDIR /app/backend
 
-# 启动命令
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 启动命令 - 使用 shell 形式以支持环境变量
+CMD uvicorn main:app --host 0.0.0.0 --port ${VABHUB_PORT:-52180}

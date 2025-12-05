@@ -1,8 +1,8 @@
 <template>
   <div class="system-update-page">
     <PageHeader
-      title="系统更新"
-      subtitle="检查更新、自动更新和热更新管理"
+      title="系统升级"
+      subtitle="版本信息、检查更新、一键升级"
     />
 
     <v-row>
@@ -18,19 +18,31 @@
               <v-list-item>
                 <v-list-item-title>版本号</v-list-item-title>
                 <template v-slot:append>
-                  <v-chip color="primary" variant="flat">{{ versionInfo.version || '未知' }}</v-chip>
+                  <v-chip color="primary" variant="flat">{{ versionData?.current_version || '未知' }}</v-chip>
                 </template>
               </v-list-item>
               <v-list-item>
                 <v-list-item-title>Commit Hash</v-list-item-title>
                 <template v-slot:append>
-                  <span class="text-caption text-medium-emphasis">{{ versionInfo.commit || '未知' }}</span>
+                  <span class="text-caption text-medium-emphasis">{{ versionData?.build_commit || '未知' }}</span>
                 </template>
               </v-list-item>
               <v-list-item>
-                <v-list-item-title>构建时间</v-list-item-title>
+                <v-list-item-title>检查时间</v-list-item-title>
                 <template v-slot:append>
-                  <span class="text-caption text-medium-emphasis">{{ versionInfo.build_time || '未知' }}</span>
+                  <span class="text-caption text-medium-emphasis">{{ formatTime(versionData?.checked_at) }}</span>
+                </template>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title>Docker 升级</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip 
+                    :color="dockerAvailable ? 'success' : 'warning'" 
+                    variant="flat"
+                    size="small"
+                  >
+                    {{ dockerAvailable ? '可用' : '不可用' }}
+                  </v-chip>
                 </template>
               </v-list-item>
             </v-list>
@@ -57,30 +69,30 @@
           </v-card-title>
           <v-card-text>
             <v-alert
-              v-if="updateInfo.has_update"
+              v-if="versionData?.update_available"
               type="info"
               variant="tonal"
               class="mb-4"
             >
               <div class="text-body-2">
-                <strong>发现新版本！</strong>
+                <strong>🎉 发现新版本！</strong>
               </div>
               <div class="text-caption mt-2">
-                当前版本: {{ updateInfo.current_version }}<br />
-                最新版本: {{ updateInfo.remote_info?.latest_release || updateInfo.remote_info?.latest_commit }}
+                当前版本: {{ versionData?.current_version }}<br />
+                最新版本: {{ versionData?.latest_version }}
               </div>
             </v-alert>
             <v-alert
-              v-else-if="updateInfo.current_version"
+              v-else-if="versionData?.current_version"
               type="success"
               variant="tonal"
               class="mb-4"
             >
               <div class="text-body-2">
-                <strong>已是最新版本</strong>
+                <strong>✅ 已是最新版本</strong>
               </div>
               <div class="text-caption mt-2">
-                当前版本: {{ updateInfo.current_version }}
+                当前版本: {{ versionData?.current_version }}
               </div>
             </v-alert>
             <div v-else class="text-center py-4">
@@ -124,75 +136,93 @@
       </v-card-text>
     </v-card>
 
-    <!-- 更新操作卡片 -->
+    <!-- Docker 升级卡片 -->
     <v-card variant="outlined" class="mb-4">
       <v-card-title class="d-flex align-center">
-        <v-icon class="me-2">mdi-download</v-icon>
-        更新操作
+        <v-icon class="me-2">mdi-docker</v-icon>
+        一键升级
+        <v-spacer />
+        <v-chip v-if="dockerAvailable" color="success" variant="flat" size="small">
+          <v-icon start size="small">mdi-check-circle</v-icon>
+          Docker 就绪
+        </v-chip>
+        <v-chip v-else color="warning" variant="flat" size="small">
+          <v-icon start size="small">mdi-alert</v-icon>
+          Docker 不可用
+        </v-chip>
       </v-card-title>
       <v-card-text>
-        <v-alert type="warning" variant="tonal" class="mb-4">
+        <v-alert type="info" variant="tonal" class="mb-4">
           <div class="text-body-2">
-            <strong>注意：</strong>系统更新需要重启才能生效。更新前请确保已保存所有重要数据。
+            <strong>升级流程：</strong>拉取最新镜像 → 重启容器 → 完成升级
+          </div>
+          <div class="text-caption mt-2">
+            升级过程中 Web 界面会短暂中断（约 10-30 秒），请稍后刷新页面。
           </div>
         </v-alert>
 
         <v-row>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="6">
             <v-btn
               color="primary"
-              prepend-icon="mdi-download"
+              prepend-icon="mdi-cloud-download"
               variant="elevated"
               block
-              @click="updateSystem('release')"
-              :loading="updating"
-              :disabled="!updateInfo.has_update"
+              size="large"
+              @click="applyUpgrade"
+              :loading="upgrading"
+              :disabled="!dockerAvailable"
             >
-              更新到发行版
+              立即升级
             </v-btn>
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="6">
             <v-btn
-              color="info"
-              prepend-icon="mdi-code-branch"
-              variant="elevated"
+              color="secondary"
+              prepend-icon="mdi-console"
+              variant="outlined"
               block
-              @click="updateSystem('dev')"
-              :loading="updating"
+              size="large"
+              @click="showManualUpgrade = true"
             >
-              更新到开发版
-            </v-btn>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-btn
-              color="success"
-              prepend-icon="mdi-reload"
-              variant="elevated"
-              block
-              @click="hotReload"
-              :loading="reloading"
-            >
-              热重载模块
+              手动升级命令
             </v-btn>
           </v-col>
         </v-row>
 
         <v-alert
-          v-if="updateResult"
-          :type="updateResult.success ? 'success' : 'error'"
+          v-if="upgradeResult"
+          :type="upgradeResult.success ? 'success' : 'error'"
           variant="tonal"
           class="mt-4"
           closable
-          @click:close="updateResult = null"
+          @click:close="upgradeResult = null"
         >
           <div class="text-body-2">
-            <strong>{{ updateResult.success ? '更新成功' : '更新失败' }}</strong>
+            <strong>{{ upgradeResult.success ? '升级已启动' : '升级失败' }}</strong>
           </div>
-          <div class="text-caption mt-2">{{ updateResult.message }}</div>
-          <div v-if="updateResult.requires_restart" class="text-caption mt-2">
-            <strong>⚠️ 需要重启系统以应用更改</strong>
-          </div>
+          <div class="text-caption mt-2">{{ upgradeResult.message }}</div>
         </v-alert>
+
+        <!-- 手动升级命令对话框 -->
+        <v-dialog v-model="showManualUpgrade" max-width="600">
+          <v-card>
+            <v-card-title>手动升级命令</v-card-title>
+            <v-card-text>
+              <p class="text-body-2 mb-4">如果自动升级不可用，可以在服务器上执行以下命令：</p>
+              <v-code class="pa-4 d-block bg-grey-darken-3">
+docker compose pull && docker compose up -d
+              </v-code>
+              <p class="text-caption mt-4 text-medium-emphasis">
+                执行目录：VabHub 的 docker-compose.yml 所在目录
+              </p>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn color="primary" @click="showManualUpgrade = false">关闭</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-text>
     </v-card>
 
@@ -271,13 +301,15 @@ import PageHeader from '@/components/common/PageHeader.vue'
 
 const toast = useToast()
 
+// 状态
 const checking = ref(false)
-const updating = ref(false)
+const upgrading = ref(false)
 const reloading = ref(false)
-const versionInfo = ref<any>({})
-const updateInfo = ref<any>({})
-const updateResult = ref<any>(null)
+const versionData = ref<any>(null)
+const dockerAvailable = ref(false)
+const upgradeResult = ref<any>(null)
 const reloadResult = ref<any>(null)
+const showManualUpgrade = ref(false)
 
 const updateMode = ref('never')
 const autoUpdateEnabled = ref(false)
@@ -295,60 +327,111 @@ const reloadableModules = [
   { title: '插件', value: 'plugins' }
 ]
 
-const loadVersionInfo = async () => {
+// 格式化时间
+const formatTime = (isoString: string | null) => {
+  if (!isoString) return '未检查'
   try {
-    const response = await api.get('/system/version')
-    versionInfo.value = response.data
-  } catch (error: any) {
-    console.error('Failed to load version info:', error)
-    toast.error(error.message || '获取版本信息失败！')
+    return new Date(isoString).toLocaleString('zh-CN')
+  } catch {
+    return isoString
   }
 }
 
+// 加载版本信息
+const loadVersionInfo = async () => {
+  try {
+    const response = await api.get('/admin/system/version')
+    if (response.data?.success) {
+      versionData.value = response.data.data
+    }
+  } catch (error: any) {
+    console.error('Failed to load version info:', error)
+    // 静默失败，不弹 toast
+  }
+}
+
+// 检查 Docker 状态
+const checkDockerStatus = async () => {
+  try {
+    const response = await api.get('/admin/system/docker-status')
+    if (response.data?.success) {
+      dockerAvailable.value = response.data.docker_available
+    }
+  } catch (error: any) {
+    console.error('Failed to check docker status:', error)
+    dockerAvailable.value = false
+  }
+}
+
+// 检查更新
 const checkUpdate = async () => {
   checking.value = true
   try {
-    const response = await api.get('/system/update/check')
-    updateInfo.value = response.data
-    if (updateInfo.value.has_update) {
-      toast.info('发现新版本！')
-    } else {
-      toast.success('已是最新版本')
+    const response = await api.post('/admin/system/upgrade', { mode: 'check_only' })
+    if (response.data?.success) {
+      const result = response.data.data
+      // 更新版本数据
+      if (result.details) {
+        versionData.value = {
+          ...versionData.value,
+          current_version: result.details.current_version,
+          latest_version: result.details.latest_version,
+          update_available: result.details.update_available,
+          checked_at: new Date().toISOString()
+        }
+      }
+      if (result.details?.update_available) {
+        toast.info('发现新版本！')
+      } else {
+        toast.success('已是最新版本')
+      }
     }
   } catch (error: any) {
     console.error('Failed to check update:', error)
-    toast.error(error.message || '检查更新失败！')
+    toast.error(error.response?.data?.detail || '检查更新失败！')
   } finally {
     checking.value = false
   }
 }
 
-const updateSystem = async (mode: string) => {
-  updating.value = true
+// 执行升级
+const applyUpgrade = async () => {
+  if (!dockerAvailable.value) {
+    toast.warning('Docker 不可用，请使用手动升级命令')
+    showManualUpgrade.value = true
+    return
+  }
+
+  upgrading.value = true
+  upgradeResult.value = null
+  
   try {
-    const response = await api.post('/system/update', { mode })
-    updateResult.value = response.data
-    
-    if (response.data.requires_restart) {
-      toast.warning('系统已更新，需要重启以应用更改')
-    } else {
-      toast.success('更新成功')
+    const response = await api.post('/admin/system/upgrade', { mode: 'apply' })
+    if (response.data?.success) {
+      upgradeResult.value = response.data.data
+      if (response.data.data.success) {
+        toast.success('升级已启动，请稍后刷新页面')
+        // 延迟刷新页面
+        setTimeout(() => {
+          window.location.reload()
+        }, 10000)
+      } else {
+        toast.error(response.data.data.message || '升级失败')
+      }
     }
-    
-    // 重新检查更新
-    await checkUpdate()
   } catch (error: any) {
-    console.error('Failed to update system:', error)
-    updateResult.value = {
+    console.error('Failed to apply upgrade:', error)
+    upgradeResult.value = {
       success: false,
-      message: error.message || '更新失败'
+      message: error.response?.data?.detail || '升级失败'
     }
-    toast.error(error.message || '系统更新失败！')
+    toast.error(error.response?.data?.detail || '升级失败！')
   } finally {
-    updating.value = false
+    upgrading.value = false
   }
 }
 
+// 热重载
 const hotReload = async () => {
   reloading.value = true
   try {
@@ -400,8 +483,10 @@ const saveAutoUpdateEnabled = async () => {
 }
 
 onMounted(async () => {
-  await loadVersionInfo()
-  await checkUpdate()
+  await Promise.all([
+    loadVersionInfo(),
+    checkDockerStatus()
+  ])
 })
 </script>
 

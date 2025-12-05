@@ -149,6 +149,7 @@ from app.api import (
     ai_log_doctor,  # AI 故障医生 API (FUTURE-AI-LOG-DOCTOR-1)
     ai_cleanup_advisor,  # AI 整理顾问 API (FUTURE-AI-CLEANUP-ADVISOR-1)
     ai_reading_assistant,  # AI 阅读助手 API (FUTURE-AI-READING-ASSISTANT-1)
+    admin_system,  # 系统管理 API (DEPLOY-UPGRADE-1)
 )
 
 # 创建主API路由器
@@ -298,3 +299,4 @@ api_router.include_router(ai_subs_workflow.router, tags=["AI 订阅工作流"]) 
 api_router.include_router(ai_log_doctor.router, tags=["AI 故障医生"])  # AI 故障医生 API (FUTURE-AI-LOG-DOCTOR-1)
 api_router.include_router(ai_cleanup_advisor.router, tags=["AI 整理顾问"])  # AI 整理顾问 API (FUTURE-AI-CLEANUP-ADVISOR-1)
 api_router.include_router(ai_reading_assistant.router, tags=["AI 阅读助手"])  # AI 阅读助手 API (FUTURE-AI-READING-ASSISTANT-1)
+api_router.include_router(admin_system.router, tags=["系统管理"])  # 系统管理 API (DEPLOY-UPGRADE-1)

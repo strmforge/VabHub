@@ -34,6 +34,7 @@ email-validator>=2.1.0  # Email validation for Pydantic models
 psutil>=5.9.0  # System resource monitoring
 zhconv>=1.4.3  # Chinese text conversion for search
 pypinyin>=0.49.0  # Chinese pinyin conversion for search
+docker>=7.0.0  # Docker SDK for upgrade engine
 # 深度学习推荐系统（可选，如果Docker环境不支持GPU可以注释掉）
 # torch>=2.0.0
 # torchvision>=0.15.0

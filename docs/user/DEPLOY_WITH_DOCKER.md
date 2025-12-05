@@ -42,6 +42,7 @@ VabHub 使用 Docker Compose 管理所有服务。采用 **All-in-One 单镜像�
 
 ```yaml
 # VabHub Docker Compose 配置 (All-in-One 架构)
+# 默认端口: 52180 (避开 8080/7878/8989/9091 等常见下载器端口)
 version: '3.8'
 
 services:
@@ -55,13 +56,16 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
       - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
-      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8080}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:52180}
+      - VABHUB_PORT=${VABHUB_PORT:-52180}
       - TZ=Asia/Shanghai
     volumes:
       - vabhub_data:/app/data
       - vabhub_logs:/app/logs
+      # Docker Socket - 用于 UI 升级功能 (可选)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - "${VABHUB_PORT:-8080}:8000"
+      - "${VABHUB_PORT:-52180}:${VABHUB_PORT:-52180}"
     depends_on:
       db:
         condition: service_healthy
@@ -140,16 +144,16 @@ docker compose logs -f
 
 等待服务启动完成（约 30 秒），然后在浏览器中访问：
 
-- **应用首页**：http://<宿主机 IP>:8080
-- **API 文档**：http://<宿主机 IP>:8080/docs
+- **应用首页**：http://<宿主机 IP>:52180
+- **API 文档**：http://<宿主机 IP>:52180/docs
 
-> 默认端口为 8080，可通过环境变量 `VABHUB_PORT` 修改。
+> 默认端口为 **52180**（避开常见下载器端口），可通过环境变量 `VABHUB_PORT` 修改。
 
 ### 步骤 6：创建初始用户
 
 首次部署后，通过以下方式创建初始用户：
 
-1. 访问 API 文档：http://<宿主机 IP>:8080/docs
+1. 访问 API 文档：http://<宿主机 IP>:52180/docs
 2. 找到 `/api/auth/register` 接口
 3. 点击 "Try it out" 按钮
 4. 填写用户名、邮箱和密码
@@ -163,19 +167,50 @@ VabHub 采用 **All-in-One 单镜像架构**，前端和后端合并在一个容
 
 | 服务 | 镜像 | 端口 | 功能 |
 |------|------|------|------|
-| `vabhub` | `ghcr.io/strmforge/vabhub:latest` | 8080:8000 | 主应用（前端 + 后端） |
+| `vabhub` | `ghcr.io/strmforge/vabhub:latest` | 52180:52180 | 主应用（前端 + 后端） |
 | `db` | `postgres:14-alpine` | 无（内部网络） | PostgreSQL 数据库 |
 | `redis` | `redis:7-alpine` | 无（内部网络） | Redis 缓存 |
 
-### 2.2 自定义配置选项
+### 2.2 端口配置
 
-#### 2.2.1 自定义端口
+默认端口 `52180` 是精心选择的"冷门端口"，避开以下常见端口冲突：
+- `8080` - 常用 Web 服务
+- `7878` - Radarr
+- `8989` - Sonarr
+- `9091` - Transmission
+
+#### 修改端口
+
+在 `.env.docker` 中设置：
+
+```bash
+VABHUB_PORT=3020
+APP_BASE_URL=http://localhost:3020
+```
+
+端口配置为**内外同步**，容器内监听端口与宿主机映射端口相同。
+
+### 2.3 升级方式
+
+**推荐：UI 一键升级**
+
+在管理界面 > 系统升级页面，点击「立即升级」按钮即可完成升级。
+
+**备选：手动命令**
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+### 2.4 自定义配置选项
+
+#### 2.4.1 自定义端口
 
 修改 `.env.docker` 中的端口配置：
 
 ```bash
 # 修改应用端口
-VABHUB_PORT=8080
+VABHUB_PORT=52180
 
 # 修改应用基础 URL
 APP_BASE_URL=http://localhost:8080

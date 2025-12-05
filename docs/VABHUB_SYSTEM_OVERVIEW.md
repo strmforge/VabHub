@@ -490,6 +490,8 @@ VabHub 系统总览（单一事实来源）
   CI 通过后自动构建并推送 Docker 镜像到 GHCR（ghcr.io/strmforge/vabhub-backend + frontend），docker-compose.yml 添加 image 字段支持 `docker compose pull` 升级。
 - **2025-12-05 – CI-DOCKER-ONE-IMAGE-1 完成**：
   单流水线 CI + 单应用镜像架构。合并多个 workflow 为唯一主 CI (VabHub CI)，将 backend/frontend 双镜像改为 All-in-One 单镜像 `ghcr.io/strmforge/vabhub:latest`，docker-compose 简化为 3 服务架构。
+- **2025-12-05 – DEPLOY-UPGRADE-1 完成**：
+  端口策略（默认 52180）+ 升级引擎 v1 + 插件运行模型对齐。实现 UI 一键升级（docker.sock）、版本检查 API、明确插件为进程内模块而非外部容器。
 - （此处由后续任务持续追加）
 
 ---
