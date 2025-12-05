@@ -152,7 +152,8 @@ const loadFollowing = async () => {
   loading.value = true
   error.value = null
   try {
-    const list = await mangaFollowApi.listFollowing()
+    const response = await mangaFollowApi.listFollowing()
+    const list = response.items || []
     // 简单排序：先按是否有未读，其次按更新时间倒序
     items.value = [...list].sort((a, b) => {
       const aUnread = a.unread_chapter_count || 0
@@ -165,8 +166,9 @@ const loadFollowing = async () => {
     })
   } catch (err: any) {
     console.error('加载追更列表失败:', err)
-    error.value = err.response?.data?.detail || err.message || '加载追更列表失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '加载追更列表失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
   }
@@ -187,7 +189,7 @@ const goToReader = (item: FollowedMangaItem) => {
 const handleMarkRead = async (item: FollowedMangaItem) => {
   try {
     markingIds.value.add(item.series_id)
-    await mangaFollowApi.markSeriesRead(item.series_id)
+    await mangaFollowApi.markSeriesRead(String(item.series_id))
     item.unread_chapter_count = 0
     toast.success('已标记为已读')
   } catch (err: any) {
@@ -207,7 +209,7 @@ const handleMarkAllRead = async () => {
     for (const item of targets) {
       markingIds.value.add(item.series_id)
       try {
-        await mangaFollowApi.markSeriesRead(item.series_id)
+        await mangaFollowApi.markSeriesRead(String(item.series_id))
         item.unread_chapter_count = 0
       } catch (err: any) {
         console.error('批量标记已读失败:', err)

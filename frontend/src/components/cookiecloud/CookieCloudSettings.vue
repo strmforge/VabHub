@@ -332,8 +332,10 @@ const triggerSync = async () => {
     await store.triggerSync()
     if (store.syncResult?.success) {
       toast.success(`同步完成: 成功${store.syncResult.synced_sites}个站点`)
-    } else {
+    } else if (store.syncResult) {
       toast.error(`同步失败: ${store.syncResult.errors.join(', ')}`)
+    } else {
+      toast.error('同步失败: 未知错误')
     }
   } catch (error: any) {
     toast.error(`同步失败: ${error.message}`)

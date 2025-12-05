@@ -52,7 +52,7 @@
             <v-table density="compact">
               <tbody>
                 <tr v-for="(ttl, op) in config.cache_ttl" :key="op">
-                  <td>{{ getOperationName(op) }}</td>
+                  <td>{{ getOperationName(String(op)) }}</td>
                   <td>{{ formatTTL(ttl) }}</td>
                 </tr>
               </tbody>
@@ -63,7 +63,7 @@
             <v-table density="compact">
               <tbody>
                 <tr v-for="(conc, op) in config.concurrency" :key="op">
-                  <td>{{ getOperationName(op) }}</td>
+                  <td>{{ getOperationName(String(op)) }}</td>
                   <td>{{ conc }}</td>
                 </tr>
               </tbody>

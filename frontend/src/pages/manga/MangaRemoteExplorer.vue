@@ -616,7 +616,7 @@ const importLatestN = ref(5)
 const downloadJobs = ref<MangaDownloadJob[]>([])
 const showDownloadJobsDialog = ref(false)
 const loadingDownloadJobs = ref(false)
-const jobPollingInterval = ref<NodeJS.Timeout | null>(null)
+const jobPollingInterval = ref<ReturnType<typeof setInterval> | null>(null)
 
 // 源选项
 const sourceOptions = computed(() => {
@@ -721,8 +721,9 @@ const loadSources = async () => {
     }
   } catch (err: any) {
     console.error('加载源列表失败:', err)
-    error.value = err.response?.data?.detail || err.message || '加载源列表失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '加载源列表失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loadingSources.value = false
   }
@@ -806,8 +807,9 @@ const performSearch = async () => {
     }
   } catch (err: any) {
     console.error('搜索失败:', err)
-    error.value = err.response?.data?.detail || err.message || '搜索失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '搜索失败'
+    error.value = errMsg
+    toast.error(errMsg)
     searchResult.value = null
     aggregatedSearchResult.value = null
   } finally {

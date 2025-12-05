@@ -301,8 +301,9 @@ const loadConfig = async () => {
     }
   } catch (err: any) {
     console.error('加载 AI 配置失败:', err)
-    error.value = err.response?.data?.detail?.error_message || err.message || '加载失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail?.error_message || err.message || '加载失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
   }

@@ -646,7 +646,7 @@ const restoreScrollPosition = () => {
 
 // 监听主题和字号变化，重新恢复滚动位置（保持阅读位置）
 watch(
-  [() => preferences.theme, () => preferences.fontSize],
+  [() => preferences.value.theme, () => preferences.value.fontSize],
   () => {
     // 主题或字号变化后，等待 DOM 更新，然后恢复滚动位置
     nextTick(() => {

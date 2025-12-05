@@ -242,12 +242,12 @@ const downloadStatusOptions = [
 ]
 
 const downloadHeaders = [
-  { title: '标题', key: 'title', align: 'start' },
+  { title: '标题', key: 'title', align: 'start' as const },
   { title: '状态', key: 'status', width: 90 },
   { title: '进度', key: 'progress', width: 140 },
   { title: '大小', key: 'size_gb', width: 90 },
   { title: '操作', key: 'actions', width: 80, sortable: false }
-]
+] as const
 
 const stats = computed(() => {
   const total = subscriptions.value.length

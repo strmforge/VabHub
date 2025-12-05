@@ -282,7 +282,7 @@ const handleNotificationClick = async (item: UserNotificationItem) => {
       if (seriesId) {
         // 可选：后台标记已读，不阻塞跳转
         try {
-          void mangaFollowApi.markSeriesRead(seriesId as number)
+          void mangaFollowApi.markSeriesRead(String(seriesId))
         } catch (e) {
           console.error('Failed to mark series read from notification', e)
         }

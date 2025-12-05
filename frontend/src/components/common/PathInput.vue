@@ -62,7 +62,7 @@
               <v-btn
                 variant="text"
                 size="small"
-                @click="navigateToPath(item.path)"
+                @click="navigateToPath((item as any).path)"
               >
                 {{ item.title }}
               </v-btn>
@@ -172,14 +172,15 @@ const directoryItems = ref<Array<{
 const currentPath = ref(props.modelValue || props.root)
 
 // 路径面包屑导航
-const pathBreadcrumbs = computed(() => {
-  const paths = currentPath.value.split('/').filter(p => p)
-  const items = [
+// Note: 使用 any 类型断言是因为 Vuetify v-breadcrumbs 的 slot 类型定义不支持自定义属性
+const pathBreadcrumbs = computed((): Array<{ title: string; path: string }> => {
+  const paths = currentPath.value.split('/').filter((p: string) => p)
+  const items: Array<{ title: string; path: string }> = [
     { title: '根目录', path: props.root }
   ]
   
   let current = props.root
-  paths.forEach((path, index) => {
+  paths.forEach((path: string) => {
     current = current === '/' ? `/${path}` : `${current}/${path}`
     items.push({
       title: path,

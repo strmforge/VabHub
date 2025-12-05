@@ -28,7 +28,7 @@ jobs:
   backend-ci:
     name: Backend CI
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.skip_ci != 'true' }}
+    # [DEPRECATED] 此 workflow 已废弃，移除无效的 skip_ci 判断
     
     env:
       VABHUB_CI: "1"
@@ -55,7 +55,7 @@ jobs:
   frontend-ci:
     name: Frontend CI
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.skip_ci != 'true' }}
+    # [DEPRECATED] 此 workflow 已废弃，移除无效的 skip_ci 判断
     defaults:
       run:
         working-directory: frontend
@@ -83,7 +83,8 @@ jobs:
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
+          # 使用 pnpm 默认 store 路径，避免 env context 静态检查警告
+          path: ~/.local/share/pnpm/store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
@@ -99,11 +100,10 @@ jobs:
     name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: [backend-ci, frontend-ci]
-    # 如果 skip_ci 为 true，则不依赖 CI job
+    # [DEPRECATED] 简化条件判断，移除无效的 skip_ci 引用
     if: |
       always() && 
-      (github.event.inputs.skip_ci == 'true' || 
-       (needs.backend-ci.result == 'success' && needs.frontend-ci.result == 'success'))
+      (needs.backend-ci.result == 'success' && needs.frontend-ci.result == 'success')
     
     permissions:
       contents: read

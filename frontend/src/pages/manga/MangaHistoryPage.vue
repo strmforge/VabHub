@@ -194,8 +194,9 @@ const loadHistory = async (reset: boolean = false) => {
     hasMore.value = data.length === limit
   } catch (err: any) {
     console.error('加载阅读历史失败:', err)
-    error.value = err.response?.data?.detail || err.message || '加载失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '加载失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
     loadingMore.value = false

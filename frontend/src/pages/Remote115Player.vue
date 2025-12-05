@@ -234,7 +234,7 @@ const currentQuality = computed(() => {
 const selectedSubtitleId = ref<string | null>(null)
 const subtitleOptions = computed(() => {
   if (!playOptions.value) return []
-  const options = [
+  const options: Array<{ title: string; value: string | null }> = [
     { title: '关闭字幕', value: null }
   ]
   playOptions.value.subtitles.forEach(sub => {
@@ -264,10 +264,10 @@ const loadPlayOptions = async () => {
     error.value = null
 
     const response = await remote115Api.getPlayOptions(workId.value)
-    playOptions.value = response.data
+    playOptions.value = response
 
     // 选择默认清晰度（分辨率最高的）
-    if (playOptions.value.qualities.length > 0) {
+    if (playOptions.value && playOptions.value.qualities.length > 0) {
       const sortedQualities = [...playOptions.value.qualities].sort((a, b) => {
         const resolutionA = a.height * a.width
         const resolutionB = b.height * b.width
@@ -278,9 +278,11 @@ const loadPlayOptions = async () => {
     }
 
     // 选择默认字幕
-    const defaultSubtitle = playOptions.value.subtitles.find(s => s.is_default)
-    if (defaultSubtitle) {
-      selectedSubtitleId.value = defaultSubtitle.sid
+    if (playOptions.value) {
+      const defaultSubtitle = playOptions.value.subtitles.find(s => s.is_default)
+      if (defaultSubtitle) {
+        selectedSubtitleId.value = defaultSubtitle.sid
+      }
     }
 
     // 初始化视频源
@@ -288,8 +290,9 @@ const loadPlayOptions = async () => {
     await initializeVideoSource()
   } catch (err: any) {
     console.error('加载播放选项失败:', err)
-    error.value = err.response?.data?.detail || err.message || '加载播放选项失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '加载播放选项失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
   }

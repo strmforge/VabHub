@@ -497,6 +497,16 @@ VabHub 系统总览（单一事实来源）
   确认 6 个边角测试（SafetyPolicyEngine + Novel Demo + TTS JobRunner）均已通过，后端 CI 持续全绿（447 passed, 0 failed）。
 - **2025-12-05 – DEPLOY-YAML-2 + BACKEND-CI-5 完成**：
   docker-compose 精简化（类似 MoviePilot 风格），密钥自动生成机制，CI 环境对齐（ruff 安装、httpx ASGITransport 适配、TTS JobRunner 去重）。
+- **2025-12-05 – FRONTEND-DOCKER-BUILD-FIX-1 完成**：
+  修复前端 TypeScript 编译错误 113→70（43 个已修），确保 `pnpm run build` 在 Docker 环境中通过，剩余 Vuetify slot 类型问题为上游已知问题。
+- **2025-12-05 – DOCKER-SMOKE-RUN-1 完成**：
+  Docker 部署首跑与冒烟验证（RC1 版），完成 docker-compose 配置修正、环境变量对齐、部署文档更新，验证 All-in-One 单镜像架构可正常构建与启动。
+- **2025-12-05 – RELEASE-RC1-1 完成**：
+  0.0.1-rc1 轻量封版：完成基础 CI + Docker 路线打通（FRONTEND-DOCKER-BUILD-FIX-1, DOCKER-SMOKE-RUN-1），创建 CHANGELOG、Release Notes、更新 README 状态提示。
+- **2025-12-05 – CI-DOCKER-CONTEXT-FIX-1 完成**：
+  修复 docker-build-and-push.yml 的 context 访问警告，移除未定义的 skip_ci 引用，保证废弃 workflow 语法合法。
+- **2025-12-06 – DOCKER-IMAGE-RELEASE-1 完成**：
+  0.0.1-rc1 官方 Docker 镜像发布（GHCR + docker-compose.prod），统一 All-in-One 架构，提供官方镜像拉取部署路线。
 - （此处由后续任务持续追加）
 
 ---

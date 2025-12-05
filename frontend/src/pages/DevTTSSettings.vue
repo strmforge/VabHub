@@ -683,8 +683,8 @@ const presetFormRef = ref()
 // Provider 分布表格
 const providerHeaders = [
   { title: 'Provider', key: 'provider', sortable: false },
-  { title: '数量', key: 'count', sortable: false, align: 'end' }
-]
+  { title: '数量', key: 'count', sortable: false, align: 'end' as const }
+] as const
 
 // 预设表格
 const presetUsageHeaders = [
@@ -792,8 +792,8 @@ const presetHeaders = [
   { title: 'Language', key: 'language', sortable: false },
   { title: 'Voice', key: 'voice', sortable: false },
   { title: 'Speed / Pitch', key: 'params', sortable: false },
-  { title: '操作', key: 'actions', sortable: false, align: 'end' }
-]
+  { title: '操作', key: 'actions', sortable: false, align: 'end' as const }
+] as const
 
 const providerItems = computed(() => {
   if (!settings.value) return []

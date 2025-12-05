@@ -248,7 +248,8 @@ const followingSeriesIds = ref<Set<number>>(new Set())
 // 从后端刷新追更中的系列列表
 const refreshFollowingFromServer = async () => {
   try {
-    const list: FollowedMangaItem[] = await mangaFollowApi.listFollowing()
+    const response = await mangaFollowApi.listFollowing()
+    const list: FollowedMangaItem[] = response.items || []
     followingSeriesIds.value = new Set(list.map(item => item.series_id))
   } catch (err) {
     // 静默失败，不影响主流程
@@ -264,13 +265,13 @@ const isFollowing = (seriesId: number): boolean => {
 const toggleFollow = async (item: MangaSeriesLocal) => {
   try {
     if (isFollowing(item.id)) {
-      await mangaFollowApi.unfollowSeries(item.id)
+      await mangaFollowApi.unfollowSeries(String(item.id))
       const next = new Set(followingSeriesIds.value)
       next.delete(item.id)
       followingSeriesIds.value = next
       toast.info('已取消追更')
     } else {
-      await mangaFollowApi.followSeries(item.id)
+      await mangaFollowApi.followSeries(String(item.id))
       const next = new Set(followingSeriesIds.value)
       next.add(item.id)
       followingSeriesIds.value = next

@@ -218,8 +218,8 @@ const headers = [
   { title: '名称', key: 'name', sortable: true },
   { title: '大小', key: 'size', sortable: true, width: '120px' },
   { title: '修改时间', key: 'modify_time', sortable: true, width: '180px' },
-  { title: '操作', key: 'actions', sortable: false, width: '80px', align: 'end' }
-]
+  { title: '操作', key: 'actions', sortable: false, width: '80px', align: 'end' as const }
+] as const
 
 // 获取文件图标（参考MoviePilot的图标映射）
 const getFileIcon = (extension: string | null): string => {

@@ -159,6 +159,59 @@ docker compose logs -f
 4. 填写用户名、邮箱和密码
 5. 点击 "Execute" 按钮完成注册
 
+## §1.5 使用官方镜像部署（生产环境推荐）
+
+对于生产环境，推荐使用 `docker-compose.prod.yml` 配合 GHCR 官方镜像：
+
+### 步骤 1：配置环境变量
+
+```bash
+cp .env.docker.example .env.docker
+```
+
+编辑 `.env.docker`，设置镜像版本：
+
+```bash
+# 设置要使用的镜像版本
+VABHUB_VERSION=0.0.1-rc1
+```
+
+### 步骤 2：拉取官方镜像
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.docker pull
+```
+
+### 步骤 3：启动服务
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.docker up -d
+```
+
+### 步骤 4：冒烟检查
+
+```bash
+# 检查服务状态
+docker compose -f docker-compose.prod.yml ps
+
+# 检查健康端点
+curl http://localhost:52180/health
+
+# 访问首页
+# http://<宿主机 IP>:52180
+```
+
+### 升级方式
+
+修改 `.env.docker` 中的 `VABHUB_VERSION`，然后：
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.docker pull
+docker compose -f docker-compose.prod.yml --env-file .env.docker up -d
+```
+
+---
+
 ## §2. Docker Compose 详解
 
 ### 2.1 核心服务说明

@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, type ComponentPublicInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '@/composables/useToast'
 import { mangaLocalApi, mangaProgressApi } from '@/services/api'
@@ -208,8 +208,10 @@ const getStatusText = (status: string): string => {
 }
 
 // 设置页面引用（用于键盘导航）
-const setPageRef = (pageIndex: number, element: HTMLElement) => {
-  pageRefs.value.set(pageIndex, element)
+const setPageRef = (pageIndex: number, element: Element | ComponentPublicInstance | null) => {
+  if (element instanceof HTMLElement) {
+    pageRefs.value.set(pageIndex, element)
+  }
 }
 
 // 滚动到指定页面
@@ -221,7 +223,7 @@ const scrollToPage = (pageIndex: number) => {
     currentPageIndex.value = pageIndex
     
     // 更新阅读进度
-    updateReadingProgress(pageIndex)
+    updateProgress()
     
     // 重置自动滚动标记
     setTimeout(() => {
@@ -346,7 +348,7 @@ const onPageLoad = (pageIndex: number) => {
   // 更新当前页面索引（用于进度跟踪）
   if (!isAutoScrolling.value) {
     currentPageIndex.value = pageIndex
-    updateReadingProgress(pageIndex)
+    updateProgress()
   }
 }
 
@@ -419,8 +421,9 @@ const loadSeriesDetail = async () => {
     }
   } catch (err: any) {
     console.error('加载系列详情失败:', err)
-    error.value = err.response?.data?.detail || err.message || '加载失败'
-    toast.error(error.value)
+    const errMsg = err.response?.data?.detail || err.message || '加载失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
   }
@@ -576,7 +579,7 @@ const handleScroll = () => {
     let closestPage = 1
     let minDistance = Infinity
     
-    pageRefs.forEach((el, index) => {
+    pageRefs.value.forEach((el: HTMLElement, index: number) => {
       const rect = el.getBoundingClientRect()
       const pageCenter = rect.top + rect.height / 2
       const distance = Math.abs(pageCenter - viewportCenter)

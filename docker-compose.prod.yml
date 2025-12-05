@@ -1,24 +1,66 @@
 # VabHub Docker Compose 生产配置
-# RELEASE-1 R4-1 实现
+# DOCKER-IMAGE-RELEASE-1 实现
+#
+# 使用官方 GHCR 镜像部署（推荐）
 #
 # 使用方法:
-#   1. 复制 .env.example 为 .env 并修改配置
-#   2. docker compose -f docker-compose.prod.yml up -d
+#   1. 复制 .env.docker.example 为 .env.docker 并修改配置
+#   2. 设置 VABHUB_VERSION=0.0.1-rc1 (或其他版本)
+#   3. docker compose -f docker-compose.prod.yml --env-file .env.docker pull
+#   4. docker compose -f docker-compose.prod.yml --env-file .env.docker up -d
 #
-# 包含反向代理层，支持 HTTPS
-
-version: '3.8'
+# All-in-One 架构：单镜像包含前后端
 
 services:
-  # ============== 数据层 ==============
-  
+  # ============== VabHub 主应用 ==============
+  vabhub:
+    image: ghcr.io/strmforge/vabhub:${VABHUB_VERSION:-latest}
+    container_name: vabhub
+    environment:
+      # ---------- 基础配置 ----------
+      - VABHUB_PORT=${VABHUB_PORT:-52180}
+      - TZ=${TZ:-Asia/Shanghai}
+      # ---------- 数据库 ----------
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:-vabhub_password}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      # ---------- 初始管理员 (首次启动有效) ----------
+      - SUPERUSER_NAME=${SUPERUSER_NAME:-admin}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-}
+      # ---------- 可选配置 ----------
+      - APP_BASE_URL=${APP_BASE_URL:-}
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
+    volumes:
+      - vabhub_data:/app/data        # 数据 + 自动生成的密钥
+      - vabhub_logs:/app/logs        # 日志
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # UI 升级功能
+      # 媒体目录 (按需挂载)
+      # - /path/to/media:/media
+      # - /path/to/downloads:/downloads
+    ports:
+      - "${VABHUB_PORT:-52180}:${VABHUB_PORT:-52180}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${VABHUB_PORT:-52180}/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # ============== PostgreSQL 数据库 ==============
   db:
     image: postgres:14-alpine
     container_name: vabhub-db
     environment:
       POSTGRES_DB: ${DB_NAME:-vabhub}
       POSTGRES_USER: ${DB_USER:-vabhub}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vabhub_password}
     volumes:
       - vabhub_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -30,10 +72,11 @@ services:
       - vabhub-internal
     restart: unless-stopped
 
+  # ============== Redis 缓存 ==============
   redis:
     image: redis:7-alpine
     container_name: vabhub-redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    command: redis-server --appendonly yes
     volumes:
       - vabhub_redis_data:/data
     healthcheck:
@@ -43,71 +86,6 @@ services:
       retries: 5
     networks:
       - vabhub-internal
-    restart: unless-stopped
-
-  # ============== 应用层 ==============
-  
-  backend:
-    image: vabhub/backend:${APP_VERSION:-latest}
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: vabhub-backend
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-}@redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - APP_DEMO_MODE=${APP_DEMO_MODE:-false}
-      - APP_BASE_URL=${APP_BASE_URL:-https://vabhub.local}
-    volumes:
-      - vabhub_data:/app/data
-      - vabhub_logs:/app/logs
-      - ${MEDIA_PATH:-./media}:/media:ro
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - vabhub-internal
-    restart: unless-stopped
-    # 不直接暴露端口，通过 proxy 访问
-
-  frontend:
-    image: vabhub/frontend:${APP_VERSION:-latest}
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=${APP_BASE_URL:-https://vabhub.local}/api
-    container_name: vabhub-frontend
-    depends_on:
-      - backend
-    networks:
-      - vabhub-internal
-    restart: unless-stopped
-    # 不直接暴露端口，通过 proxy 访问
-
-  # ============== 代理层 ==============
-  
-  proxy:
-    image: nginx:alpine
-    container_name: vabhub-proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx-prod.conf:/etc/nginx/conf.d/default.conf:ro
-      # 如需 HTTPS，挂载证书
-      # - ./certs/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-      # - ./certs/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
-    depends_on:
-      - backend
-      - frontend
-    networks:
-      - vabhub-internal
-      - vabhub-public
     restart: unless-stopped
 
 volumes:
@@ -122,7 +100,4 @@ volumes:
 
 networks:
   vabhub-internal:
-    driver: bridge
-    internal: true
-  vabhub-public:
     driver: bridge

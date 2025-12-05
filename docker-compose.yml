@@ -5,12 +5,13 @@
 # 安全密钥会自动生成并保存到 /app/data/.vabhub_secrets.json
 # 如需自定义密钥，可在 .env 中设置 SECRET_KEY / JWT_SECRET_KEY
 
-version: '3.8'
-
 services:
   # ============== VabHub 主应用 ==============
   vabhub:
     image: ghcr.io/strmforge/vabhub:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: vabhub
     environment:
       # ---------- 基础配置 ----------

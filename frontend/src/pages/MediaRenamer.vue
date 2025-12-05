@@ -210,7 +210,7 @@
                   >
                     可直接填入 <code>shortdrama_default</code> 使用短剧默认模板{{ ' ' }}
                     <span class="text-medium-emphasis">
-                      （{{ renameTemplatePresets.at(-1)?.description }}）
+                      （{{ renameTemplatePresets[renameTemplatePresets.length - 1]?.description }}）
                     </span>
                   </v-alert>
                 </v-col>

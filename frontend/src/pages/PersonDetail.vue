@@ -199,8 +199,9 @@ const loadPersonDetails = async () => {
     const response = await mediaApi.getPersonDetails(personId.value)
     personDetails.value = response.data
   } catch (err: any) {
-    error.value = err.message || '加载人物详情失败'
-    toast.error(error.value)
+    const errMsg = err.message || '加载人物详情失败'
+    error.value = errMsg
+    toast.error(errMsg)
   } finally {
     loading.value = false
   }

@@ -2,10 +2,14 @@
 
 > 面向 NAS/PT 玩家的「搜索 · 下载 · 媒体库」一体化平台
 
-![Version](https://img.shields.io/badge/version-0.1.0--rc1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.1--rc1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![Vue](https://img.shields.io/badge/vue-3.0+-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
+
+> **当前状态**: VabHub 处于 `0.0.1-rc1` 试用阶段，推荐通过 Docker 部署体验。  
+> **官方镜像**: `ghcr.io/strmforge/vabhub:0.0.1-rc1`  
+> 简要步骤：参考 [`docs/releases/0.0.1-rc1.md`](docs/releases/0.0.1-rc1.md) 与 [`docs/user/DEPLOY_WITH_DOCKER.md`](docs/user/DEPLOY_WITH_DOCKER.md)。
 
 ## 🎯 项目简介
 

@@ -243,8 +243,8 @@ const headers = [
   { title: '最后运行', key: 'last_run_time', sortable: true },
   { title: '成功率', key: 'success_rate', sortable: true },
   { title: '运行次数', key: 'run_count', sortable: true },
-  { title: '操作', key: 'actions', sortable: false, align: 'end' }
-]
+  { title: '操作', key: 'actions', sortable: false, align: 'end' as const }
+] as const
 
 // 计算成功率
 const getSuccessRate = (job: any): number => {

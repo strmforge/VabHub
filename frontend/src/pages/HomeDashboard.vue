@@ -173,7 +173,7 @@
         </v-row>
 
         <!-- 最近活动时间线 -->
-        <v-row class="mb-4" v-if="dashboardData?.recent_events?.length > 0">
+        <v-row class="mb-4" v-if="dashboardData && dashboardData.recent_events && dashboardData.recent_events.length > 0">
           <v-col cols="12">
             <v-card rounded="xl" elevation="1" class="pa-4">
               <div class="d-flex align-center mb-3">

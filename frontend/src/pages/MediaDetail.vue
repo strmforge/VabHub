@@ -475,14 +475,16 @@ const loadMediaDetails = async () => {
         seasons.value = results[seasonIndex].value.data || []
         seasonsLoading.value = false
       } else if (results[seasonIndex]?.status === 'rejected') {
-        console.warn('加载季信息失败:', results[seasonIndex].reason)
+        const errMsg = results[seasonIndex].reason.message || '加载季信息失败'
+        console.warn('加载季信息失败:', errMsg)
         seasons.value = []
         seasonsLoading.value = false
       }
     }
   } catch (err: any) {
-    error.value = err.message || '加载媒体详情失败'
-    toast.error(error.value)
+    const errMsg = err.message || '加载媒体详情失败'
+    error.value = errMsg
+    toast.error(errMsg)
     console.error('加载媒体详情失败:', err)
   } finally {
     loading.value = false
