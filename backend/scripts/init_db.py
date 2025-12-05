@@ -17,7 +17,6 @@ if str(backend_root) not in sys.path:
 
 from app.core.database import init_db, close_db, engine
 from app.core.config import settings
-from app.core.cache import get_cache
 from app.modules.settings.service import SettingsService
 from app.core.database import AsyncSessionLocal
 from loguru import logger
@@ -41,7 +40,6 @@ async def init_database():
         # 初始化L3缓存表（如果使用PostgreSQL）
         if not settings.DATABASE_URL.startswith("sqlite"):
             try:
-                from app.models.cache import CacheEntry
                 async with AsyncSessionLocal() as session:
                     # 检查表是否已存在
                     from sqlalchemy import inspect

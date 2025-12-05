@@ -12,10 +12,9 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from sqlalchemy import text, inspect
-from app.core.database import engine, AsyncSessionLocal, init_db
+from sqlalchemy import text
+from app.core.database import engine, init_db
 from app.core.config import settings
-from loguru import logger
 
 
 async def migrate_rsshub_tables():

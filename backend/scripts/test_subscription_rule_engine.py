@@ -4,8 +4,6 @@
 
 import asyncio
 import httpx
-import json
-from typing import Dict, Any
 
 
 async def test_rule_engine():

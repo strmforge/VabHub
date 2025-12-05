@@ -15,6 +15,13 @@ from app.models.ebook import EBook
 import app.core.config as config_module
 from unittest.mock import patch, MagicMock
 import yaml
+from app.modules.media_renamer.category_helper import RUAMEL_YAML_AVAILABLE
+
+# 如果 ruamel.yaml 未安装，跳过需要分类功能的测试
+requires_ruamel = pytest.mark.skipif(
+    not RUAMEL_YAML_AVAILABLE,
+    reason="ruamel.yaml 未安装，分类功能不可用"
+)
 
 
 @pytest.fixture(name="db_session")
@@ -50,19 +57,12 @@ def temp_category_yaml(tmp_path):
     return yaml_file
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
-@patch('app.modules.media_renamer.category_helper.ruamel')
-def test_ebook_importer_path_with_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@requires_ruamel
+@pytest.mark.asyncio
+async def test_ebook_importer_path_with_category(tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试命中分类时，路径包含分类目录"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
-    
-    # Mock ruamel.yaml
-    mock_yaml_instance = MagicMock()
-    with open(temp_category_yaml, 'r', encoding='utf-8') as f:
-        yaml_data = yaml.safe_load(f)
-    mock_yaml_instance.load.return_value = yaml_data
-    mock_ruamel.yaml.YAML.return_value = mock_yaml_instance
     
     importer = EBookImporter(db_session)
     # 替换 category_helper 的配置文件路径
@@ -91,18 +91,12 @@ def test_ebook_importer_path_with_category(tmp_path, db_session, temp_category_y
     assert target_path.name == "三体.epub"
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
-@patch('app.modules.media_renamer.category_helper.ruamel')
-def test_ebook_importer_path_without_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@requires_ruamel
+@pytest.mark.asyncio
+async def test_ebook_importer_path_without_category(tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试未命中分类时，路径不包含分类目录（保持原有结构）"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
-    
-    mock_yaml_instance = MagicMock()
-    with open(temp_category_yaml, 'r', encoding='utf-8') as f:
-        yaml_data = yaml.safe_load(f)
-    mock_yaml_instance.load.return_value = yaml_data
-    mock_ruamel.yaml.YAML.return_value = mock_yaml_instance
     
     importer = EBookImporter(db_session)
     importer.category_helper = importer.category_helper.__class__(config_path=temp_category_yaml)
@@ -130,18 +124,11 @@ def test_ebook_importer_path_without_category(tmp_path, db_session, temp_categor
     assert "其他电子书" in path_str
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
-@patch('app.modules.media_renamer.category_helper.ruamel')
-def test_ebook_importer_path_no_ebook_object(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@pytest.mark.asyncio
+async def test_ebook_importer_path_no_ebook_object(tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试不传入 ebook 对象时，使用原有结构（不包含分类目录）"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
-    
-    mock_yaml_instance = MagicMock()
-    with open(temp_category_yaml, 'r', encoding='utf-8') as f:
-        yaml_data = yaml.safe_load(f)
-    mock_yaml_instance.load.return_value = yaml_data
-    mock_ruamel.yaml.YAML.return_value = mock_yaml_instance
     
     importer = EBookImporter(db_session)
     importer.category_helper = importer.category_helper.__class__(config_path=temp_category_yaml)
@@ -163,18 +150,12 @@ def test_ebook_importer_path_no_ebook_object(tmp_path, db_session, temp_category
     assert "其他电子书" not in path_str
 
 
-@patch('app.modules.media_renamer.category_helper.RUAMEL_YAML_AVAILABLE', True)
-@patch('app.modules.media_renamer.category_helper.ruamel')
-def test_ebook_importer_path_with_series_and_category(tmp_path, db_session, temp_category_yaml, monkeypatch, mock_ruamel):
+@requires_ruamel
+@pytest.mark.asyncio
+async def test_ebook_importer_path_with_series_and_category(tmp_path, db_session, temp_category_yaml, monkeypatch):
     """测试带系列和分类的路径"""
     library_root = tmp_path / "ebooks"
     monkeypatch.setattr(config_module.settings, "EBOOK_LIBRARY_ROOT", str(library_root))
-    
-    mock_yaml_instance = MagicMock()
-    with open(temp_category_yaml, 'r', encoding='utf-8') as f:
-        yaml_data = yaml.safe_load(f)
-    mock_yaml_instance.load.return_value = yaml_data
-    mock_ruamel.yaml.YAML.return_value = mock_yaml_instance
     
     importer = EBookImporter(db_session)
     importer.category_helper = importer.category_helper.__class__(config_path=temp_category_yaml)

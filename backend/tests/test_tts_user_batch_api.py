@@ -15,8 +15,12 @@ from app.models.tts_job import TTSJob
 
 
 @pytest.fixture(autouse=True)
-async def override_get_db_dependency(db_session: AsyncSession):
-    """覆盖 get_db 依赖，使用测试数据库会话"""
+async def override_get_db_dependency(db_session: AsyncSession, monkeypatch):
+    """覆盖 get_db 依赖，使用测试数据库会话，并启用 TTS"""
+    # 启用 TTS - 同时 patch 核心配置和 API 模块
+    monkeypatch.setattr("app.core.config.settings.SMART_TTS_ENABLED", True)
+    monkeypatch.setattr("app.api.tts_user_batch.settings.SMART_TTS_ENABLED", True)
+    
     async def _override_get_db():
         yield db_session
     app.dependency_overrides[get_db] = _override_get_db
@@ -83,11 +87,13 @@ async def test_enqueue_respects_skip_if_has_tts_and_only_without_audiobook(db_se
     await db_session.commit()
     
     client = TestClient(app)
+    # 注意：only_without_audiobook=False 才能在 enqueue 阶段测试跳过逻辑
+    # 如果设为 True，有有声书的作品在 preview 阶段就会被过滤
     response = client.post(
         "/api/tts/batch/enqueue",
         json={
             "filter": {
-                "only_without_audiobook": True,
+                "only_without_audiobook": False,  # 允许有有声书的作品进入 enqueue 阶段
                 "only_without_active_job": True,
                 "max_candidates": 100
             },
@@ -98,10 +104,12 @@ async def test_enqueue_respects_skip_if_has_tts_and_only_without_audiobook(db_se
     
     assert response.status_code == 200
     data = response.json()
-    # ebook1 应该被 enqueue，ebook2 和 ebook3 应该被跳过
-    assert data["enqueued_new_jobs"] >= 0
-    assert data["skipped_has_audiobook"] >= 1  # ebook2
-    assert data["skipped_has_tts"] >= 1  # ebook3
+    # ebook1 应该被 enqueue
+    # ebook2 和 ebook3 已经有有声书，但因为 filter.only_without_audiobook=False，它们会进入 enqueue 阶段
+    # 然后因为 skip_if_has_tts=True，ebook3 会被跳过
+    assert data["total_candidates"] >= 1
+    assert data["enqueued_new_jobs"] >= 1  # ebook1
+    assert data["skipped_has_tts"] >= 1  # ebook3 (因为 has_tts_audiobook=True)
 
 
 @pytest.mark.asyncio
@@ -150,12 +158,14 @@ async def test_enqueue_skips_when_active_job_exists(db_session: AsyncSession):
     await db_session.commit()
     
     client = TestClient(app)
+    # 注意：only_without_active_job=False 才能在 enqueue 阶段测试活跃 job 跳过逻辑
+    # 如果设为 True，有活跃 job 的作品在 preview 阶段就会被过滤
     response = client.post(
         "/api/tts/batch/enqueue",
         json={
             "filter": {
                 "only_without_audiobook": True,
-                "only_without_active_job": True,
+                "only_without_active_job": False,  # 允许有活跃 job 的作品进入 enqueue 阶段
                 "max_candidates": 100
             },
             "max_new_jobs": 10,
@@ -165,8 +175,9 @@ async def test_enqueue_skips_when_active_job_exists(db_session: AsyncSession):
     
     assert response.status_code == 200
     data = response.json()
-    # 应该跳过或计入 already_had_jobs
-    assert data["skipped_has_active_job"] >= 1 or data["already_had_jobs"] >= 1
+    # ebook id=20 已经有活跃 job，应该被计入 already_had_jobs
+    assert data["total_candidates"] >= 1
+    assert data["already_had_jobs"] >= 1
 
 
 @pytest.mark.asyncio

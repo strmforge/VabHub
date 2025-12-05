@@ -15,7 +15,6 @@ if str(backend_root) not in sys.path:
     sys.path.insert(0, str(backend_root))
 
 from app.core.database import engine, Base
-from app.models.cloud_storage import CloudStorage, CloudStorageAuth
 from loguru import logger
 
 
@@ -25,7 +24,6 @@ async def migrate():
         logger.info("开始创建云存储相关表...")
         
         # 导入所有模型以确保它们被注册
-        from app.models import CloudStorage, CloudStorageAuth
         
         # 创建表
         async with engine.begin() as conn:

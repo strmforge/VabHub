@@ -10,7 +10,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.core.database import init_db, engine, Base
+from app.core.database import engine, Base
 from loguru import logger
 
 
@@ -22,11 +22,6 @@ async def ensure_tables_created():
     
     try:
         # 导入所有模型以确保它们被注册到Base.metadata
-        from app.models.user import User
-        from app.models.media import Media, MediaFile
-        from app.models.subscription import Subscription
-        from app.models.download import DownloadTask
-        from app.models.cache import CacheEntry  # 确保缓存表被注册
         # 导入其他模型...
         
         # 创建所有表
@@ -38,7 +33,6 @@ async def ensure_tables_created():
         # 验证cache_entries表是否存在
         from sqlalchemy import inspect
         from app.core.database import AsyncSessionLocal
-        from app.models.cache import CacheEntry
         
         async with AsyncSessionLocal() as session:
             inspector = inspect(engine.sync_engine)

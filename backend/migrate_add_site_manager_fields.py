@@ -6,10 +6,8 @@ SITE-MANAGER-1 数据库迁移脚本
 
 import asyncio
 import sys
-from datetime import datetime
 from sqlalchemy import text
-from app.core.database import AsyncSessionLocal, Base
-from app.models.site import Site, SiteStats, SiteAccessConfig, SiteCategory
+from app.core.database import AsyncSessionLocal
 from loguru import logger
 
 async def migrate_site_manager():
@@ -21,7 +19,6 @@ async def migrate_site_manager():
             logger.info("开始创建新表...")
             
             # 导入所有模型确保表被注册
-            from app.models import site  # 确保所有新表都被注册
             
             # 创建新表（如果不存在）
             async with db.begin():

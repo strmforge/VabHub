@@ -10,7 +10,7 @@ from app.constants.media_types import MEDIA_TYPE_MUSIC
 
 
 @pytest.mark.asyncio
-async def test_library_preview_includes_music(db: AsyncSession):
+async def test_library_preview_includes_music(db_session: AsyncSession):
     """测试统一库预览默认包含音乐"""
     from app.api.library import get_library_preview
     
@@ -21,15 +21,15 @@ async def test_library_preview_includes_music(db: AsyncSession):
         album="测试专辑",
         year=2023
     )
-    db.add(music)
-    await db.commit()
+    db_session.add(music)
+    await db_session.commit()
     
     # 调用预览接口（不指定 media_types，应该包含所有类型）
     response = await get_library_preview(
         page=1,
         page_size=20,
         media_types=None,
-        db=db
+        db=db_session
     )
     
     # 检查是否包含音乐
@@ -47,7 +47,7 @@ async def test_library_preview_includes_music(db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_library_preview_music_only(db: AsyncSession):
+async def test_library_preview_music_only(db_session: AsyncSession):
     """测试只查询音乐类型"""
     from app.api.library import get_library_preview
     
@@ -57,15 +57,15 @@ async def test_library_preview_music_only(db: AsyncSession):
         artist="测试歌手2",
         genre="流行"
     )
-    db.add(music)
-    await db.commit()
+    db_session.add(music)
+    await db_session.commit()
     
     # 只查询音乐类型
     response = await get_library_preview(
         page=1,
         page_size=20,
         media_types="music",
-        db=db
+        db=db_session
     )
     
     # 所有项都应该是音乐类型
@@ -79,7 +79,7 @@ async def test_library_preview_music_only(db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_library_preview_music_extra_fields(db: AsyncSession):
+async def test_library_preview_music_extra_fields(db_session: AsyncSession):
     """测试音乐项的 extra 字段"""
     from app.api.library import get_library_preview
     
@@ -92,15 +92,15 @@ async def test_library_preview_music_extra_fields(db: AsyncSession):
         genre="摇滚",
         year=2022
     )
-    db.add(music)
-    await db.commit()
+    db_session.add(music)
+    await db_session.commit()
     
     # 查询音乐
     response = await get_library_preview(
         page=1,
         page_size=20,
         media_types="music",
-        db=db
+        db=db_session
     )
     
     # 找到对应的音乐项

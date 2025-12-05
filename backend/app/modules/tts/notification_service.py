@@ -110,7 +110,7 @@ async def create_tts_job_notification(
         severity=severity,
         is_read=False,
         # 设置用户ID（从job.created_by或默认值）
-        user_id=job.created_by if job.created_by else 1,  # 使用任务创建者或默认管理员
+        user_id=int(job.created_by) if job.created_by and str(job.created_by).isdigit() else 1,  # 使用任务创建者或默认管理员
         # 设置媒体类型和路由payload
         media_type=ReadingMediaType.AUDIOBOOK,
         payload={

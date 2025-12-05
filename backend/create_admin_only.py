@@ -47,11 +47,11 @@ async def create_admin():
             await db.commit()
             await db.refresh(user)
             
-            print(f"\n[成功] 创建admin管理员账号成功！")
-            print(f"  用户名: admin")
-            print(f"  密码: admin123")
-            print(f"  邮箱: admin@vabhub.com")
-            print(f"  角色: 管理员")
+            print("\n[成功] 创建admin管理员账号成功！")
+            print("  用户名: admin")
+            print("  密码: admin123")
+            print("  邮箱: admin@vabhub.com")
+            print("  角色: 管理员")
         except Exception as e:
             print(f"\n[失败] 创建失败: {e}")
             await db.rollback()

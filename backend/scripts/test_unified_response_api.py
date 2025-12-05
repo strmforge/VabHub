@@ -3,7 +3,6 @@
 验证所有API端点是否使用统一响应格式
 """
 
-import asyncio
 import sys
 from pathlib import Path
 

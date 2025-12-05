@@ -18,7 +18,7 @@ def test_get_notifications():
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ 获取通知列表成功")
+            print("✅ 获取通知列表成功")
             print(f"响应数据: {json.dumps(data, indent=2, ensure_ascii=False)}")
             return True
         else:
@@ -49,7 +49,7 @@ def test_create_notification():
         
         if response.status_code == 201:
             data = response.json()
-            print(f"✅ 创建通知成功")
+            print("✅ 创建通知成功")
             print(f"响应数据: {json.dumps(data, indent=2, ensure_ascii=False)}")
             return True
         else:

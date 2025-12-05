@@ -89,7 +89,7 @@ async def test_token_persist():
                 # 获取provider并检查token
                 provider = service._get_provider(storage)
                 if provider.access_token:
-                    logger.info(f"✅ Token已从数据库加载")
+                    logger.info("✅ Token已从数据库加载")
                     logger.info(f"   Access Token: {provider.access_token[:30]}...")
                     logger.info(f"   User ID: {provider.user_id}")
                     logger.info(f"   User Name: {provider.user_name}")

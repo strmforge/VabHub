@@ -233,3 +233,132 @@ def mock_cookiecloud_client():
 
 # 注意：pytest-asyncio 会自动处理事件循环，不需要手动创建
 
+
+@pytest.fixture(autouse=True)
+def reset_tts_state():
+    """
+    自动重置 TTS 相关全局状态，避免测试间污染
+    """
+    # 在测试开始前重置
+    try:
+        from app.modules.tts.usage_tracker import reset as reset_usage_tracker
+        reset_usage_tracker()
+    except ImportError:
+        pass
+    
+    try:
+        from app.modules.tts.rate_limiter import reset as reset_rate_limiter
+        reset_rate_limiter()
+    except ImportError:
+        pass
+    
+    yield
+    
+    # 测试结束后再次重置
+    try:
+        from app.modules.tts.usage_tracker import reset as reset_usage_tracker
+        reset_usage_tracker()
+    except ImportError:
+        pass
+    
+    try:
+        from app.modules.tts.rate_limiter import reset as reset_rate_limiter
+        reset_rate_limiter()
+    except ImportError:
+        pass
+
+
+@pytest.fixture(autouse=True)
+def reset_app_dependency_overrides():
+    """
+    自动清理 FastAPI app 的依赖覆盖，避免测试间污染
+    注意：只在测试结束后清理，以免影响测试内设置的覆盖
+    """
+    from main import app
+    
+    # 记录测试开始前的覆盖状态
+    initial_overrides = dict(app.dependency_overrides)
+    
+    yield
+    
+    # 测试结束后：恢复到初始状态（通常是空）
+    app.dependency_overrides.clear()
+    app.dependency_overrides.update(initial_overrides)
+
+
+@pytest.fixture
+def override_get_db(db_session):
+    """
+    提供统一的 get_db 覆盖函数，可在测试中使用
+    用法：
+        def test_xxx(override_get_db):
+            from main import app
+            from app.core.database import get_db
+            app.dependency_overrides[get_db] = override_get_db
+            # ... test code ...
+    """
+    async def _override():
+        yield db_session
+    return _override
+
+
+@pytest.fixture
+def apply_db_override(db_session):
+    """
+    自动应用 get_db 覆盖的 fixture
+    用法：直接使用即可，无需手动设置 dependency_overrides
+    """
+    from main import app
+    from app.core.database import get_db
+    
+    async def override_get_db():
+        yield db_session
+    
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+    # 清理由 reset_app_dependency_overrides 处理
+
+
+@pytest.fixture(autouse=True)
+def reset_settings_state(monkeypatch):
+    """
+    确保 settings.DEBUG 等配置在测试间不会污染
+    """
+    # 这个 fixture 不主动修改 settings，但确保测试结束后恢复
+    yield
+    # monkeypatch 会自动在测试结束后恢复所有修改
+
+
+@pytest.fixture(autouse=True)
+def reset_notification_state():
+    """
+    重置通知服务相关的全局状态
+    """
+    yield
+    # 通知服务通常没有全局状态需要重置，但保留此 fixture 以备扩展
+
+
+@pytest.fixture
+def mock_settings_debug(monkeypatch):
+    """
+    设置 DEBUG=True 的便捷 fixture
+    同时 patch 核心配置和常见 API 模块
+    """
+    monkeypatch.setattr("app.core.config.settings.DEBUG", True)
+    # 常见的 API 模块也需要 patch
+    modules_to_patch = [
+        "app.api.tts_jobs.settings.DEBUG",
+        "app.api.tts_playground.settings.DEBUG",
+        "app.api.tts_voice_presets.settings.DEBUG",
+        "app.api.tts_work_profile.settings.DEBUG",
+        "app.api.tts_work_batch.settings.DEBUG",
+        "app.api.tts_user_flow.settings.DEBUG",
+        "app.api.tts_user_batch.settings.DEBUG",
+    ]
+    for module_path in modules_to_patch:
+        try:
+            monkeypatch.setattr(module_path, True)
+        except AttributeError:
+            pass  # 模块可能不存在
+    yield
+

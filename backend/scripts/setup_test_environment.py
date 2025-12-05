@@ -62,7 +62,7 @@ async def setup_tmdb_api_key(api_key: str):
                 json={"value": api_key}
             )
             if response.status_code == 200:
-                logger.info(f"✓ TMDB API密钥已配置")
+                logger.info("✓ TMDB API密钥已配置")
             else:
                 logger.warning(f"✗ TMDB API密钥配置失败: {response.status_code}")
     except Exception as e:

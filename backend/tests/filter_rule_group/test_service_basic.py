@@ -201,7 +201,8 @@ class TestFilterRuleGroupService:
         assert len(resolved) == 1
         assert resolved[0]["name"] == sample_rule_data["name"]
         assert resolved[0]["priority"] == sample_rule_data["priority"]
-        assert resolved[0]["rules"] == sample_rule_data["rules"]["rules"]
+        # 服务返回完整的 rules dict，而不是内部的 rules 列表
+        assert resolved[0]["rules"] == sample_rule_data["rules"]
     
     @pytest.mark.asyncio
     async def test_resolve_groups_for_backward_compatibility(self, service, test_user_id, sample_rule_data):

@@ -1,7 +1,6 @@
 """
 测试漫画路由器注册问题
 """
-import sys
 from fastapi import FastAPI, APIRouter
 
 # 模拟漫画路由器（已有前缀）

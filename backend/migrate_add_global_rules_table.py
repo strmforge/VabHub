@@ -13,11 +13,6 @@ sys.path.append(str(Path(__file__).parent))
 from sqlalchemy import text
 from app.core.database import get_db_session
 from app.models.global_rules import GlobalRuleSettings
-from app.models.enums.global_rules import (
-    HRPolicy, HRMode, ResolutionTier, ResolutionPolicy,
-    SourceQualityPolicy, HdrPolicy, CodecPolicy,
-    SubtitlePolicy, AudioLangPolicy, ExtraFeaturePolicy
-)
 from loguru import logger
 
 

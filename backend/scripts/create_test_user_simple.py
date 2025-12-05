@@ -41,7 +41,7 @@ async def create_test_user():
         )
         
         await user.save(db)
-        print(f"[OK] 测试用户创建成功")
+        print("[OK] 测试用户创建成功")
         print(f"     用户名: {username}")
         print(f"     邮箱: {email}")
         print(f"     密码: {password}")

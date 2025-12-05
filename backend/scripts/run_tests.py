@@ -7,7 +7,6 @@ import asyncio
 import httpx
 import sys
 import subprocess
-import time
 from pathlib import Path
 
 # 添加backend目录到路径

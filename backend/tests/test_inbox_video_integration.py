@@ -85,8 +85,8 @@ async def test_inbox_router_calls_video_importer_for_movie(tmp_path, db_session,
 @pytest.mark.asyncio
 async def test_inbox_router_skip_video_when_disabled(tmp_path, db_session, temp_video_file, monkeypatch):
     """测试 INBOX_ENABLE_VIDEO=False 时跳过视频处理"""
-    # 配置
-    monkeypatch.setattr(config_module.settings, "INBOX_ENABLE_VIDEO", False)
+    # 配置 - 需要 patch router 模块中导入的 settings
+    monkeypatch.setattr("app.modules.inbox.router.settings.INBOX_ENABLE_VIDEO", False)
     
     # 创建 InboxItem 和 MediaTypeGuess
     item = InboxItem(path=temp_video_file)

@@ -4,7 +4,6 @@
 """
 
 import sys
-import os
 from pathlib import Path
 
 # 添加backend目录到Python路径

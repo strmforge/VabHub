@@ -62,14 +62,27 @@ async def test_create_safe_filename():
 @pytest.mark.asyncio
 async def test_handle_novel_txt_metadata_construction(mock_db_session, tmp_path, monkeypatch):
     """测试从 InboxItem 构造的 NovelMetadata 包含正确的字段"""
-    from app.modules.novel.pipeline import NovelToEbookPipeline
+    from app.modules.novel.pipeline import NovelToEbookPipeline, NovelPipelineResult
     from app.modules.novel.epub_builder import EpubBuilder
     from app.modules.ebook.importer import EBookImporter
     from app.core.config import settings
+    from app.models.ebook import EBook
     
     monkeypatch.setattr(settings, "INBOX_ENABLE_NOVEL_TXT", True)
     monkeypatch.setattr(settings, "NOVEL_UPLOAD_ROOT", str(tmp_path / "novel_uploads"))
     monkeypatch.setattr(settings, "EBOOK_LIBRARY_ROOT", str(tmp_path / "ebook_library"))
+    
+    # 创建输出目录
+    (tmp_path / "ebook_library" / "novel_output").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "novel_uploads" / "source_txt").mkdir(parents=True, exist_ok=True)
+    
+    # 设置 db mock
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None  # 未找到已存在的导入记录
+    mock_db_session.execute.return_value = mock_result
+    mock_db_session.flush = AsyncMock()
+    mock_db_session.commit = AsyncMock()
+    mock_db_session.add = MagicMock()
     
     # 创建测试文件
     test_file = tmp_path / "测试小说[精校].txt"
@@ -82,23 +95,30 @@ async def test_handle_novel_txt_metadata_construction(mock_db_session, tmp_path,
     
     router = InboxRouter(db=mock_db_session)
     
+    # 创建 mock ebook 对象
+    mock_ebook = MagicMock(spec=EBook)
+    mock_ebook.id = 1
+    mock_ebook.title = "测试小说"
+    
+    # 记录传入 pipeline.run 的参数
+    captured_source = None
+    
+    async def capture_run(source, output_dir, **kwargs):
+        nonlocal captured_source
+        captured_source = source
+        return NovelPipelineResult(epub_path=Path("/mock/epub.epub"), ebook=mock_ebook)
+    
     # Mock pipeline.run 返回成功
-    with patch.object(router.novel_pipeline, 'run', new_callable=AsyncMock) as mock_run:
-        mock_run.return_value = Path("/mock/epub.epub")
-        
+    with patch.object(router.novel_pipeline, 'run', side_effect=capture_run):
         with patch("app.modules.inbox.router.shutil.move") as mock_move:
             result = await router._handle_novel_txt(item)
             
-            # 验证 pipeline 被调用
-            assert mock_run.called
-            call_args = mock_run.call_args
-            
-            # 获取传入的 source
-            source = call_args[0][0]  # 第一个参数是 source
-            assert isinstance(source, LocalTxtNovelSourceAdapter)
+            # 验证 pipeline 被调用，且传入了正确的 source
+            assert captured_source is not None
+            assert isinstance(captured_source, LocalTxtNovelSourceAdapter)
             
             # 验证 metadata
-            metadata = source.get_metadata()
+            metadata = captured_source.get_metadata()
             assert isinstance(metadata, NovelMetadata)
             assert metadata.title == "测试小说"  # 应该清洗掉 [精校]
             assert metadata.language == "zh-CN"
@@ -111,14 +131,27 @@ async def test_handle_novel_txt_metadata_construction(mock_db_session, tmp_path,
 @pytest.mark.asyncio
 async def test_handle_novel_txt_with_source_tags_string(mock_db_session, tmp_path, monkeypatch):
     """测试 source_tags 是字符串时的处理"""
-    from app.modules.novel.pipeline import NovelToEbookPipeline
+    from app.modules.novel.pipeline import NovelToEbookPipeline, NovelPipelineResult
     from app.modules.novel.epub_builder import EpubBuilder
     from app.modules.ebook.importer import EBookImporter
     from app.core.config import settings
+    from app.models.ebook import EBook
     
     monkeypatch.setattr(settings, "INBOX_ENABLE_NOVEL_TXT", True)
     monkeypatch.setattr(settings, "NOVEL_UPLOAD_ROOT", str(tmp_path / "novel_uploads"))
     monkeypatch.setattr(settings, "EBOOK_LIBRARY_ROOT", str(tmp_path / "ebook_library"))
+    
+    # 创建输出目录
+    (tmp_path / "ebook_library" / "novel_output").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "novel_uploads" / "source_txt").mkdir(parents=True, exist_ok=True)
+    
+    # 设置 db mock
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_db_session.execute.return_value = mock_result
+    mock_db_session.flush = AsyncMock()
+    mock_db_session.commit = AsyncMock()
+    mock_db_session.add = MagicMock()
     
     test_file = tmp_path / "test.txt"
     test_file.write_text("第一章 测试\n这是测试内容。")
@@ -130,15 +163,24 @@ async def test_handle_novel_txt_with_source_tags_string(mock_db_session, tmp_pat
     
     router = InboxRouter(db=mock_db_session)
     
-    with patch.object(router.novel_pipeline, 'run', new_callable=AsyncMock) as mock_run:
-        mock_run.return_value = Path("/mock/epub.epub")
-        
+    # 创建 mock ebook 对象
+    mock_ebook = MagicMock(spec=EBook)
+    mock_ebook.id = 1
+    
+    # 记录传入参数
+    captured_source = None
+    
+    async def capture_run(source, output_dir, **kwargs):
+        nonlocal captured_source
+        captured_source = source
+        return NovelPipelineResult(epub_path=Path("/mock/epub.epub"), ebook=mock_ebook)
+    
+    with patch.object(router.novel_pipeline, 'run', side_effect=capture_run):
         with patch("app.modules.inbox.router.shutil.move"):
             result = await router._handle_novel_txt(item)
             
-            call_args = mock_run.call_args
-            source = call_args[0][0]
-            metadata = source.get_metadata()
+            assert captured_source is not None
+            metadata = captured_source.get_metadata()
             
             # 验证 tags 包含分割后的标签
             assert "from_inbox_novel_txt" in metadata.tags

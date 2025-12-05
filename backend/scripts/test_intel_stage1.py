@@ -11,7 +11,6 @@ project_root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(project_root))
 
 from app.core.intel.service import get_intel_service, LocalIntelService
-from loguru import logger
 
 
 async def test_local_intel():
@@ -85,7 +84,7 @@ async def test_local_intel():
     try:
         if isinstance(intel, LocalIntelService):
             await intel._ensure_loaded()
-            print(f"  [OK] 数据加载完成")
+            print("  [OK] 数据加载完成")
             print(f"  [INFO] 别名数量: {len(intel._aliases)}")
             print(f"  [INFO] 索引数量: {len(intel._index)}")
         else:

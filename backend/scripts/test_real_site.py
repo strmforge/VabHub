@@ -45,7 +45,7 @@ async def test_site_identification_real(site_name: str, site_url: str, cookie: s
         
         if profile:
             meta = profile.get("meta", {})
-            print(f"[OK] 站点识别成功!")
+            print("[OK] 站点识别成功!")
             print(f"  配置文件ID: {meta.get('id')}")
             print(f"  站点名称: {meta.get('name')}")
             print(f"  站点类型: {meta.get('family')}")
@@ -127,7 +127,7 @@ async def test_site_parsing_real(site_url: str, cookie: str = None, page_url: st
             items = result["list"]
             print(f"[OK] 解析成功! 找到 {len(items)} 个种子")
             if items:
-                print(f"[INFO] 第一个种子示例:")
+                print("[INFO] 第一个种子示例:")
                 first_item = items[0]
                 for key, value in first_item.items():
                     print(f"  {key}: {value}")

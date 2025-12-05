@@ -484,6 +484,10 @@ VabHub 系统总览（单一事实来源）
   修复 plugin_admin 对 require_admin 的依赖，统一使用 DbSessionDep 和 CurrentAdminUserDep 依赖注入模式。
 - **2025-12-04 – CI-BACKEND-PYTEST-COLLECT-4 完成**：
   统一 Admin 依赖与 DbSessionDep/CurrentUserDep，清除 pytest 收集期错误，确保 0 个 ERROR during collection。
+- **2025-12-05 – BACKEND-CI-3 完成**：
+  后端 pytest 全绿（0 failed, 447 passed, 111 skipped），Ruff + mypy 0 error，建立集成测试 skipif 环境变量机制。
+- **2025-12-05 – DOCKER-CI-1 完成**：
+  CI 通过后自动构建并推送 Docker 镜像到 GHCR（ghcr.io/strmforge/vabhub-backend + frontend），docker-compose.yml 添加 image 字段支持 `docker compose pull` 升级。
 - （此处由后续任务持续追加）
 
 ---

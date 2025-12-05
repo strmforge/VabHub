@@ -71,7 +71,7 @@ async def test_docs():
             
             if response.status_code == 200:
                 print("[OK] API文档可访问")
-                print(f"  URL: http://localhost:8000/docs")
+                print("  URL: http://localhost:8000/docs")
                 return True
             else:
                 print(f"[ERROR] API文档不可访问: {response.status_code}")

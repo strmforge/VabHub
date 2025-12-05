@@ -3,11 +3,9 @@
 测试STRM文件生成、重定向功能、pickcode存储和使用
 """
 
-import os
 import sys
 import asyncio
 from pathlib import Path
-from typing import Dict, Any, Optional
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent

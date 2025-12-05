@@ -13,8 +13,6 @@ sys.path.insert(0, str(backend_root))
 from fastapi import APIRouter
 from app.api import api_router
 from app.core.schemas import BaseResponse
-from inspect import getmembers, isfunction, signature
-import re
 
 from scripts.api_test_config import API_PREFIX as CONFIG_API_PREFIX
 

@@ -22,7 +22,7 @@ async def test_subscription_status():
             try:
                 response = await client.get("http://localhost:8092/health")
                 if response.status_code == 200:
-                    print(f"  [OK] 后端服务运行正常")
+                    print("  [OK] 后端服务运行正常")
                 else:
                     print(f"  [FAIL] 后端服务响应异常: {response.status_code}")
                     return False
@@ -79,7 +79,7 @@ async def test_subscription_status():
                     status = subscription.get("status")
                     
                     if status == "paused":
-                        print(f"  [OK] 订阅禁用成功，状态已变更为 paused")
+                        print("  [OK] 订阅禁用成功，状态已变更为 paused")
                     else:
                         print(f"  [FAIL] 订阅禁用后状态为 {status} (期望: paused)")
                 else:
@@ -101,7 +101,7 @@ async def test_subscription_status():
                     status = subscription.get("status")
                     
                     if status == "active":
-                        print(f"  [OK] 订阅启用成功，状态已变更为 active")
+                        print("  [OK] 订阅启用成功，状态已变更为 active")
                     else:
                         print(f"  [FAIL] 订阅启用后状态为 {status} (期望: active)")
                 else:
@@ -129,7 +129,7 @@ async def test_subscription_status():
                     disable_history = [h for h in history_list if h.get("action") == "disable"]
                     
                     if enable_history and disable_history:
-                        print(f"  [OK] 状态变更历史记录已保存")
+                        print("  [OK] 状态变更历史记录已保存")
                         print(f"    启用记录: {len(enable_history)} 条")
                         print(f"    禁用记录: {len(disable_history)} 条")
                         
@@ -138,7 +138,7 @@ async def test_subscription_status():
                             latest = enable_history[0]
                             print(f"    最新启用: {latest.get('old_value')} -> {latest.get('new_value')}")
                     else:
-                        print(f"  [WARN] 未找到完整的状态变更历史记录")
+                        print("  [WARN] 未找到完整的状态变更历史记录")
                 else:
                     print(f"  [FAIL] 获取历史记录失败: {response.status_code}")
             except Exception as e:
@@ -163,10 +163,10 @@ async def test_subscription_status():
                     message = result.get("message", "")
                     
                     if not success and "无法执行搜索" in message:
-                        print(f"  [OK] 暂停状态下的搜索被正确阻止")
+                        print("  [OK] 暂停状态下的搜索被正确阻止")
                         print(f"    消息: {message}")
                     else:
-                        print(f"  [WARN] 暂停状态下的搜索未被阻止")
+                        print("  [WARN] 暂停状态下的搜索未被阻止")
                 else:
                     print(f"  [INFO] 搜索请求返回: {response.status_code}")
             except Exception as e:
@@ -181,7 +181,7 @@ async def test_subscription_status():
                     f"{base_url}/subscriptions/{subscription_id}"
                 )
                 if response.status_code == 200:
-                    print(f"  [OK] 订阅删除成功")
+                    print("  [OK] 订阅删除成功")
                 else:
                     print(f"  [WARN] 订阅删除失败: {response.status_code}")
             except Exception as e:

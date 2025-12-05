@@ -10,7 +10,6 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.core.config import settings
 from app.utils.http_client import create_httpx_client
 from loguru import logger
 
@@ -106,7 +105,7 @@ async def test_media_details_api():
         print("\n[1.4] 测试类似推荐API")
         if movie_details and movie_details.get('similar'):
             similar = movie_details.get('similar', {}).get('results', [])
-            print(f"[OK] 类似推荐获取成功")
+            print("[OK] 类似推荐获取成功")
             print(f"   - 推荐数量: {len(similar)}")
             if len(similar) > 0:
                 print(f"   - 第一个推荐: {similar[0].get('title', 'N/A')} (TMDB ID: {similar[0].get('id', 'N/A')})")
@@ -176,7 +175,7 @@ async def test_bangumi_api():
         try:
             calendar = await bangumi_client.get_calendar()
             if calendar:
-                print(f"[OK] 每日放送获取成功")
+                print("[OK] 每日放送获取成功")
                 # 按星期分组
                 weekday_groups = {}
                 for item in calendar:
@@ -202,7 +201,7 @@ async def test_bangumi_api():
         try:
             popular = await bangumi_client.get_popular_anime(limit=10)
             if popular:
-                print(f"[OK] 热门动漫获取成功")
+                print("[OK] 热门动漫获取成功")
                 print(f"   - 数量: {len(popular)}")
                 if len(popular) > 0:
                     top_anime = popular[0]

@@ -4,9 +4,7 @@
 """
 
 import requests
-import time
 import sys
-import os
 
 def check_service_status():
     """检查后端服务状态"""
@@ -45,7 +43,7 @@ def check_openapi_spec(port):
         
         openapi_spec = response.json()
         
-        print(f"✅ OpenAPI规范获取成功")
+        print("✅ OpenAPI规范获取成功")
         print(f"   版本: {openapi_spec.get('openapi', 'Unknown')}")
         print(f"   标题: {openapi_spec.get('info', {}).get('title', 'Unknown')}")
         print(f"   路径数量: {len(openapi_spec.get('paths', {}))}")
@@ -60,7 +58,7 @@ def check_openapi_spec(port):
 def check_manga_sync_in_openapi(openapi_spec):
     """检查漫画同步相关端点在OpenAPI中的存在"""
     
-    print(f"\n🔍 检查漫画同步相关端点...")
+    print("\n🔍 检查漫画同步相关端点...")
     
     if not openapi_spec:
         return
@@ -83,7 +81,7 @@ def check_manga_sync_in_openapi(openapi_spec):
     
     # 打印漫画同步端点详情
     if manga_sync_paths:
-        print(f"\n🔍 漫画同步端点详情:")
+        print("\n🔍 漫画同步端点详情:")
         for path in manga_sync_paths:
             print(f"   - {path}")
             for method in ["get", "post", "put", "delete", "patch"]:
@@ -92,7 +90,7 @@ def check_manga_sync_in_openapi(openapi_spec):
                     print(f"     {method.upper()}: {endpoint_info.get('summary', 'No summary')}")
                     print(f"       标签: {endpoint_info.get('tags', [])}")
     else:
-        print(f"\n❌ 未找到漫画同步端点")
+        print("\n❌ 未找到漫画同步端点")
     
     # 检查标签
     tags = openapi_spec.get("tags", [])
@@ -114,13 +112,13 @@ def check_manga_sync_in_openapi(openapi_spec):
         print(f"\n❌ 缺少预期端点: {missing_endpoints}")
         return False
     else:
-        print(f"\n✅ 所有预期端点都已注册!")
+        print("\n✅ 所有预期端点都已注册!")
         return True
 
 def check_other_manga_modules(openapi_spec):
     """检查其他漫画模块的注册情况"""
     
-    print(f"\n🔍 检查其他漫画模块的注册情况...")
+    print("\n🔍 检查其他漫画模块的注册情况...")
     
     if not openapi_spec:
         return

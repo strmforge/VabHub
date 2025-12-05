@@ -34,7 +34,8 @@ def test_inbox_preview_empty_dir(temp_inbox_dir, monkeypatch):
     importlib.reload(config_module)
     
     client = TestClient(app)
-    response = client.get("/api/dev/inbox/preview")
+    # 路由无 /api 前缀，因为测试 app 没有挂载 prefix
+    response = client.get("/dev/inbox/preview")
     
     assert response.status_code == 200
     data = response.json()
@@ -55,14 +56,11 @@ def test_inbox_preview_with_sample_files(temp_inbox_dir, monkeypatch):
     (temp_inbox_dir / "test.epub").write_text("fake epub")
     (temp_inbox_dir / "test.mkv").write_text("fake video")
     
-    monkeypatch.setenv("INBOX_ROOT", str(temp_inbox_dir))
-    
-    import importlib
-    import app.core.config as config_module
-    importlib.reload(config_module)
+    # 需要 patch scanner 模块中的 settings
+    monkeypatch.setattr("app.modules.inbox.scanner.settings.INBOX_ROOT", str(temp_inbox_dir))
     
     client = TestClient(app)
-    response = client.get("/api/dev/inbox/preview")
+    response = client.get("/dev/inbox/preview")
     
     assert response.status_code == 200
     data = response.json()
@@ -110,7 +108,8 @@ async def test_inbox_run_once_basic(temp_inbox_dir, monkeypatch, db_session):
         
         # 使用 TestClient 调用 API
         client = TestClient(app)
-        response = client.post("/api/dev/inbox/run-once")
+        # 路由无 /api 前缀，因为测试 app 没有挂载 prefix
+        response = client.post("/dev/inbox/run-once")
         
         # 注意：由于 TestClient 是同步的，而我们的服务是异步的，可能需要调整
         # 这里先检查基本结构

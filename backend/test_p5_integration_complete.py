@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from app.core.database import AsyncSessionLocal
 from app.modules.site_manager.service import SiteManagerService
 from app.modules.site_manager.integration_hooks import integration_hooks, IntegrationEvent
-from app.schemas.site_manager import SiteListFilter, SiteUpdatePayload, HealthStatus
+from app.schemas.site_manager import SiteUpdatePayload, HealthStatus
 from loguru import logger
 
 # 集成测试计数器

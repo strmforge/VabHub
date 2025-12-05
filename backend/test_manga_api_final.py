@@ -2,8 +2,6 @@
 最终测试漫画API端点
 """
 import requests
-import json
-import sys
 
 BASE_URL = "http://localhost:8000"
 
@@ -22,10 +20,10 @@ def test_endpoint(method, path, data=None):
         print(f"{method} {path} -> 状态码: {response.status_code}")
         
         if response.status_code == 200:
-            print(f"   ✅ 成功")
+            print("   ✅ 成功")
             return True
         elif response.status_code == 404:
-            print(f"   ❌ 端点不存在")
+            print("   ❌ 端点不存在")
             return False
         else:
             print(f"   ⚠️  其他状态码: {response.status_code}")

@@ -1,7 +1,6 @@
 """
 调试后端服务启动过程中的漫画模块注册
 """
-import sys
 import traceback
 
 # 模拟后端启动过程

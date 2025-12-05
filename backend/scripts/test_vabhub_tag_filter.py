@@ -49,7 +49,7 @@ async def test_vabhub_tag_filter():
                 if data.get("success"):
                     items = data.get("data", {}).get("items", [])
                     total = data.get("data", {}).get("total", 0)
-                    logger.info(f"✅ API调用成功")
+                    logger.info("✅ API调用成功")
                     logger.info(f"   返回任务数: {len(items)}")
                     logger.info(f"   总任务数: {total}")
                     
@@ -82,7 +82,7 @@ async def test_vabhub_tag_filter():
             
             # 测试只显示VABHUB标签的任务
             downloads = await service.list_downloads(vabhub_only=True)
-            logger.info(f"✅ 服务层调用成功")
+            logger.info("✅ 服务层调用成功")
             logger.info(f"   返回任务数: {len(downloads)}")
             
             # 检查返回的任务是否都有VABHUB标签
@@ -109,9 +109,9 @@ async def test_vabhub_tag_filter():
             
             # 不传递vabhub_only参数，应该使用默认值True
             downloads_default = await service.list_downloads()
-            logger.info(f"✅ 默认行为测试成功")
+            logger.info("✅ 默认行为测试成功")
             logger.info(f"   返回任务数: {len(downloads_default)}")
-            logger.info(f"   说明: 默认只显示VABHUB标签的任务")
+            logger.info("   说明: 默认只显示VABHUB标签的任务")
         
         logger.info("")
         
@@ -124,9 +124,9 @@ async def test_vabhub_tag_filter():
             
             # 传递vabhub_only=False，应该显示所有任务
             downloads_all = await service.list_downloads(vabhub_only=False)
-            logger.info(f"✅ 显示所有任务测试成功")
+            logger.info("✅ 显示所有任务测试成功")
             logger.info(f"   返回任务数: {len(downloads_all)}")
-            logger.info(f"   说明: 显示所有任务（包括没有VABHUB标签的）")
+            logger.info("   说明: 显示所有任务（包括没有VABHUB标签的）")
         
         logger.info("")
         logger.info("="*60)

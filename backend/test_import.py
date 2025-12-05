@@ -19,14 +19,12 @@ print()
 # 测试1: 基础导入
 print("测试1: 基础模块导入...")
 try:
-    import fastapi
     print("[OK] fastapi 导入成功")
 except Exception as e:
     print(f"[ERROR] fastapi 导入失败: {e}")
     sys.exit(1)
 
 try:
-    import uvicorn
     print("[OK] uvicorn 导入成功")
 except Exception as e:
     print(f"[ERROR] uvicorn 导入失败: {e}")
@@ -36,7 +34,7 @@ except Exception as e:
 print("\n测试2: 应用配置...")
 try:
     from app.core.config import settings
-    print(f"[OK] 配置导入成功")
+    print("[OK] 配置导入成功")
     print(f"   HOST: {settings.HOST}")
     print(f"   PORT: {settings.PORT}")
     print(f"   DATABASE_URL: {settings.DATABASE_URL}")
@@ -91,7 +89,7 @@ except Exception as e:
 print("\n测试5: API路由...")
 try:
     routes = [route.path for route in app.routes]
-    print(f"[OK] API路由加载成功")
+    print("[OK] API路由加载成功")
     print(f"   路由数量: {len(routes)}")
     if routes:
         print(f"   前5个路由: {routes[:5]}")

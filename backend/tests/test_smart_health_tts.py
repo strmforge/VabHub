@@ -392,7 +392,8 @@ async def test_smart_health_tts_storage_warning_levels_by_size(db_session, monke
     from app.modules.tts.storage_service import TTSStorageOverview
     
     # Mock build_overview 返回不同大小
-    with patch("app.api.smart_health.build_overview") as mock_build:
+    # build_overview 是在 get_tts_health 函数内部导入的，需要 patch 原始模块
+    with patch("app.modules.tts.storage_service.build_overview") as mock_build:
         # 测试 high_usage（15GB）
         mock_build.return_value = TTSStorageOverview(
             root=test_root,

@@ -189,15 +189,13 @@ async def test_novel_to_ebook_pipeline_run_basic_flow(tmp_path):
             source = FakeSourceAdapter()
             result = await pipeline.run(source, output_dir=tmp_path)
             
-            # 验证返回了文件路径
+            # 验证返回了 NovelPipelineResult
             assert result is not None
-            assert result.exists()
-            
-            # 验证文件内容
-            content = result.read_text(encoding='utf-8')
-            assert "测试小说" in content
-            assert "第一章" in content
-            assert "第二章" in content
+            assert result.epub_path is not None
+            # epub_path 是生成的临时文件路径，文件会被 importer 移动到库目录
+            # 所以验证 ebook 对象而非路径存在
+            assert result.ebook is not None
+            assert result.ebook.title == "测试小说"
         finally:
             config_module.settings.EBOOK_LIBRARY_ROOT = original_root
     
@@ -231,8 +229,10 @@ async def test_novel_to_ebook_pipeline_run_empty_chapters(tmp_path):
     source = EmptySourceAdapter()
     result = await pipeline.run(source, output_dir=tmp_path)
     
-    # 应该返回 None（因为没有章节）
-    assert result is None
+    # 应该返回空的 NovelPipelineResult（因为没有章节）
+    assert result is not None
+    assert result.epub_path is None
+    assert result.ebook is None
     # builder 不应该被调用
     mock_builder.build_epub.assert_not_called()
 

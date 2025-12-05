@@ -244,7 +244,7 @@ api_router.include_router(tts_voice_presets.router, prefix="/dev/tts", tags=["TT
 api_router.include_router(tts_work_batch.router, prefix="/dev/tts", tags=["TTS批量应用"])  # TTS 作品批量应用预设 Dev API
 api_router.include_router(admin_library_settings.router, prefix="/admin/settings/library", tags=["媒体库设置"])  # 媒体库设置管理（只读）
 api_router.include_router(admin_tts_settings.router, prefix="/admin/settings/tts", tags=["TTS设置"])  # TTS 设置管理（只读）
-api_router.include_router(tts_playground.router, prefix="/api/dev/tts", tags=["TTS Dev"])  # TTS Playground Dev API
+api_router.include_router(tts_playground.router, prefix="/dev/tts", tags=["TTS Dev"])  # TTS Playground Dev API
 api_router.include_router(tts_user_flow.router, prefix="/tts", tags=["TTS"])  # 用户版 TTS Flow API
 api_router.include_router(tts_user_batch.router, prefix="/tts/batch", tags=["TTS"])  # 用户批量 TTS API
 api_router.include_router(tts_storage.router, prefix="/dev", tags=["TTS存储（Dev）"])  # TTS 存储管理 Dev API

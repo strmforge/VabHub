@@ -53,10 +53,10 @@ async def test_auth_flow():
                 data = response.json()
                 if "data" in data and "access_token" in data.get("data", {}):
                     auth_token = data["data"]["access_token"]
-                    print(f"[OK] 登录成功，Token已获取")
+                    print("[OK] 登录成功，Token已获取")
                     return True
                 else:
-                    print(f"[ERROR] 未获取到Token")
+                    print("[ERROR] 未获取到Token")
                     return False
             else:
                 print(f"[ERROR] 登录失败: {response.status_code}")
@@ -102,7 +102,7 @@ async def test_subscription_workflow():
                     subscription_id = data["data"]["id"]
                     print(f"     [OK] 订阅创建成功，ID: {subscription_id}")
                 else:
-                    print(f"     [ERROR] 未获取到订阅ID")
+                    print("     [ERROR] 未获取到订阅ID")
                     return False
             else:
                 print(f"     [ERROR] 创建订阅失败: {response.status_code}")
@@ -122,7 +122,7 @@ async def test_subscription_workflow():
                     items = data["data"]["items"]
                     print(f"     [OK] 获取订阅列表成功，数量: {len(items)}")
                 else:
-                    print(f"     [ERROR] 订阅列表数据格式错误")
+                    print("     [ERROR] 订阅列表数据格式错误")
                     return False
             else:
                 print(f"     [ERROR] 获取订阅列表失败: {response.status_code}")
@@ -139,9 +139,9 @@ async def test_subscription_workflow():
                 if response.status_code == 200:
                     data = response.json()
                     if "data" in data:
-                        print(f"     [OK] 获取订阅详情成功")
+                        print("     [OK] 获取订阅详情成功")
                     else:
-                        print(f"     [ERROR] 订阅详情数据格式错误")
+                        print("     [ERROR] 订阅详情数据格式错误")
                         return False
                 else:
                     print(f"     [ERROR] 获取订阅详情失败: {response.status_code}")
@@ -178,11 +178,11 @@ async def test_dashboard_integration():
                 data = response.json()
                 if "data" in data:
                     dashboard_data = data["data"]
-                    print(f"[OK] 获取仪表盘数据成功")
+                    print("[OK] 获取仪表盘数据成功")
                     print(f"     数据键: {list(dashboard_data.keys())[:5]}")
                     return True
                 else:
-                    print(f"[ERROR] 仪表盘数据格式错误")
+                    print("[ERROR] 仪表盘数据格式错误")
                     return False
             else:
                 print(f"[ERROR] 获取仪表盘数据失败: {response.status_code}")
@@ -223,7 +223,7 @@ async def test_settings_integration():
                         print(f"[OK] 获取设置成功，键: {list(settings.keys())[:5]}")
                     return True
                 else:
-                    print(f"[ERROR] 设置数据格式错误")
+                    print("[ERROR] 设置数据格式错误")
                     return False
             else:
                 print(f"[ERROR] 获取设置失败: {response.status_code}")
@@ -257,10 +257,10 @@ async def test_search_integration():
             if response.status_code == 200:
                 data = response.json()
                 if "data" in data:
-                    print(f"[OK] 搜索成功")
+                    print("[OK] 搜索成功")
                     return True
                 else:
-                    print(f"[ERROR] 搜索数据格式错误")
+                    print("[ERROR] 搜索数据格式错误")
                     return False
             else:
                 print(f"[ERROR] 搜索失败: {response.status_code}")

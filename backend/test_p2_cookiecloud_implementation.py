@@ -14,9 +14,6 @@ sys.path.append(str(Path(__file__).parent))
 from app.core.database import AsyncSessionLocal
 from app.core.cookiecloud import CookieCloudClient
 from app.modules.cookiecloud.service import CookieCloudSyncService
-from app.models.cookiecloud import CookieCloudSettings
-from app.models.site import Site
-from app.schemas.cookiecloud import CookieSource
 from sqlalchemy import text
 from loguru import logger
 

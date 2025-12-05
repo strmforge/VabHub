@@ -43,14 +43,14 @@ def test_openapi_registration():
             if "漫画" in tag.get("name", ""):
                 manga_tags.append(tag.get("name"))
         
-        print(f"📊 OpenAPI规范检查结果:")
+        print("📊 OpenAPI规范检查结果:")
         print(f"   漫画同步端点数量: {len(manga_sync_endpoints)}")
         print(f"   漫画同步标签: {manga_tags}")
         print(f"   所有漫画相关端点数量: {len(all_manga_endpoints)}")
         
         # 打印具体的漫画同步端点
         if manga_sync_endpoints:
-            print(f"\n🔍 漫画同步端点详情:")
+            print("\n🔍 漫画同步端点详情:")
             for endpoint in manga_sync_endpoints:
                 print(f"   - {endpoint}")
                 # 打印该端点的HTTP方法
@@ -73,7 +73,7 @@ def test_openapi_registration():
             print(f"\n❌ 缺少预期端点: {missing_endpoints}")
             return False
         else:
-            print(f"\n✅ 所有预期端点都已注册!")
+            print("\n✅ 所有预期端点都已注册!")
             return True
             
     except requests.exceptions.ConnectionError:

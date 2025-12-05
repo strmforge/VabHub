@@ -11,19 +11,17 @@ from app.api.smart_health import smart_health
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_disabled_all_types(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_disabled_all_types(db_session: AsyncSession, monkeypatch):
     """测试所有 INBOX_ENABLE_* 为 False 时"""
-    from app.core.config import settings
+    # 禁用所有类型 - 需要 patch smart_health 模块中的 settings 引用
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", False)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_EBOOK", False)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_AUDIOBOOK", False)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_NOVEL_TXT", False)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_COMIC", False)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_MUSIC", False)
     
-    # 禁用所有类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", False)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_EBOOK", False)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_AUDIOBOOK", False)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_NOVEL_TXT", False)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_COMIC", False)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_MUSIC", False)
-    
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -35,15 +33,13 @@ async def test_smart_health_inbox_disabled_all_types(db: AsyncSession, monkeypat
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_enabled_but_never_run(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_enabled_but_never_run(db_session: AsyncSession, monkeypatch):
     """测试某些类型启用，但 InboxRunLog 无记录"""
-    from app.core.config import settings
+    # 启用部分类型 - 需要 patch smart_health 模块中的 settings 引用
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_EBOOK", True)
     
-    # 启用部分类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_EBOOK", True)
-    
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -56,12 +52,10 @@ async def test_smart_health_inbox_enabled_but_never_run(db: AsyncSession, monkey
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_with_recent_success_run(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_with_recent_success_run(db_session: AsyncSession, monkeypatch):
     """测试构造一条最近的 success 记录"""
-    from app.core.config import settings
-    
     # 启用部分类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
     
     # 创建一条成功的运行日志
     finished_at = datetime.utcnow() - timedelta(hours=1)  # 1 小时前
@@ -75,10 +69,10 @@ async def test_smart_health_inbox_with_recent_success_run(db: AsyncSession, monk
         failed_items=0,
         message="处理完成：成功 10，跳过 0，失败 0"
     )
-    db.add(log)
-    await db.commit()
+    db_session.add(log)
+    await db_session.commit()
     
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -90,12 +84,10 @@ async def test_smart_health_inbox_with_recent_success_run(db: AsyncSession, monk
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_with_failed_run(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_with_failed_run(db_session: AsyncSession, monkeypatch):
     """测试最近一条记录 status='failed'"""
-    from app.core.config import settings
-    
     # 启用部分类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
     
     # 创建一条失败的运行日志
     finished_at = datetime.utcnow() - timedelta(hours=1)
@@ -109,10 +101,10 @@ async def test_smart_health_inbox_with_failed_run(db: AsyncSession, monkeypatch)
         failed_items=5,
         message="处理完成：成功 0，跳过 0，失败 5"
     )
-    db.add(log)
-    await db.commit()
+    db_session.add(log)
+    await db_session.commit()
     
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -122,12 +114,10 @@ async def test_smart_health_inbox_with_failed_run(db: AsyncSession, monkeypatch)
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_too_long_without_run(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_too_long_without_run(db_session: AsyncSession, monkeypatch):
     """测试超过 24 小时没跑时给出警告"""
-    from app.core.config import settings
-    
     # 启用部分类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
     
     # 创建一条 25 小时前的运行日志
     finished_at = datetime.utcnow() - timedelta(hours=25)
@@ -141,10 +131,10 @@ async def test_smart_health_inbox_too_long_without_run(db: AsyncSession, monkeyp
         failed_items=0,
         message="处理完成：成功 10，跳过 0，失败 0"
     )
-    db.add(log)
-    await db.commit()
+    db_session.add(log)
+    await db_session.commit()
     
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -154,19 +144,17 @@ async def test_smart_health_inbox_too_long_without_run(db: AsyncSession, monkeyp
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_all_media_types(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_all_media_types(db_session: AsyncSession, monkeypatch):
     """测试所有媒体类型都启用时的 enabled_media_types"""
-    from app.core.config import settings
-    
     # 启用所有类型
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_EBOOK", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_AUDIOBOOK", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_NOVEL_TXT", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_COMIC", True)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_MUSIC", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_EBOOK", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_AUDIOBOOK", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_NOVEL_TXT", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_COMIC", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_MUSIC", True)
     
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]
@@ -181,16 +169,14 @@ async def test_smart_health_inbox_all_media_types(db: AsyncSession, monkeypatch)
 
 
 @pytest.mark.asyncio
-async def test_smart_health_inbox_root_path(db: AsyncSession, monkeypatch):
+async def test_smart_health_inbox_root_path(db_session: AsyncSession, monkeypatch):
     """测试 inbox_root 路径正确返回"""
-    from app.core.config import settings
-    
     # 设置自定义路径
     custom_path = "/custom/inbox/path"
-    monkeypatch.setattr(settings, "INBOX_ROOT", custom_path)
-    monkeypatch.setattr(settings, "INBOX_ENABLE_VIDEO", True)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ROOT", custom_path)
+    monkeypatch.setattr("app.api.smart_health.settings.INBOX_ENABLE_VIDEO", True)
     
-    result = await smart_health(db)
+    result = await smart_health(db_session)
     
     assert "inbox" in result["features"]
     inbox_status = result["features"]["inbox"]

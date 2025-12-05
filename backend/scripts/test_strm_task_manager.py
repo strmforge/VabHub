@@ -11,10 +11,6 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from app.modules.strm.task_manager import get_sync_task_manager, SyncTaskStatus
-from app.modules.strm.sync_manager import STRMSyncManager
-from app.modules.strm.config import STRMConfig
-from app.modules.strm.file_operation_mode import STRMSyncConfig
-from app.core.database import AsyncSessionLocal
 from loguru import logger
 
 

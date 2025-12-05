@@ -68,7 +68,7 @@ def test_p1_integration():
         if updated_state.required_seed_hours == 96.0 and updated_state.seeded_hours == 48.0:
             print("   ✅ HR页面更新成功")
         else:
-            print(f"   ❌ HR页面更新失败")
+            print("   ❌ HR页面更新失败")
             return False
         
         # 验证数据库已更新

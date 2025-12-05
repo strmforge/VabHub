@@ -27,7 +27,7 @@ async def test_frontend_integration():
             try:
                 response = await client.get(f"{API_BASE_URL}/health")
                 if response.status_code == 200:
-                    print(f"  [OK] 后端服务运行正常")
+                    print("  [OK] 后端服务运行正常")
                 else:
                     print(f"  [FAIL] 后端服务响应异常: {response.status_code}")
                     return False
@@ -49,13 +49,13 @@ async def test_frontend_integration():
             response = await client.post(api_url("/auth/register"), json=register_data)
             if response.status_code == 201:
                 user_data = response.json()
-                print(f"  [OK] 用户注册成功")
+                print("  [OK] 用户注册成功")
                 print(f"    用户ID: {user_data.get('id')}")
                 print(f"    用户名: {user_data.get('username')}")
             else:
                 # 如果用户已存在，尝试登录
                 if response.status_code == 400:
-                    print(f"  [INFO] 用户已存在，跳过注册")
+                    print("  [INFO] 用户已存在，跳过注册")
                 else:
                     print(f"  [FAIL] 用户注册失败: {response.status_code}")
                     print(f"    响应: {response.text}")
@@ -77,7 +77,7 @@ async def test_frontend_integration():
             if response.status_code == 200:
                 token_data = response.json()
                 access_token = token_data.get("access_token")
-                print(f"  [OK] 用户登录成功")
+                print("  [OK] 用户登录成功")
                 print(f"    Token: {access_token[:50]}...")
             else:
                 print(f"  [FAIL] 用户登录失败: {response.status_code}")
@@ -94,15 +94,15 @@ async def test_frontend_integration():
             )
             if response.status_code == 200:
                 dashboard_data = response.json()
-                print(f"  [OK] 仪表盘数据获取成功")
-                print(f"    系统统计:")
+                print("  [OK] 仪表盘数据获取成功")
+                print("    系统统计:")
                 print(f"      CPU: {dashboard_data.get('system_stats', {}).get('cpu_usage')}%")
                 print(f"      内存: {dashboard_data.get('system_stats', {}).get('memory_usage')}%")
                 print(f"      磁盘: {dashboard_data.get('system_stats', {}).get('disk_usage')}%")
-                print(f"    媒体统计:")
+                print("    媒体统计:")
                 print(f"      电影: {dashboard_data.get('media_stats', {}).get('total_movies')}")
                 print(f"      电视剧: {dashboard_data.get('media_stats', {}).get('total_tv_shows')}")
-                print(f"    下载统计:")
+                print("    下载统计:")
                 print(f"      活跃下载: {dashboard_data.get('download_stats', {}).get('active')}")
                 print(f"      总速度: {dashboard_data.get('download_stats', {}).get('total_speed_mbps')} Mbps")
             else:
@@ -120,7 +120,7 @@ async def test_frontend_integration():
             )
             if response.status_code == 200:
                 stats = response.json()
-                print(f"  [OK] 系统统计获取成功")
+                print("  [OK] 系统统计获取成功")
                 print(f"    CPU: {stats.get('cpu_usage')}%")
                 print(f"    内存: {stats.get('memory_usage')}% ({stats.get('memory_used_gb')}GB / {stats.get('memory_total_gb')}GB)")
                 print(f"    磁盘: {stats.get('disk_usage')}% ({stats.get('disk_used_gb')}GB / {stats.get('disk_total_gb')}GB)")
@@ -137,7 +137,7 @@ async def test_frontend_integration():
             )
             if response.status_code == 200:
                 stats = response.json()
-                print(f"  [OK] 媒体统计获取成功")
+                print("  [OK] 媒体统计获取成功")
                 print(f"    电影: {stats.get('total_movies')}")
                 print(f"    电视剧: {stats.get('total_tv_shows')}")
                 print(f"    动漫: {stats.get('total_anime')}")
@@ -155,7 +155,7 @@ async def test_frontend_integration():
             )
             if response.status_code == 200:
                 stats = response.json()
-                print(f"  [OK] 下载统计获取成功")
+                print("  [OK] 下载统计获取成功")
                 print(f"    活跃: {stats.get('active')}")
                 print(f"    暂停: {stats.get('paused')}")
                 print(f"    完成: {stats.get('completed')}")

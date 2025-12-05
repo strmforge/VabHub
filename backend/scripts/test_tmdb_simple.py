@@ -11,8 +11,6 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-import httpx
-from app.core.config import settings
 from app.utils.http_client import create_httpx_client
 
 # 用户提供的TMDB API key
@@ -112,7 +110,7 @@ async def test_tmdb_tv_details(tmdb_id: int):
             response.raise_for_status()
             details = response.json()
             
-            print(f"[OK] 获取TMDB详情成功")
+            print("[OK] 获取TMDB详情成功")
             print(f"   - 标题: {details.get('name', 'N/A')}")
             print(f"   - 年份: {details.get('first_air_date', 'N/A')[:4] if details.get('first_air_date') else 'N/A'}")
             print(f"   - TMDB ID: {details.get('id', 'N/A')}")

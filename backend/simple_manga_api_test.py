@@ -36,7 +36,7 @@ def test_api_registration():
         paths_count = len(openapi_schema.get("paths", {}))
         tags_count = len(openapi_schema.get("tags", []))
         
-        print(f"📊 OpenAPI统计:")
+        print("📊 OpenAPI统计:")
         print(f"   路径数量: {paths_count}")
         print(f"   标签数量: {tags_count}")
         
@@ -58,7 +58,7 @@ def test_api_registration():
         print(f"   漫画相关路径数量: {len(manga_paths)}")
         
         if manga_paths:
-            print(f"\n📋 漫画相关路径:")
+            print("\n📋 漫画相关路径:")
             for i, path in enumerate(manga_paths[:20], 1):
                 print(f"   {i}. {path}")
         else:
@@ -73,7 +73,7 @@ def test_api_registration():
             "/api/reading/ongoing"
         ]
         
-        print(f"\n🔍 检查特定漫画端点:")
+        print("\n🔍 检查特定漫画端点:")
         found_endpoints = []
         missing_endpoints = []
         
@@ -85,12 +85,12 @@ def test_api_registration():
                 missing_endpoints.append(endpoint)
                 print(f"   ❌ {endpoint}")
         
-        print(f"\n📊 端点检查结果:")
+        print("\n📊 端点检查结果:")
         print(f"   找到: {len(found_endpoints)}/{len(manga_endpoints_to_check)}")
         print(f"   缺失: {len(missing_endpoints)}/{len(manga_endpoints_to_check)}")
         
         if missing_endpoints:
-            print(f"\n❌ 缺失的端点:")
+            print("\n❌ 缺失的端点:")
             for endpoint in missing_endpoints:
                 print(f"   - {endpoint}")
             return False

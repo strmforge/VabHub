@@ -9,6 +9,7 @@ from app.models.user_notification import UserNotification
 from app.models.ebook import EBook
 from app.models.tts_job import TTSJob
 from app.modules.tts.notification_service import create_tts_job_notification
+from app.models.enums.notification_type import NotificationType
 
 
 @pytest.mark.asyncio
@@ -45,7 +46,7 @@ async def test_create_notification_success(db_session):
     
     # 验证
     assert notification.id > 0
-    assert notification.type == "tts_job_succeeded"
+    assert notification.type == NotificationType.TTS_JOB_COMPLETED
     assert notification.severity == "success"
     assert notification.ebook_id == 1
     assert notification.tts_job_id == job.id
@@ -82,7 +83,7 @@ async def test_create_notification_for_different_statuses(db_session):
         ebook=ebook,
         status="success"
     )
-    assert notif1.type == "tts_job_succeeded"
+    assert notif1.type == NotificationType.TTS_JOB_COMPLETED
     assert notif1.severity == "success"
     
     # 测试 partial
@@ -106,7 +107,7 @@ async def test_create_notification_for_different_statuses(db_session):
         status="partial",
         summary={"generated_chapters": 5, "total_chapters": 10}
     )
-    assert notif2.type == "tts_job_partial"
+    assert notif2.type == NotificationType.TTS_JOB_COMPLETED  # partial 也使用 COMPLETED 类型
     assert notif2.severity == "warning"
     
     # 测试 failed
@@ -130,7 +131,7 @@ async def test_create_notification_for_different_statuses(db_session):
         ebook=ebook,
         status="failed"
     )
-    assert notif3.type == "tts_job_failed"
+    assert notif3.type == NotificationType.TTS_JOB_FAILED
     assert notif3.severity == "error"
     assert "失败" in notif3.message
     

@@ -22,13 +22,14 @@ async def test_tts_summary_basic_counts_and_no_rate_limit(db_session, monkeypatc
     """测试 TTS 汇总信息：基本计数且无限流"""
     reset()
     
-    # 设置 TTS 启用，关闭限流
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_ENABLED", True)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_PROVIDER", "dummy")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_CHAPTERS", 10)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_RATE_LIMIT_ENABLED", False)
+    # 创建测试用 Settings 实例
+    test_settings = Settings()
+    monkeypatch.setattr(test_settings, "SMART_TTS_ENABLED", True)
+    monkeypatch.setattr(test_settings, "SMART_TTS_PROVIDER", "dummy")
+    monkeypatch.setattr(test_settings, "SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
+    monkeypatch.setattr(test_settings, "SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_CHAPTERS", 10)
+    monkeypatch.setattr(test_settings, "SMART_TTS_RATE_LIMIT_ENABLED", False)
     
     # 创建测试 TXT 文件（3 章）
     with TemporaryDirectory() as tmpdir:
@@ -60,7 +61,7 @@ async def test_tts_summary_basic_counts_and_no_rate_limit(db_session, monkeypatc
         
         # 创建 pipeline（需要真实的 TTS 引擎）
         from app.modules.tts.factory import get_tts_engine
-        tts_engine = get_tts_engine(settings=Settings())
+        tts_engine = get_tts_engine(settings=test_settings)
         
         from app.modules.audiobook.importer import AudiobookImporter
         audiobook_importer = AudiobookImporter(db=db_session)
@@ -71,7 +72,7 @@ async def test_tts_summary_basic_counts_and_no_rate_limit(db_session, monkeypatc
             epub_builder=epub_builder,
             tts_engine=tts_engine,
             audiobook_importer=audiobook_importer,
-            settings=Settings()
+            settings=test_settings
         )
         
         # 执行
@@ -90,16 +91,17 @@ async def test_tts_summary_with_rate_limit_sets_first_rate_limited_index(db_sess
     """测试限流时设置 first_rate_limited_chapter_index"""
     reset()
     
-    # 设置 TTS 启用，开启限流（只允许 2 个请求）
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_ENABLED", True)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_PROVIDER", "dummy")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_CHAPTERS", 10)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_RATE_LIMIT_ENABLED", True)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_REQUESTS_PER_RUN", 2)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_DAILY_REQUESTS", 100)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_DAILY_CHARACTERS", 100000)
+    # 创建测试用 Settings 实例
+    test_settings = Settings()
+    monkeypatch.setattr(test_settings, "SMART_TTS_ENABLED", True)
+    monkeypatch.setattr(test_settings, "SMART_TTS_PROVIDER", "dummy")
+    monkeypatch.setattr(test_settings, "SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
+    monkeypatch.setattr(test_settings, "SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_CHAPTERS", 10)
+    monkeypatch.setattr(test_settings, "SMART_TTS_RATE_LIMIT_ENABLED", True)
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_REQUESTS_PER_RUN", 2)
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_DAILY_REQUESTS", 100)
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_DAILY_CHARACTERS", 100000)
     
     # 创建测试 TXT 文件（3 章）
     with TemporaryDirectory() as tmpdir:
@@ -131,7 +133,7 @@ async def test_tts_summary_with_rate_limit_sets_first_rate_limited_index(db_sess
         
         # 创建 pipeline
         from app.modules.tts.factory import get_tts_engine
-        tts_engine = get_tts_engine(settings=Settings())
+        tts_engine = get_tts_engine(settings=test_settings)
         
         from app.modules.audiobook.importer import AudiobookImporter
         audiobook_importer = AudiobookImporter(db=db_session)
@@ -142,7 +144,7 @@ async def test_tts_summary_with_rate_limit_sets_first_rate_limited_index(db_sess
             epub_builder=epub_builder,
             tts_engine=tts_engine,
             audiobook_importer=audiobook_importer,
-            settings=Settings()
+            settings=test_settings
         )
         
         # 执行
@@ -161,13 +163,14 @@ async def test_start_chapter_index_skips_earlier_chapters(db_session, monkeypatc
     """测试 start_chapter_index 跳过前面的章节"""
     reset()
     
-    # 设置 TTS 启用，关闭限流
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_ENABLED", True)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_PROVIDER", "dummy")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_MAX_CHAPTERS", 10)
-    monkeypatch.setattr("app.modules.novel.pipeline.settings.SMART_TTS_RATE_LIMIT_ENABLED", False)
+    # 创建测试用 Settings 实例
+    test_settings = Settings()
+    monkeypatch.setattr(test_settings, "SMART_TTS_ENABLED", True)
+    monkeypatch.setattr(test_settings, "SMART_TTS_PROVIDER", "dummy")
+    monkeypatch.setattr(test_settings, "SMART_TTS_OUTPUT_ROOT", "./data/tts_output")
+    monkeypatch.setattr(test_settings, "SMART_TTS_CHAPTER_STRATEGY", "per_chapter")
+    monkeypatch.setattr(test_settings, "SMART_TTS_MAX_CHAPTERS", 10)
+    monkeypatch.setattr(test_settings, "SMART_TTS_RATE_LIMIT_ENABLED", False)
     
     # 创建测试 TXT 文件（3 章）
     with TemporaryDirectory() as tmpdir:
@@ -199,7 +202,7 @@ async def test_start_chapter_index_skips_earlier_chapters(db_session, monkeypatc
         
         # 创建 pipeline
         from app.modules.tts.factory import get_tts_engine
-        tts_engine = get_tts_engine(settings=Settings())
+        tts_engine = get_tts_engine(settings=test_settings)
         
         from app.modules.audiobook.importer import AudiobookImporter
         audiobook_importer = AudiobookImporter(db=db_session)
@@ -210,7 +213,7 @@ async def test_start_chapter_index_skips_earlier_chapters(db_session, monkeypatc
             epub_builder=epub_builder,
             tts_engine=tts_engine,
             audiobook_importer=audiobook_importer,
-            settings=Settings()
+            settings=test_settings
         )
         
         # 执行（从第 3 章开始）

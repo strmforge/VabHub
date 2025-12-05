@@ -8,12 +8,11 @@ import asyncio
 import sys
 import os
 from datetime import datetime, timedelta
-from typing import List
 
 # 添加项目路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.modules.bots.telegram_bot_state import reading_activity_cache, UserReadingActivityState
+from app.modules.bots.telegram_bot_state import reading_activity_cache
 from app.schemas.reading_hub import ReadingActivityItem
 from app.models.enums.reading_media_type import ReadingMediaType
 from app.modules.bots.commands.reading import _format_activity_item_line, _format_relative_time, _build_web_url_unified
@@ -48,7 +47,7 @@ def test_relative_time_formatting():
             assert result == "未知时间", f"Expected '未知时间', got '{result}'"
         else:
             assert result != "未知时间", f"Expected not '未知时间', got '{result}'"
-            assert len(result) > 0, f"Expected non-empty result"
+            assert len(result) > 0, "Expected non-empty result"
     
     print("✅ 相对时间格式化测试通过\n")
 
@@ -103,9 +102,9 @@ def test_activity_item_formatting():
         
         # 验证格式
         assert formatted.startswith(f"[{idx}]"), f"Expected to start with '[{idx}]'"
-        assert "《" in formatted and "》" in formatted, f"Expected title brackets"
-        assert "·" in formatted, f"Expected separator"
-        assert len(formatted) > 20, f"Expected reasonable length"
+        assert "《" in formatted and "》" in formatted, "Expected title brackets"
+        assert "·" in formatted, "Expected separator"
+        assert len(formatted) > 20, "Expected reasonable length"
     
     print("✅ 活动条目格式化测试通过\n")
 

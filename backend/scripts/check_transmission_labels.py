@@ -108,7 +108,7 @@ async def check_transmission_labels():
                 else:
                     tasks_without_labels += 1
                     logger.info(f"{i}. {torrent_name[:60]}")
-                    logger.info(f"   标签: 无标签")
+                    logger.info("   标签: 无标签")
                 logger.info("")
             
             logger.info("="*60)

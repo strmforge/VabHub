@@ -13,7 +13,7 @@ backend_dir = Path(__file__).parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
-from scripts.api_test_config import API_BASE_URL, API_PREFIX, api_url
+from scripts.api_test_config import API_BASE_URL, api_url
 
 BASE_URL = API_BASE_URL
 TIMEOUT = 30.0
@@ -49,12 +49,12 @@ async def test_user_registration():
                 data = response.json()
                 print(f"[OK] 用户注册成功: {response.status_code}")
                 # 注册后需要登录获取token
-                print(f"[INFO] 注册成功，尝试登录获取Token")
+                print("[INFO] 注册成功，尝试登录获取Token")
                 return await test_user_login()
             elif response.status_code == 400:
                 data = response.json()
                 if "已存在" in str(data.get("message", "")) or "USERNAME_EXISTS" in str(data) or "EMAIL_EXISTS" in str(data):
-                    print(f"[INFO] 用户已存在，尝试登录")
+                    print("[INFO] 用户已存在，尝试登录")
                     return await test_user_login()
                 else:
                     print(f"[ERROR] 用户注册失败: {response.status_code}")
@@ -66,7 +66,7 @@ async def test_user_registration():
                 return False
     except httpx.ConnectError as e:
         print(f"[ERROR] 无法连接到服务: {e}")
-        print(f"     请确保后端服务已启动: python backend/run_server.py")
+        print("     请确保后端服务已启动: python backend/run_server.py")
         return False
     except httpx.ReadTimeout as e:
         print(f"[ERROR] 请求超时: {e}")
@@ -100,10 +100,10 @@ async def test_user_login():
                 if "data" in data and "access_token" in data.get("data", {}):
                     global auth_token
                     auth_token = data["data"]["access_token"]
-                    print(f"     Token已获取")
+                    print("     Token已获取")
                     return True
                 else:
-                    print(f"[WARNING] 未获取到Token")
+                    print("[WARNING] 未获取到Token")
                     return False
             else:
                 print(f"[ERROR] 用户登录失败: {response.status_code}")
@@ -111,7 +111,7 @@ async def test_user_login():
                 return False
     except httpx.ConnectError as e:
         print(f"[ERROR] 无法连接到服务: {e}")
-        print(f"     请确保后端服务已启动: python backend/run_server.py")
+        print("     请确保后端服务已启动: python backend/run_server.py")
         return None
     except httpx.ReadTimeout as e:
         print(f"[ERROR] 请求超时: {e}")

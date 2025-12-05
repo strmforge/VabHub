@@ -1,7 +1,6 @@
 """
 详细调试漫画模块导入和注册问题
 """
-import sys
 import traceback
 from fastapi import FastAPI
 
@@ -32,7 +31,7 @@ for module_name in modules_to_test:
             # 尝试注册到应用
             try:
                 app.include_router(router, tags=getattr(router, 'tags', []))
-                print(f"   ✅ 注册到FastAPI成功")
+                print("   ✅ 注册到FastAPI成功")
             except Exception as e:
                 print(f"   ❌ 注册失败: {e}")
                 traceback.print_exc()

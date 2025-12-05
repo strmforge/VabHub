@@ -37,7 +37,7 @@ def test_upload_txt_novel_success(temp_txt_content):
     
     client = TestClient(app)
     response = client.post(
-        "/api/dev/novel/upload-txt",
+        "/dev/novel/upload-txt",
         files={"file": ("test_novel.txt", file_obj, "text/plain")},
         data={
             "title": "测试小说",
@@ -66,9 +66,8 @@ def test_upload_txt_novel_success(temp_txt_content):
         ebook_id = data.get("ebook_id")
         ebook_path = data.get("ebook_path")
     
-    # 验证文件路径存在
-    if ebook_path:
-        assert Path(ebook_path).exists()
+    # 验证有 ebook_id 返回（文件会被移动到库目录，原路径不再存在）
+    assert ebook_id is not None
 
 
 def test_upload_txt_novel_invalid_extension():
@@ -78,21 +77,22 @@ def test_upload_txt_novel_invalid_extension():
     
     client = TestClient(app)
     response = client.post(
-        "/api/dev/novel/upload-txt",
+        "/dev/novel/upload-txt",
         files={"file": ("test_novel.pdf", file_obj, "application/pdf")},
         data={"title": "测试小说"}
     )
     
     assert response.status_code == 400
     data = response.json()
-    assert "error" in data or "error_message" in data or "error_code" in data
+    # FastAPI HTTPException 返回 detail 字段
+    assert "error" in data or "error_message" in data or "error_code" in data or "detail" in data
 
 
 def test_upload_txt_novel_missing_file():
     """测试不传文件字段"""
     client = TestClient(app)
     response = client.post(
-        "/api/dev/novel/upload-txt",
+        "/dev/novel/upload-txt",
         data={"title": "测试小说"}
     )
     
@@ -107,7 +107,7 @@ def test_upload_txt_novel_auto_title(temp_txt_content):
     
     client = TestClient(app)
     response = client.post(
-        "/api/dev/novel/upload-txt",
+        "/dev/novel/upload-txt",
         files={"file": ("我的小说.txt", file_obj, "text/plain")},
         data={"author": "测试作者"}
     )

@@ -46,8 +46,8 @@ async def test_music_routing_disabled(inbox_router, tmp_path, monkeypatch):
 @pytest.mark.asyncio
 async def test_music_routing_enabled(inbox_router, tmp_path, monkeypatch):
     """测试音乐处理启用时调用导入器"""
-    from app.core.config import settings
-    monkeypatch.setattr(settings, "INBOX_ENABLE_MUSIC", True)
+    # Patch router 模块中导入的 settings
+    monkeypatch.setattr("app.modules.inbox.router.settings.INBOX_ENABLE_MUSIC", True)
     
     test_file = tmp_path / "test.mp3"
     test_file.write_bytes(b"fake audio")
@@ -72,8 +72,8 @@ async def test_music_routing_enabled(inbox_router, tmp_path, monkeypatch):
 @pytest.mark.asyncio
 async def test_music_import_failure(inbox_router, tmp_path, monkeypatch):
     """测试音乐导入失败"""
-    from app.core.config import settings
-    monkeypatch.setattr(settings, "INBOX_ENABLE_MUSIC", True)
+    # Patch router 模块中导入的 settings
+    monkeypatch.setattr("app.modules.inbox.router.settings.INBOX_ENABLE_MUSIC", True)
     
     test_file = tmp_path / "test.mp3"
     test_file.write_bytes(b"fake audio")
@@ -97,8 +97,8 @@ async def test_music_import_failure(inbox_router, tmp_path, monkeypatch):
 @pytest.mark.asyncio
 async def test_music_import_exception(inbox_router, tmp_path, monkeypatch):
     """测试音乐导入异常"""
-    from app.core.config import settings
-    monkeypatch.setattr(settings, "INBOX_ENABLE_MUSIC", True)
+    # Patch router 模块中导入的 settings
+    monkeypatch.setattr("app.modules.inbox.router.settings.INBOX_ENABLE_MUSIC", True)
     
     test_file = tmp_path / "test.mp3"
     test_file.write_bytes(b"fake audio")

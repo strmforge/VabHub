@@ -6,7 +6,7 @@
 import asyncio
 import httpx
 import json
-from typing import Dict, List, Any
+from typing import Dict, Any
 from loguru import logger
 
 # 配置

@@ -145,7 +145,7 @@ async def test_qbittorrent_connection():
                         if test_response.status_code == 200:
                             test_data = test_response.json()
                             if test_data.get("success"):
-                                logger.success(f"✓ qBittorrent 连接测试成功")
+                                logger.success("✓ qBittorrent 连接测试成功")
                                 
                                 # 获取统计信息
                                 stats_response = await client.get(f"{BASE_URL}/dl/{instance_id}/stats")
@@ -210,7 +210,7 @@ async def test_transmission_connection():
                         if test_response.status_code == 200:
                             test_data = test_response.json()
                             if test_data.get("success"):
-                                logger.success(f"✓ Transmission 连接测试成功")
+                                logger.success("✓ Transmission 连接测试成功")
                                 
                                 # 获取统计信息
                                 stats_response = await client.get(f"{BASE_URL}/dl/{instance_id}/stats")

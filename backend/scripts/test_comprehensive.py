@@ -7,7 +7,6 @@ import asyncio
 import sys
 from pathlib import Path
 import subprocess
-import time
 
 # 添加backend目录到路径
 backend_dir = Path(__file__).parent.parent

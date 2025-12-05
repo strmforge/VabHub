@@ -38,7 +38,7 @@ async def test_notification_schema():
             total=0,
             unread_count=0
         )
-        print(f"✅ 列表响应Schema测试通过")
+        print("✅ 列表响应Schema测试通过")
         
         return True
     except Exception as e:

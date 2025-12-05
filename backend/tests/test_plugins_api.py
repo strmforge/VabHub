@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
+import pytest
 from fastapi.testclient import TestClient
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +25,11 @@ def _api_path(path: str) -> str:
     return f"{prefix}{path}"
 
 
+# 检查 example_extension_plugin 是否存在
+_EXAMPLE_PLUGIN_EXISTS = (PROJECT_ROOT / "plugins" / "example_extension_plugin").exists()
+
+
+@pytest.mark.skipif(not _EXAMPLE_PLUGIN_EXISTS, reason="example_extension_plugin not installed")
 def test_plugin_rest_endpoint():
     resp = client.get(_api_path("/plugins/example_extension_plugin/ping"))
     assert resp.status_code == 200
@@ -33,6 +39,7 @@ def test_plugin_rest_endpoint():
     assert payload["data"]["message"] == "pong"
 
 
+@pytest.mark.skipif(not _EXAMPLE_PLUGIN_EXISTS, reason="example_extension_plugin not installed")
 def test_plugin_graphql_field():
     query = """
     query {

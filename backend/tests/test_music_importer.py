@@ -74,8 +74,7 @@ async def test_import_music_invalid_format(music_importer, tmp_path):
 
 @pytest.mark.asyncio
 @patch('app.modules.music.importer.probe_audio_file')
-@patch('app.modules.music.importer.MusicWorkResolver')
-async def test_import_music_success(mock_resolver_class, mock_probe, music_importer, tmp_path):
+async def test_import_music_success(mock_probe, music_importer, tmp_path):
     """测试成功导入音乐文件（模拟）"""
     # 创建测试文件
     test_file = tmp_path / "test.mp3"
@@ -93,26 +92,10 @@ async def test_import_music_success(mock_resolver_class, mock_probe, music_impor
     # 模拟 WorkResolver
     mock_resolver = MagicMock()
     mock_resolver.find_existing_work = AsyncMock(return_value=None)
-    mock_resolver_class.return_value = music_importer.work_resolver
     music_importer.work_resolver = mock_resolver
     
-    # 模拟 mutagen 解析（如果安装了）
-    with patch('app.modules.music.importer.mutagen') as mock_mutagen:
-        # 如果 mutagen 未安装，会跳过元数据解析
-        try:
-            import mutagen
-            # 模拟 mutagen.File
-            mock_audio = MagicMock()
-            mock_tags = MagicMock()
-            mock_tags.__getitem__ = MagicMock(return_value=["测试歌手"])
-            mock_audio.tags = mock_tags
-            mock_audio.info = MagicMock()
-            mock_audio.info.length = 180
-            mock_mutagen.File.return_value = mock_audio
-        except ImportError:
-            pass
-        
-        # 由于涉及文件移动和数据库操作，这里只测试基本流程
-        # 实际测试需要更完整的 mock 设置
-        pass
+    # 由于涉及文件移动和数据库操作，测试基本流程
+    # mutagen 是函数内条件导入，无法在模块级别 mock
+    # 实际测试需要更完整的 mock 设置
+    pass
 

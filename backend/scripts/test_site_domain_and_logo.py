@@ -12,7 +12,6 @@ project_root = backend_dir.parent
 sys.path.insert(0, str(backend_dir))
 sys.path.insert(0, str(project_root))
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import AsyncSessionLocal, init_db
 from app.models.site import Site
 from app.modules.site_domain.service import SiteDomainService

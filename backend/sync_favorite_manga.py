@@ -13,7 +13,6 @@
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到 Python 路径
@@ -44,14 +43,14 @@ async def main():
                 processed = result.get("processed_series", 0)
                 new_chapters = result.get("total_new_chapters", 0)
                 
-                logger.info(f"✅ 漫画收藏追更完成!")
+                logger.info("✅ 漫画收藏追更完成!")
                 logger.info(f"   处理系列数: {processed}")
                 logger.info(f"   新增章节数: {new_chapters}")
                 
                 if new_chapters > 0:
                     logger.info(f"   🎉 发现 {new_chapters} 个新章节，用户会收到通知")
                 else:
-                    logger.info(f"   💭 暂无新章节")
+                    logger.info("   💭 暂无新章节")
                 
                 # 输出详细信息
                 details = result.get("details", [])

@@ -172,16 +172,20 @@ async def test_novel_pipeline_with_local_txt(tmp_path):
             
             # 执行流水线
             output_dir = tmp_path / "novel_output"
-            result_path = await pipeline.run(source, output_dir)
+            result = await pipeline.run(source, output_dir)
             
-            # 验证生成了文件
-            assert result_path is not None
-            assert result_path.exists()
+            # 验证结果对象
+            assert result is not None
+            # epub_path 是 pipeline 生成的原始文件路径（已被 importer 移动到库）
+            assert result.epub_path is not None
+            # 验证 ebook 对象已创建
+            assert result.ebook is not None
+            assert result.ebook.title == "测试小说"
             
             # 验证数据库中创建了 EBook 记录
             stmt = select(func.count(EBook.id)).where(EBook.title == "测试小说")
-            result = await db_session.execute(stmt)
-            count = result.scalar()
+            db_result = await db_session.execute(stmt)
+            count = db_result.scalar()
             assert count > 0
             
         finally:

@@ -11,7 +11,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from app.core.database import AsyncSessionLocal, init_db
 from app.modules.media_server.service import MediaServerService
-from app.models.media_server import MediaServer
 from loguru import logger
 
 
@@ -114,7 +113,6 @@ async def test_scheduler_monitor():
         # 创建数据库会话
         async with AsyncSessionLocal() as session:
             from app.modules.scheduler.monitor import SchedulerMonitor
-            from app.core.scheduler import get_scheduler
             
             monitor = SchedulerMonitor(session)
             
@@ -143,7 +141,7 @@ async def test_scheduler_monitor():
             logger.info("\n测试3: 获取整体统计信息...")
             try:
                 statistics = await monitor.get_overall_statistics()
-                logger.info(f"✅ 获取统计信息成功:")
+                logger.info("✅ 获取统计信息成功:")
                 logger.info(f"   - 总任务数: {statistics.get('total_tasks', 0)}")
                 logger.info(f"   - 启用任务数: {statistics.get('enabled_tasks', 0)}")
                 logger.info(f"   - 运行中任务数: {statistics.get('running_tasks', 0)}")

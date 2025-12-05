@@ -4,8 +4,6 @@
 
 import asyncio
 import httpx
-import json
-from datetime import datetime
 
 
 async def test_subscription_history():
@@ -24,7 +22,7 @@ async def test_subscription_history():
             try:
                 response = await client.get("http://localhost:8092/health")
                 if response.status_code == 200:
-                    print(f"  [OK] 后端服务运行正常")
+                    print("  [OK] 后端服务运行正常")
                 else:
                     print(f"  [FAIL] 后端服务响应异常: {response.status_code}")
                     return False
@@ -71,10 +69,10 @@ async def test_subscription_history():
                         # 查找创建历史
                         create_history = [h for h in history_list if h.get("action") == "create"]
                         if create_history:
-                            print(f"  [OK] 创建历史记录已保存")
+                            print("  [OK] 创建历史记录已保存")
                             print(f"    描述: {create_history[0].get('description')}")
                         else:
-                            print(f"  [WARN] 未找到创建历史记录")
+                            print("  [WARN] 未找到创建历史记录")
                     else:
                         print(f"  [WARN] 获取历史记录失败: {history_response.status_code}")
                 else:
@@ -101,7 +99,7 @@ async def test_subscription_history():
                     json=update_data
                 )
                 if response.status_code == 200:
-                    print(f"  [OK] 订阅更新成功")
+                    print("  [OK] 订阅更新成功")
                     
                     # 等待一下
                     await asyncio.sleep(0.5)
@@ -118,12 +116,12 @@ async def test_subscription_history():
                         # 查找更新历史
                         update_history = [h for h in history_list if h.get("action") == "update"]
                         if update_history:
-                            print(f"  [OK] 更新历史记录已保存")
+                            print("  [OK] 更新历史记录已保存")
                             print(f"    描述: {update_history[0].get('description')}")
                             print(f"    旧值: {update_history[0].get('old_value')}")
                             print(f"    新值: {update_history[0].get('new_value')}")
                         else:
-                            print(f"  [WARN] 未找到更新历史记录")
+                            print("  [WARN] 未找到更新历史记录")
             except Exception as e:
                 print(f"  [FAIL] 更新订阅异常: {e}")
             
@@ -136,7 +134,7 @@ async def test_subscription_history():
                     f"{base_url}/subscriptions/{subscription_id}/disable"
                 )
                 if response.status_code == 200:
-                    print(f"  [OK] 订阅禁用成功")
+                    print("  [OK] 订阅禁用成功")
                     
                     # 等待一下
                     await asyncio.sleep(0.5)
@@ -153,11 +151,11 @@ async def test_subscription_history():
                         # 查找禁用历史
                         disable_history = [h for h in history_list if h.get("action") == "disable"]
                         if disable_history:
-                            print(f"  [OK] 禁用历史记录已保存")
+                            print("  [OK] 禁用历史记录已保存")
                             print(f"    描述: {disable_history[0].get('description')}")
                             print(f"    状态变更: {disable_history[0].get('old_value')} -> {disable_history[0].get('new_value')}")
                         else:
-                            print(f"  [WARN] 未找到禁用历史记录")
+                            print("  [WARN] 未找到禁用历史记录")
             except Exception as e:
                 print(f"  [FAIL] 禁用订阅异常: {e}")
             
@@ -173,7 +171,7 @@ async def test_subscription_history():
                     f"{base_url}/subscriptions/{subscription_id}/search"
                 )
                 if response.status_code == 200:
-                    print(f"  [OK] 搜索执行成功")
+                    print("  [OK] 搜索执行成功")
                     
                     # 等待一下
                     await asyncio.sleep(0.5)
@@ -190,12 +188,12 @@ async def test_subscription_history():
                         # 查找搜索历史
                         search_history = [h for h in history_list if h.get("action") == "search"]
                         if search_history:
-                            print(f"  [OK] 搜索历史记录已保存")
+                            print("  [OK] 搜索历史记录已保存")
                             print(f"    描述: {search_history[0].get('description')}")
                             print(f"    搜索关键词: {search_history[0].get('search_query')}")
                             print(f"    结果数量: {search_history[0].get('search_results_count')}")
                         else:
-                            print(f"  [WARN] 未找到搜索历史记录")
+                            print("  [WARN] 未找到搜索历史记录")
             except Exception as e:
                 print(f"  [FAIL] 执行搜索异常: {e}")
             
@@ -219,7 +217,7 @@ async def test_subscription_history():
                         action = h.get("action", "unknown")
                         action_counts[action] = action_counts.get(action, 0) + 1
                     
-                    print(f"  操作类型统计:")
+                    print("  操作类型统计:")
                     for action, count in action_counts.items():
                         print(f"    - {action}: {count} 条")
                 else:
@@ -254,7 +252,7 @@ async def test_subscription_history():
                     f"{base_url}/subscriptions/{subscription_id}"
                 )
                 if response.status_code == 200:
-                    print(f"  [OK] 订阅删除成功")
+                    print("  [OK] 订阅删除成功")
                 else:
                     print(f"  [WARN] 订阅删除失败: {response.status_code}")
             except Exception as e:

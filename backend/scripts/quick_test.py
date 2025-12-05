@@ -6,8 +6,6 @@
 import asyncio
 import httpx
 import sys
-import subprocess
-import time
 from pathlib import Path
 
 # 添加backend目录到路径
@@ -62,13 +60,13 @@ async def test_api_serialization():
                 data = response.json()
                 if "data" in data and "access_token" in data.get("data", {}):
                     auth_token = data["data"]["access_token"]
-                    print(f"[OK] 登录成功，获取Token")
+                    print("[OK] 登录成功，获取Token")
                 else:
                     print(f"[WARNING] 登录响应格式异常: {data}")
                     return False
             else:
                 print(f"[WARNING] 登录失败: {response.status_code}")
-                print(f"     尝试注册新用户...")
+                print("     尝试注册新用户...")
                 # 尝试注册
                 response = await client.post(
                     api_url("/auth/register"),
@@ -80,7 +78,7 @@ async def test_api_serialization():
                     }
                 )
                 if response.status_code in [200, 201]:
-                    print(f"[OK] 用户注册成功，重新登录...")
+                    print("[OK] 用户注册成功，重新登录...")
                     await asyncio.sleep(1)
                     response = await client.post(
                         api_url("/auth/login"),
@@ -93,9 +91,9 @@ async def test_api_serialization():
                         data = response.json()
                         if "data" in data and "access_token" in data.get("data", {}):
                             auth_token = data["data"]["access_token"]
-                            print(f"[OK] 登录成功，获取Token")
+                            print("[OK] 登录成功，获取Token")
                         else:
-                            print(f"[ERROR] 登录响应格式异常")
+                            print("[ERROR] 登录响应格式异常")
                             return False
                     else:
                         print(f"[ERROR] 登录失败: {response.status_code}")
@@ -131,15 +129,15 @@ async def test_api_serialization():
                 data = response.json()
                 # 检查响应格式
                 if "success" in data:
-                    print(f"[OK] 创建订阅成功，响应格式正确")
+                    print("[OK] 创建订阅成功，响应格式正确")
                     print(f"     success: {data.get('success')}")
                     if "data" in data:
-                        print(f"     data字段存在: [OK]")
+                        print("     data字段存在: [OK]")
                     else:
-                        print(f"     data字段缺失: [ERROR]")
+                        print("     data字段缺失: [ERROR]")
                     return True
                 else:
-                    print(f"[ERROR] 响应格式错误，缺少'success'字段")
+                    print("[ERROR] 响应格式错误，缺少'success'字段")
                     print(f"     Response: {data}")
                     return False
             else:
@@ -162,17 +160,17 @@ async def test_api_serialization():
             if response.status_code == 200:
                 data = response.json()
                 if "success" in data:
-                    print(f"[OK] 获取订阅列表成功，响应格式正确")
+                    print("[OK] 获取订阅列表成功，响应格式正确")
                     print(f"     success: {data.get('success')}")
                     if "data" in data:
-                        print(f"     data字段存在: [OK]")
+                        print("     data字段存在: [OK]")
                         if isinstance(data.get("data"), dict) and "items" in data.get("data", {}):
-                            print(f"     items字段存在: [OK]")
+                            print("     items字段存在: [OK]")
                     else:
-                        print(f"     data字段缺失: [ERROR]")
+                        print("     data字段缺失: [ERROR]")
                     return True
                 else:
-                    print(f"[ERROR] 响应格式错误，缺少'success'字段")
+                    print("[ERROR] 响应格式错误，缺少'success'字段")
                     print(f"     Response: {data}")
                     return False
             else:

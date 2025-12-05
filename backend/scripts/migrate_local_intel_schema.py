@@ -12,7 +12,7 @@ from loguru import logger
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import AsyncSessionLocal, engine
+from app.core.database import AsyncSessionLocal
 
 
 async def create_hr_cases_table(session: AsyncSession) -> Dict[str, Any]:

@@ -6,8 +6,6 @@
 import sys
 import os
 import asyncio
-import uvicorn
-from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
 # 添加项目根目录到Python路径
@@ -25,7 +23,7 @@ async def test_fastapi_startup():
         print("✅ FastAPI应用导入成功")
         
         # 检查应用的路由器
-        print(f"\n🔍 检查应用路由器:")
+        print("\n🔍 检查应用路由器:")
         print(f"   路由器数量: {len(app.routes)}")
         
         # 获取所有路由
@@ -46,12 +44,12 @@ async def test_fastapi_startup():
             if path and ("/manga/" in path or "/reading/" in path):
                 manga_routes.append(route)
         
-        print(f"\n📊 漫画相关路由统计:")
+        print("\n📊 漫画相关路由统计:")
         print(f"   总路由数量: {len(routes_info)}")
         print(f"   漫画相关路由数量: {len(manga_routes)}")
         
         if manga_routes:
-            print(f"\n📋 漫画相关路由详情:")
+            print("\n📋 漫画相关路由详情:")
             for i, route in enumerate(manga_routes[:10], 1):  # 只显示前10个
                 print(f"   {i}. {route['path']} - {route['methods']} - {route['tags']}")
             
@@ -61,7 +59,7 @@ async def test_fastapi_startup():
             print("❌ 未找到任何漫画相关路由")
         
         # 检查OpenAPI规范
-        print(f"\n🔍 检查OpenAPI规范...")
+        print("\n🔍 检查OpenAPI规范...")
         
         openapi_schema = get_openapi(
             title=app.title,
@@ -96,7 +94,7 @@ async def test_fastapi_startup():
         print(f"   漫画相关路径数量: {len(manga_paths)}")
         
         if manga_paths:
-            print(f"\n📋 漫画相关路径详情:")
+            print("\n📋 漫画相关路径详情:")
             for i, path in enumerate(manga_paths[:10], 1):
                 print(f"   {i}. {path}")
             
@@ -106,7 +104,7 @@ async def test_fastapi_startup():
             print("❌ 未找到任何漫画相关路径")
         
         # 检查API路由器的注册
-        print(f"\n🔍 检查API路由器注册...")
+        print("\n🔍 检查API路由器注册...")
         
         # 导入API路由器
         from app.api import api_router
@@ -123,7 +121,7 @@ async def test_fastapi_startup():
         print(f"   API路由器中的漫画路由数量: {len(manga_api_routes)}")
         
         if manga_api_routes:
-            print(f"\n📋 API路由器中的漫画路由:")
+            print("\n📋 API路由器中的漫画路由:")
             for i, path in enumerate(manga_api_routes[:10], 1):
                 print(f"   {i}. {path}")
         else:
@@ -140,7 +138,7 @@ async def test_fastapi_startup():
 async def test_manga_module_registration():
     """测试漫画模块的注册过程"""
     
-    print(f"\n🔍 测试漫画模块注册过程...")
+    print("\n🔍 测试漫画模块注册过程...")
     
     try:
         # 导入漫画模块

@@ -3,7 +3,6 @@
 """
 import sqlite3
 from pathlib import Path
-import os
 
 # 获取数据库路径
 db_path = Path(__file__).parent / "vabhub.db"

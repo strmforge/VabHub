@@ -52,23 +52,23 @@ def test_manga_module_imports():
             print(f"❌ {module_name} 导入时发生未知错误: {e}")
             failed_modules.append((module_name, str(e)))
     
-    print(f"\n📊 导入测试结果:")
+    print("\n📊 导入测试结果:")
     print(f"   成功: {success_count}/{len(manga_modules)}")
     print(f"   失败: {len(failed_modules)}")
     
     if failed_modules:
-        print(f"\n❌ 失败的模块:")
+        print("\n❌ 失败的模块:")
         for module_name, error in failed_modules:
             print(f"   - {module_name}: {error}")
         return False
     else:
-        print(f"\n🎉 所有漫画模块导入成功!")
+        print("\n🎉 所有漫画模块导入成功!")
         return True
 
 def test_manga_models_imports():
     """测试漫画相关模型的导入"""
     
-    print(f"\n🔍 测试漫画相关模型导入...")
+    print("\n🔍 测试漫画相关模型导入...")
     
     manga_models = [
         "MangaSeriesLocal",
@@ -104,7 +104,7 @@ def test_manga_models_imports():
             print(f"❌ {model_name} 导入时发生未知错误: {e}")
             failed_models.append((model_name, str(e)))
     
-    print(f"\n📊 模型导入测试结果:")
+    print("\n📊 模型导入测试结果:")
     print(f"   成功: {success_count}/{len(manga_models)}")
     
     if failed_models:
@@ -113,13 +113,13 @@ def test_manga_models_imports():
             print(f"   - {model_name}: {error}")
         return False
     else:
-        print(f"🎉 所有漫画模型导入成功!")
+        print("🎉 所有漫画模型导入成功!")
         return True
 
 def test_manga_services_imports():
     """测试漫画相关服务的导入"""
     
-    print(f"\n🔍 测试漫画相关服务导入...")
+    print("\n🔍 测试漫画相关服务导入...")
     
     manga_services = [
         "manga_sync_service",
@@ -145,7 +145,7 @@ def test_manga_services_imports():
             print(f"❌ {service_name} 导入时发生未知错误: {e}")
             failed_services.append((service_name, str(e)))
     
-    print(f"\n📊 服务导入测试结果:")
+    print("\n📊 服务导入测试结果:")
     print(f"   成功: {success_count}/{len(manga_services)}")
     
     if failed_services:
@@ -154,7 +154,7 @@ def test_manga_services_imports():
             print(f"   - {service_name}: {error}")
         return False
     else:
-        print(f"🎉 所有漫画服务导入成功!")
+        print("🎉 所有漫画服务导入成功!")
         return True
 
 def main():

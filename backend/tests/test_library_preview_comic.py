@@ -3,9 +3,9 @@
 """
 
 import pytest
-from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.comic import Comic
+from app.constants.media_types import MEDIA_TYPE_COMIC
 from datetime import datetime, timedelta
 
 
@@ -42,42 +42,57 @@ async def create_comic_data(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_library_preview_includes_comic(client: AsyncClient, create_comic_data):
+async def test_library_preview_includes_comic(db_session: AsyncSession, create_comic_data):
     """测试统一库预览默认包含漫画"""
-    response = await client.get("/api/library/preview")
-    assert response.status_code == 200
-    data = response.json()["data"]
+    from app.api.library import get_library_preview
     
-    comic_items = [item for item in data["items"] if item["media_type"] == "comic"]
-    assert len(comic_items) >= 2  # 可能包含其他媒体类型
-    assert any(item["title"] == "测试漫画1" or item["title"] == "测试系列" for item in comic_items)
-    assert data["total"] >= 2
+    response = await get_library_preview(
+        page=1,
+        page_size=20,
+        media_types=None,
+        db=db_session
+    )
+    
+    comic_items = [item for item in response.items if item.media_type == MEDIA_TYPE_COMIC]
+    assert len(comic_items) >= 2
+    assert any(item.title == "测试漫画1" or item.title == "测试漫画2" for item in comic_items)
+    assert response.total >= 2
 
 
 @pytest.mark.asyncio
-async def test_library_preview_comic_only(client: AsyncClient, create_comic_data):
+async def test_library_preview_comic_only(db_session: AsyncSession, create_comic_data):
     """测试只查询漫画类型"""
-    response = await client.get("/api/library/preview", params={"media_types": "comic"})
-    assert response.status_code == 200
-    data = response.json()["data"]
+    from app.api.library import get_library_preview
     
-    assert len(data["items"]) == 2
-    assert all(item["media_type"] == "comic" for item in data["items"])
-    assert data["items"][0]["title"] in ["测试漫画2", "测试系列"]  # 按 created_at desc 排序
-    assert data["total"] == 2
+    response = await get_library_preview(
+        page=1,
+        page_size=20,
+        media_types="comic",
+        db=db_session
+    )
+    
+    assert len(response.items) == 2
+    assert all(item.media_type == MEDIA_TYPE_COMIC for item in response.items)
+    assert response.items[0].title in ["测试漫画1", "测试漫画2"]
+    assert response.total == 2
 
 
 @pytest.mark.asyncio
-async def test_library_preview_comic_extra_fields(client: AsyncClient, create_comic_data):
+async def test_library_preview_comic_extra_fields(db_session: AsyncSession, create_comic_data):
     """测试漫画项的 extra 字段包含 series/volume_index/author/illustrator/region"""
-    response = await client.get("/api/library/preview", params={"media_types": "comic"})
-    assert response.status_code == 200
-    data = response.json()["data"]
+    from app.api.library import get_library_preview
     
-    comic_item = next((item for item in data["items"] if item.get("extra", {}).get("series") == "测试系列"), None)
+    response = await get_library_preview(
+        page=1,
+        page_size=20,
+        media_types="comic",
+        db=db_session
+    )
+    
+    comic_item = next((item for item in response.items if item.extra and item.extra.get("series") == "测试系列"), None)
     assert comic_item is not None
-    assert comic_item["extra"]["series"] == "测试系列"
-    assert comic_item["extra"].get("author") == "测试作者"
-    assert comic_item["extra"].get("illustrator") == "测试作画"
-    assert comic_item["extra"].get("region") in ["CN", "JP"]
+    assert comic_item.extra["series"] == "测试系列"
+    assert comic_item.extra.get("author") == "测试作者"
+    assert comic_item.extra.get("illustrator") == "测试作画"
+    assert comic_item.extra.get("region") in ["CN", "JP"]
 

@@ -47,7 +47,7 @@ async def test_api():
             response = await client.post(api_url("/auth/register"), json=register_data)
             if response.status_code == 201:
                 user_data = response.json()
-                print(f"  [OK] 用户注册成功")
+                print("  [OK] 用户注册成功")
                 print(f"    用户ID: {user_data.get('id')}")
                 print(f"    用户名: {user_data.get('username')}")
                 print(f"    邮箱: {user_data.get('email')}")
@@ -72,7 +72,7 @@ async def test_api():
             if response.status_code == 200:
                 token_data = response.json()
                 access_token = token_data.get("access_token")
-                print(f"  [OK] 用户登录成功")
+                print("  [OK] 用户登录成功")
                 print(f"    Token: {access_token[:50]}...")
             else:
                 print(f"  [FAIL] 用户登录失败: {response.status_code}")
@@ -89,7 +89,7 @@ async def test_api():
             )
             if response.status_code == 200:
                 user_data = response.json()
-                print(f"  [OK] 获取用户信息成功")
+                print("  [OK] 获取用户信息成功")
                 print(f"    用户名: {user_data.get('username')}")
                 print(f"    邮箱: {user_data.get('email')}")
                 print(f"    全名: {user_data.get('full_name')}")
@@ -107,7 +107,7 @@ async def test_api():
                 headers={"Authorization": "Bearer invalid_token_12345"}
             )
             if response.status_code == 401:
-                print(f"  [OK] 无效Token正确拒绝 (401)")
+                print("  [OK] 无效Token正确拒绝 (401)")
             else:
                 print(f"  [WARN] 无效Token测试: {response.status_code}")
             

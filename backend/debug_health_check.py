@@ -23,7 +23,7 @@ def debug_health_check():
                     message = check_result.get('message', '无消息')
                     print(f"  {check_name}: {status} - {message}")
         else:
-            print(f"❌ 健康检查失败")
+            print("❌ 健康检查失败")
             try:
                 error_data = response.json()
                 print(f"错误信息: {json.dumps(error_data, indent=2, ensure_ascii=False)}")

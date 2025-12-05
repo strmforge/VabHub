@@ -59,7 +59,7 @@ async def test_douban_fallback():
                     title = result.get("title", "未知")
                     year = result.get("year", "未知")
                     
-                    print(f"✅ 识别成功")
+                    print("✅ 识别成功")
                     print(f"   标题: {title}")
                     print(f"   年份: {year}")
                     print(f"   数据源: {source}")
@@ -76,7 +76,7 @@ async def test_douban_fallback():
                         if douban_id:
                             print(f"   ✅ 豆瓣ID: {douban_id}")
                         else:
-                            print(f"   ⚠️  缺少豆瓣ID")
+                            print("   ⚠️  缺少豆瓣ID")
                         
                         rating = result.get("rating")
                         if rating:

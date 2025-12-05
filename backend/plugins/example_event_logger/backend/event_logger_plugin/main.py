@@ -25,7 +25,7 @@ def setup_plugin(ctx: PluginContext, bus: EventBus, sdk: VabHubSDK) -> None:
         sdk: VabHub SDK 实例，提供日志、HTTP、通知等能力
     """
     sdk.log.info("=" * 50)
-    sdk.log.info(f"事件日志示例插件已加载")
+    sdk.log.info("事件日志示例插件已加载")
     sdk.log.info(f"插件 ID: {ctx.plugin_id}")
     sdk.log.info(f"数据目录: {ctx.data_dir}")
     sdk.log.info(f"应用版本: {sdk.env.app_version}")

@@ -53,7 +53,7 @@ class InboxRunOnceResponse(BaseModel):
     items: List[InboxRunOnceItem]
 
 
-@router.get("/preview", response_model=InboxPreviewResponse, summary="Dev: 预览统一收件箱分类结果")
+@router.get("/preview", summary="Dev: 预览统一收件箱分类结果")
 async def preview_inbox(
     db: AsyncSession = Depends(get_db)
 ):
@@ -99,7 +99,7 @@ async def preview_inbox(
         )
 
 
-@router.post("/run-once", response_model=InboxRunOnceResponse, summary="Dev: 执行一次统一收件箱处理")
+@router.post("/run-once", summary="Dev: 执行一次统一收件箱处理")
 async def run_inbox_once(
     db: AsyncSession = Depends(get_db)
 ):

@@ -88,19 +88,19 @@ async def test_transmission_labels():
                 
                 # 尝试设置标签
                 if "VABHUB" not in labels_list:
-                    logger.info(f"  尝试添加VABHUB标签...")
+                    logger.info("  尝试添加VABHUB标签...")
                     result = await client.client.set_torrent_labels([torrent_id], labels_list + ["VABHUB"])
                     if result:
-                        logger.info(f"  ✓ 标签设置成功")
+                        logger.info("  ✓ 标签设置成功")
                         # 重新获取任务信息验证
                         updated_torrents = await client.client.get_torrents(ids=[torrent_id])
                         if updated_torrents:
                             updated_labels = updated_torrents[0].get("labels", [])
                             logger.info(f"  更新后标签: {updated_labels}")
                     else:
-                        logger.error(f"  ✗ 标签设置失败")
+                        logger.error("  ✗ 标签设置失败")
                 else:
-                    logger.info(f"  ✓ 已有VABHUB标签")
+                    logger.info("  ✓ 已有VABHUB标签")
                 
                 logger.info("")
             

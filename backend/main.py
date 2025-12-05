@@ -3,13 +3,12 @@ VabHub 后端主应用
 基于FastAPI的现代化媒体管理平台
 """
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 import uvicorn
-import os
 from pathlib import Path
 from contextlib import asynccontextmanager
 from datetime import datetime

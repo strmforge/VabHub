@@ -23,7 +23,6 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy import text
 from app.core.database import engine, AsyncSessionLocal
 from app.modules.hr_case.models import HrCase
-from app.core.database import Base
 
 
 async def check_table_exists(session, table_name: str) -> bool:
@@ -111,9 +110,9 @@ async def create_hr_cases_table():
                 default_val = col[4] if col[4] else ""
                 print(f"  {col_name:<23} | {col_type:<13} | {not_null:<6} | {default_val}")
         
-        print(f"\n🎉 HR案件系统数据库迁移完成！")
+        print("\n🎉 HR案件系统数据库迁移完成！")
         print(f"   迁移时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"   下一步: 可以开始使用 HrCasesRepository")
+        print("   下一步: 可以开始使用 HrCasesRepository")
         
     except Exception as e:
         print(f"❌ 迁移失败: {e}")
@@ -136,7 +135,7 @@ async def verify_migration():
         ))
         indexes = result.fetchall()
         
-        print(f"  ✅ hr_cases 表存在")
+        print("  ✅ hr_cases 表存在")
         print(f"  ✅ 创建了 {len(indexes)} 个索引")
         
         # 测试插入一条记录

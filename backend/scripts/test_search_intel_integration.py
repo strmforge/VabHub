@@ -10,10 +10,9 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(project_root))
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.modules.search.service import SearchService
 from app.core.config import settings
-from loguru import logger
 
 
 async def test_search_intel_integration():
@@ -23,7 +22,7 @@ async def test_search_intel_integration():
     print("=" * 60)
     print()
     
-    print(f"当前配置:")
+    print("当前配置:")
     print(f"  INTEL_ENABLED: {settings.INTEL_ENABLED}")
     print(f"  INTEL_MODE: {settings.INTEL_MODE}")
     print(f"  INTEL_FALLBACK_TO_LOCAL: {settings.INTEL_FALLBACK_TO_LOCAL}")
@@ -58,10 +57,10 @@ async def test_search_intel_integration():
                     enable_query_expansion=False  # 禁用查询扩展，专注于Intel测试
                 )
                 print(f"  [OK] 搜索完成，返回 {len(results)} 条结果")
-                print(f"  [INFO] Intel服务已集成到搜索流程")
+                print("  [INFO] Intel服务已集成到搜索流程")
             except Exception as e:
                 print(f"  [WARN] 搜索测试失败（可能是搜索引擎未配置）: {e}")
-                print(f"  [INFO] 但Intel服务集成正常（已注入到SearchService）")
+                print("  [INFO] 但Intel服务集成正常（已注入到SearchService）")
             print()
             
             # 测试3: 测试Intel服务直接调用

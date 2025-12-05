@@ -20,13 +20,13 @@ def test_manga_sync_module():
         
         # 检查路由器的属性
         router = manga_sync.router
-        print(f"📊 路由器信息:")
+        print("📊 路由器信息:")
         print(f"   前缀(prefix): {router.prefix}")
         print(f"   标签(tags): {router.tags}")
         print(f"   路由数量: {len(router.routes)}")
         
         # 检查路由详情
-        print(f"\n🔍 路由详情:")
+        print("\n🔍 路由详情:")
         for i, route in enumerate(router.routes):
             print(f"   {i+1}. 路径: {route.path}")
             print(f"      方法: {route.methods}")
@@ -51,7 +51,7 @@ def test_manga_sync_module():
             print(f"❌ 缺少预期路由: {missing_paths}")
             return False
         else:
-            print(f"✅ 所有预期路由都存在!")
+            print("✅ 所有预期路由都存在!")
             return True
             
     except ImportError as e:

@@ -12,7 +12,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from sqlalchemy import text
-from app.core.database import engine, AsyncSessionLocal
+from app.core.database import engine
 from app.core.config import settings
 from loguru import logger
 

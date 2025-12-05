@@ -13,7 +13,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 from app.core.database import AsyncSessionLocal, init_db
 from app.modules.media_server.service import MediaServerService
 from app.modules.scheduler.monitor import SchedulerMonitor
-from app.core.scheduler import get_scheduler
 from loguru import logger
 
 
@@ -106,7 +105,7 @@ async def test_scheduler_monitor():
             # 测试3: 获取统计信息
             logger.info("\n[测试3] 获取统计信息...")
             stats = await monitor.get_overall_statistics()
-            logger.info(f"✅ 获取成功:")
+            logger.info("✅ 获取成功:")
             logger.info(f"   总任务数: {stats.get('total_tasks', 0)}")
             logger.info(f"   启用任务数: {stats.get('enabled_tasks', 0)}")
             logger.info(f"   总体成功率: {stats.get('overall_success_rate', 0):.2f}%")

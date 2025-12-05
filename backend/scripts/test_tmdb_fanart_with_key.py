@@ -13,7 +13,6 @@ sys.path.insert(0, str(project_root))
 from app.modules.fanart import FanartModule
 from app.modules.media_identification.service import MediaIdentificationService
 from app.core.database import AsyncSessionLocal
-from app.core.config import settings
 from loguru import logger
 
 # 用户提供的TMDB API key（仅用于测试，不写入系统）
@@ -105,7 +104,7 @@ async def test_tmdb_details(tmdb_id: int, media_type: str = "movie"):
             details = await get_tmdb_tv_details(tmdb_id, TEST_TMDB_API_KEY)
         
         if details:
-            print(f"[OK] 获取TMDB详情成功")
+            print("[OK] 获取TMDB详情成功")
             print(f"   - 标题: {details.get('title') or details.get('name', 'N/A')}")
             print(f"   - 年份: {details.get('release_date', 'N/A')[:4] if details.get('release_date') else details.get('first_air_date', 'N/A')[:4] if details.get('first_air_date') else 'N/A'}")
             print(f"   - TMDB ID: {details.get('id', 'N/A')}")

@@ -2,7 +2,6 @@
 测试漫画API是否真的可用
 """
 import requests
-import json
 import sys
 
 # 后端服务地址

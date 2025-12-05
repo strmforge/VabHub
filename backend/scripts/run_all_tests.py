@@ -2,7 +2,6 @@
 运行所有实际场景测试脚本
 """
 
-import asyncio
 import sys
 import subprocess
 from pathlib import Path

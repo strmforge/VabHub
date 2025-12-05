@@ -107,7 +107,7 @@ async def test_user_info():
                                 result = json.loads(response_text)
                                 logger.info(f"   JSON解析成功: {json.dumps(result, indent=2, ensure_ascii=False)[:500]}")
                             except:
-                                logger.warning(f"   响应不是JSON格式")
+                                logger.warning("   响应不是JSON格式")
                 except Exception as e:
                     logger.error(f"   请求失败: {e}")
                 

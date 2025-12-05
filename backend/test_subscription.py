@@ -4,7 +4,6 @@
 
 import asyncio
 import httpx
-import json
 
 from scripts.api_test_config import API_BASE_URL, api_url
 
@@ -94,7 +93,7 @@ async def test_subscription():
             )
             if response.status_code == 200:
                 subscription = response.json()
-                print(f"[OK] 获取订阅详情成功")
+                print("[OK] 获取订阅详情成功")
                 print(f"  标题: {subscription['title']}")
             else:
                 print(f"[FAIL] 获取订阅详情失败: {response.status_code}")
@@ -117,7 +116,7 @@ async def test_subscription():
             )
             if response.status_code == 200:
                 subscription = response.json()
-                print(f"[OK] 更新订阅成功")
+                print("[OK] 更新订阅成功")
                 print(f"  新标题: {subscription['title']}")
                 print(f"  新最小做种数: {subscription['min_seeders']}")
             else:
@@ -133,7 +132,7 @@ async def test_subscription():
                 headers=headers
             )
             if response.status_code == 200:
-                print(f"[OK] 禁用订阅成功")
+                print("[OK] 禁用订阅成功")
             else:
                 print(f"[WARN] 禁用订阅失败: {response.status_code}")
         except Exception as e:
@@ -147,7 +146,7 @@ async def test_subscription():
                 headers=headers
             )
             if response.status_code == 204:
-                print(f"[OK] 删除订阅成功")
+                print("[OK] 删除订阅成功")
             else:
                 print(f"[WARN] 删除订阅失败: {response.status_code}")
         except Exception as e:

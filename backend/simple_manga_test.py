@@ -12,7 +12,7 @@ try:
         openapi_spec = response.json()
         paths = list(openapi_spec["paths"].keys())
         
-        print(f"✅ OpenAPI规范获取成功")
+        print("✅ OpenAPI规范获取成功")
         print(f"路径总数: {len(paths)}")
         
         # 查找漫画相关路径

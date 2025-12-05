@@ -35,9 +35,9 @@ async def test_vabhub_tag_filter_simple():
             
             try:
                 downloads_default = await service.list_downloads()
-                logger.info(f"✅ 默认行为测试成功")
+                logger.info("✅ 默认行为测试成功")
                 logger.info(f"   返回任务数: {len(downloads_default)}")
-                logger.info(f"   说明: 默认只显示VABHUB标签的任务")
+                logger.info("   说明: 默认只显示VABHUB标签的任务")
                 
                 if downloads_default:
                     logger.info("")
@@ -58,7 +58,7 @@ async def test_vabhub_tag_filter_simple():
             
             try:
                 downloads_filtered = await service.list_downloads(vabhub_only=True)
-                logger.info(f"✅ vabhub_only=True测试成功")
+                logger.info("✅ vabhub_only=True测试成功")
                 logger.info(f"   返回任务数: {len(downloads_filtered)}")
             except Exception as e:
                 logger.error(f"❌ vabhub_only=True测试失败: {e}")
@@ -71,9 +71,9 @@ async def test_vabhub_tag_filter_simple():
             
             try:
                 downloads_all = await service.list_downloads(vabhub_only=False)
-                logger.info(f"✅ vabhub_only=False测试成功")
+                logger.info("✅ vabhub_only=False测试成功")
                 logger.info(f"   返回任务数: {len(downloads_all)}")
-                logger.info(f"   说明: 显示所有任务（包括没有VABHUB标签的）")
+                logger.info("   说明: 显示所有任务（包括没有VABHUB标签的）")
             except Exception as e:
                 logger.error(f"❌ vabhub_only=False测试失败: {e}")
         

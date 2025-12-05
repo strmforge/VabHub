@@ -82,7 +82,7 @@ async def test_fanart_with_default_config():
     print("测试2: Fanart模块测试（使用系统默认配置）")
     print("="*60)
     
-    print(f"\n[2.1] Fanart配置状态:")
+    print("\n[2.1] Fanart配置状态:")
     print(f"   - Fanart启用: {settings.FANART_ENABLE}")
     print(f"   - Fanart API Key: {settings.FANART_API_KEY[:20] if settings.FANART_API_KEY else 'N/A'}...")
     

@@ -24,6 +24,9 @@ class UserNotification(Base):
     # 通知类型
     type = Column(String(50), nullable=False, index=True)  # NotificationType枚举
     
+    # 严重程度（success/warning/error/info）
+    severity = Column(String(20), nullable=True, default="info")
+    
     # 媒体类型（用 ReadingMediaType，方便前端路由）
     media_type = Column(String(20), nullable=True)  # ReadingMediaType枚举
     

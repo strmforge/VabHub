@@ -13,9 +13,8 @@ import argparse
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from loguru import logger
 
 from app.core.migrations import run_migrations
 

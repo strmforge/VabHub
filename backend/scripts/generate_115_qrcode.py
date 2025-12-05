@@ -19,9 +19,6 @@ from app.core.cloud_storage.providers.cloud_115 import Cloud115Provider
 from app.core.cloud_key_manager import get_key_manager
 from loguru import logger
 import qrcode
-from io import BytesIO
-import base64
-from PIL import Image
 
 
 def display_qr_code(qr_content: str):

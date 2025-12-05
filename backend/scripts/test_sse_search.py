@@ -4,7 +4,6 @@
 """
 import asyncio
 import sys
-import json
 from pathlib import Path
 
 # 添加项目根目录到路径

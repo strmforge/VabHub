@@ -5,7 +5,6 @@
 import asyncio
 import httpx
 import json
-from datetime import datetime
 
 API_BASE_URL = "http://localhost:8000"
 API_PREFIX = "/api/v1"

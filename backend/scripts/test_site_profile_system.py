@@ -13,9 +13,6 @@ project_root = backend_dir.parent
 sys.path.insert(0, str(backend_dir))
 sys.path.insert(0, str(project_root))
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import AsyncSessionLocal, init_db
-from app.models.site import Site
 from app.modules.site_profile.loader import SiteProfileLoader
 from app.modules.site_profile.verifier import SiteVerifier
 from app.modules.site_profile.parser import SiteParser
@@ -84,7 +81,7 @@ async def test_site_identification():
     
     # 注意：实际识别需要访问真实站点，这里只测试逻辑
     print("[INFO] 站点识别需要访问真实站点，跳过实际验证")
-    print(f"[OK] 站点识别服务初始化成功")
+    print("[OK] 站点识别服务初始化成功")
     
     # 测试获取站点类型
     family = profile_service.get_site_family(test_site)

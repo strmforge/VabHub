@@ -4,7 +4,6 @@
 
 import asyncio
 import httpx
-import json
 
 from scripts.api_test_config import API_BASE_URL, api_url
 

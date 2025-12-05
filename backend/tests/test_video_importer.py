@@ -14,6 +14,7 @@ from app.core.database import Base
 from app.modules.video.importer import VideoImporter
 from app.constants.media_types import MEDIA_TYPE_MOVIE, MEDIA_TYPE_TV, MEDIA_TYPE_ANIME, MEDIA_TYPE_SHORT_DRAMA
 import app.core.config as config_module
+import app.modules.video.importer as importer_module
 
 
 @pytest.fixture(name="db_session")
@@ -42,10 +43,12 @@ def temp_video_file(tmp_path):
     return video_file
 
 
-def test_video_importer_uses_movie_library_root_for_movie(tmp_path, db_session, temp_video_file, monkeypatch):
+@pytest.mark.asyncio
+async def test_video_importer_uses_movie_library_root_for_movie(tmp_path, db_session, temp_video_file, monkeypatch):
     """测试电影使用 MOVIE_LIBRARY_ROOT"""
     movie_root = tmp_path / "movies"
     monkeypatch.setattr(config_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
+    monkeypatch.setattr(importer_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
     
     importer = VideoImporter(db_session)
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_MOVIE)
@@ -53,10 +56,12 @@ def test_video_importer_uses_movie_library_root_for_movie(tmp_path, db_session, 
     assert library_root == movie_root
 
 
-def test_video_importer_tv_uses_tv_library_root(tmp_path, db_session, monkeypatch):
+@pytest.mark.asyncio
+async def test_video_importer_tv_uses_tv_library_root(tmp_path, db_session, monkeypatch):
     """测试电视剧使用 TV_LIBRARY_ROOT"""
     tv_root = tmp_path / "tv"
     monkeypatch.setattr(config_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
+    monkeypatch.setattr(importer_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
     
     importer = VideoImporter(db_session)
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_TV)
@@ -64,7 +69,8 @@ def test_video_importer_tv_uses_tv_library_root(tmp_path, db_session, monkeypatc
     assert library_root == tv_root
 
 
-def test_video_importer_anime_uses_anime_library_root_or_tv(tmp_path, db_session, monkeypatch):
+@pytest.mark.asyncio
+async def test_video_importer_anime_uses_anime_library_root_or_tv(tmp_path, db_session, monkeypatch):
     """测试动漫使用 ANIME_LIBRARY_ROOT 或回退到 TV_LIBRARY_ROOT"""
     anime_root = tmp_path / "anime"
     tv_root = tmp_path / "tv"
@@ -72,6 +78,8 @@ def test_video_importer_anime_uses_anime_library_root_or_tv(tmp_path, db_session
     # 测试配置了 ANIME_LIBRARY_ROOT
     monkeypatch.setattr(config_module.settings, "ANIME_LIBRARY_ROOT", str(anime_root))
     monkeypatch.setattr(config_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
+    monkeypatch.setattr(importer_module.settings, "ANIME_LIBRARY_ROOT", str(anime_root))
+    monkeypatch.setattr(importer_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
     
     importer = VideoImporter(db_session)
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_ANIME)
@@ -80,12 +88,14 @@ def test_video_importer_anime_uses_anime_library_root_or_tv(tmp_path, db_session
     
     # 测试未配置 ANIME_LIBRARY_ROOT 时回退到 TV_LIBRARY_ROOT
     monkeypatch.setattr(config_module.settings, "ANIME_LIBRARY_ROOT", None)
+    monkeypatch.setattr(importer_module.settings, "ANIME_LIBRARY_ROOT", None)
     
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_ANIME)
     assert library_root == tv_root
 
 
-def test_video_importer_short_drama_uses_tv_or_short_drama_root(tmp_path, db_session, monkeypatch):
+@pytest.mark.asyncio
+async def test_video_importer_short_drama_uses_tv_or_short_drama_root(tmp_path, db_session, monkeypatch):
     """测试短剧使用 SHORT_DRAMA_LIBRARY_ROOT 或回退到 TV_LIBRARY_ROOT"""
     short_drama_root = tmp_path / "short_drama"
     tv_root = tmp_path / "tv"
@@ -93,6 +103,8 @@ def test_video_importer_short_drama_uses_tv_or_short_drama_root(tmp_path, db_ses
     # 测试配置了 SHORT_DRAMA_LIBRARY_ROOT
     monkeypatch.setattr(config_module.settings, "SHORT_DRAMA_LIBRARY_ROOT", str(short_drama_root))
     monkeypatch.setattr(config_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
+    monkeypatch.setattr(importer_module.settings, "SHORT_DRAMA_LIBRARY_ROOT", str(short_drama_root))
+    monkeypatch.setattr(importer_module.settings, "TV_LIBRARY_ROOT", str(tv_root))
     
     importer = VideoImporter(db_session)
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_SHORT_DRAMA)
@@ -101,6 +113,7 @@ def test_video_importer_short_drama_uses_tv_or_short_drama_root(tmp_path, db_ses
     
     # 测试未配置 SHORT_DRAMA_LIBRARY_ROOT 时回退到 TV_LIBRARY_ROOT
     monkeypatch.setattr(config_module.settings, "SHORT_DRAMA_LIBRARY_ROOT", None)
+    monkeypatch.setattr(importer_module.settings, "SHORT_DRAMA_LIBRARY_ROOT", None)
     
     library_root = importer._get_library_root_for_media_type(MEDIA_TYPE_SHORT_DRAMA)
     assert library_root == tv_root
@@ -111,6 +124,7 @@ async def test_video_importer_calls_organizer(tmp_path, db_session, temp_video_f
     """测试 VideoImporter 调用 MediaOrganizer"""
     movie_root = tmp_path / "movies"
     monkeypatch.setattr(config_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
+    monkeypatch.setattr(importer_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
     
     importer = VideoImporter(db_session)
     
@@ -156,6 +170,7 @@ async def test_video_importer_handles_organizer_failure(tmp_path, db_session, te
     """测试 VideoImporter 处理 MediaOrganizer 失败的情况"""
     movie_root = tmp_path / "movies"
     monkeypatch.setattr(config_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
+    monkeypatch.setattr(importer_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
     
     importer = VideoImporter(db_session)
     
@@ -181,6 +196,7 @@ async def test_video_importer_handles_exception(tmp_path, db_session, temp_video
     """测试 VideoImporter 处理异常"""
     movie_root = tmp_path / "movies"
     monkeypatch.setattr(config_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
+    monkeypatch.setattr(importer_module.settings, "MOVIE_LIBRARY_ROOT", str(movie_root))
     
     importer = VideoImporter(db_session)
     

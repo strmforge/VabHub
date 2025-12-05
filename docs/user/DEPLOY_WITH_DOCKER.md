@@ -284,7 +284,25 @@ backend:
 
 ## §4. 升级与备份
 
-### 升级 VabHub
+### 升级 VabHub（推荐：使用预构建镜像）
+
+VabHub 在 CI 通过后会自动构建并推送 Docker 镜像到 GHCR。推荐使用预构建镜像进行升级：
+
+```bash
+# 拉取最新镜像
+docker compose pull
+
+# 重启服务
+docker compose up -d
+```
+
+镜像地址：
+- 后端：`ghcr.io/strmforge/vabhub-backend:latest`
+- 前端：`ghcr.io/strmforge/vabhub-frontend:latest`
+
+### 升级 VabHub（本地构建）
+
+如果需要本地构建（开发/自定义场景）：
 
 1. 获取最新代码：
    ```bash
@@ -293,7 +311,7 @@ git pull
 
 2. 重新构建并启动服务：
    ```bash
-docker compose pull && docker compose up -d --build
+docker compose up -d --build
    ```
 
 ### 备份数据

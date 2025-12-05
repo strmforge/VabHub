@@ -14,7 +14,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from app.core.intel_local.models import HRTorrentState, HRStatus, TorrentLife
-from app.core.intel_local.hr_state import _HR_STATE_CACHE, get_hr_state_for_torrent
+from app.core.intel_local.hr_state import _HR_STATE_CACHE
 from app.modules.hr_case.repository import SqlAlchemyHrCasesRepository, from_hr_torrent_state, to_hr_torrent_state
 
 
@@ -58,7 +58,7 @@ async def test_dual_write_functionality():
         cache_key = (site_key, torrent_id)
         if cache_key in _HR_STATE_CACHE:
             cache_state = _HR_STATE_CACHE[cache_key]
-            print(f"   ✅ 内存缓存已更新")
+            print("   ✅ 内存缓存已更新")
             print(f"   ✅ 缓存状态: {cache_state.hr_status.value}, 做种时间: {cache_state.seeded_hours}h")
             
             # 验证数据一致性

@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from app.core.database import AsyncSessionLocal
 from app.modules.site_manager.service import SiteManagerService
-from app.schemas.site_manager import SiteBrief, SiteUpdatePayload, SiteAccessConfigPayload, SiteListFilter
+from app.schemas.site_manager import SiteListFilter
 from loguru import logger
 
 async def test_site_manager_service():

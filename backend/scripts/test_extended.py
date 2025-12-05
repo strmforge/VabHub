@@ -105,10 +105,8 @@ class ExtendedTester:
         
         try:
             from app.core.schemas import (
-                BaseResponse,
                 success_response,
-                error_response,
-                PaginatedResponse
+                error_response
             )
             
             # 测试成功响应

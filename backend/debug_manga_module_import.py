@@ -61,11 +61,10 @@ def main():
     # 检查API路由器中的漫画路由
     print("\n=== 检查API路由器中的漫画路由 ===")
     try:
-        import app.api
         api_module = sys.modules['app.api']
         if hasattr(api_module, 'api_router'):
             api_router = api_module.api_router
-            print(f"✅ api_router 存在")
+            print("✅ api_router 存在")
             
             # 统计漫画相关路由
             manga_routes = []

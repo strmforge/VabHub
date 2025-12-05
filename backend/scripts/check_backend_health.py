@@ -5,7 +5,6 @@
 import asyncio
 import httpx
 import sys
-from datetime import datetime
 
 
 async def check_backend_health():
@@ -46,11 +45,11 @@ async def check_backend_health():
                     
                     print()
                 except httpx.ConnectError:
-                    print(f"  [FAIL] 无法连接到后端服务")
-                    print(f"  请确保后端服务正在运行: python main.py")
+                    print("  [FAIL] 无法连接到后端服务")
+                    print("  请确保后端服务正在运行: python main.py")
                     return False
                 except httpx.TimeoutException:
-                    print(f"  [FAIL] 请求超时")
+                    print("  [FAIL] 请求超时")
                     return False
                 except Exception as e:
                     print(f"  [FAIL] 请求异常: {e}")

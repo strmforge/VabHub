@@ -7,7 +7,6 @@ import asyncio
 from sqlalchemy import text
 from app.core.database import engine, init_db, close_db
 from app.core.config import settings
-from loguru import logger
 
 
 async def migrate_subscription():

@@ -13,7 +13,6 @@ sys.path.insert(0, str(project_root))
 
 from app.core.cache import get_cache, cached
 from app.core.health import get_health_checker
-from loguru import logger
 
 
 async def test_cache_system():

@@ -24,13 +24,22 @@ def setup_inbox_settings(monkeypatch):
 
 @pytest.fixture
 def mock_db_session():
-    return AsyncMock(spec=AsyncSession)
+    session = AsyncMock(spec=AsyncSession)
+    # Mock execute().scalar_one_or_none() 返回 None（表示没有已存在的导入记录）
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    session.execute.return_value = mock_result
+    return session
 
 
 @pytest.fixture
 def mock_novel_pipeline():
     pipeline = AsyncMock(spec=NovelToEbookPipeline)
-    pipeline.run.return_value = Path("/mock/epub/output.epub")
+    # run 返回 NovelPipelineResult 对象，包含 ebook 属性
+    mock_result = MagicMock()
+    mock_result.epub_path = Path("/mock/epub/output.epub")
+    mock_result.ebook = MagicMock(id=1, title="Test Novel")
+    pipeline.run.return_value = mock_result
     return pipeline
 
 

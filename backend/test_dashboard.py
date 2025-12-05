@@ -25,7 +25,7 @@ async def test_dashboard_api():
             try:
                 response = await client.get(f"{API_BASE_URL}/health")
                 if response.status_code == 200:
-                    print(f"  [OK] 后端服务运行正常")
+                    print("  [OK] 后端服务运行正常")
                 else:
                     print(f"  [FAIL] 后端服务响应异常: {response.status_code}")
                     return False
@@ -41,7 +41,7 @@ async def test_dashboard_api():
             response = await client.get(api_url("/dashboard/system-stats"))
             if response.status_code == 200:
                 data = response.json()
-                print(f"  [OK] 系统统计获取成功")
+                print("  [OK] 系统统计获取成功")
                 print(f"    CPU使用率: {data.get('cpu_usage')}%")
                 print(f"    内存使用率: {data.get('memory_usage')}%")
                 print(f"    磁盘使用率: {data.get('disk_usage')}%")
@@ -57,7 +57,7 @@ async def test_dashboard_api():
             response = await client.get(api_url("/dashboard/media-stats"))
             if response.status_code == 200:
                 data = response.json()
-                print(f"  [OK] 媒体统计获取成功")
+                print("  [OK] 媒体统计获取成功")
                 print(f"    电影数: {data.get('total_movies')}")
                 print(f"    电视剧数: {data.get('total_tv_shows')}")
                 print(f"    动漫数: {data.get('total_anime')}")
@@ -74,7 +74,7 @@ async def test_dashboard_api():
             response = await client.get(api_url("/dashboard/download-stats"))
             if response.status_code == 200:
                 data = response.json()
-                print(f"  [OK] 下载统计获取成功")
+                print("  [OK] 下载统计获取成功")
                 print(f"    活跃下载: {data.get('active')}")
                 print(f"    暂停: {data.get('paused')}")
                 print(f"    完成: {data.get('completed')}")
@@ -91,7 +91,7 @@ async def test_dashboard_api():
             response = await client.get(api_url("/dashboard/"))
             if response.status_code == 200:
                 data = response.json()
-                print(f"  [OK] 综合仪表盘数据获取成功")
+                print("  [OK] 综合仪表盘数据获取成功")
                 print(f"    系统统计: CPU {data.get('system_stats', {}).get('cpu_usage')}%")
                 print(f"    媒体统计: {data.get('media_stats', {}).get('total_movies')} 部电影")
                 print(f"    下载统计: {data.get('download_stats', {}).get('active')} 个活跃下载")

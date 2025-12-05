@@ -6,15 +6,13 @@
 import os
 import sys
 import json
-import asyncio
 from pathlib import Path
-from typing import Dict, Optional
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.core.secret_manager import SecretManager, get_secret_manager, initialize_secrets
+from app.core.secret_manager import SecretManager, initialize_secrets
 from app.core.config import settings
 
 

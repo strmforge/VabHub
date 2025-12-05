@@ -4,7 +4,6 @@
 
 import asyncio
 import httpx
-import json
 
 
 async def test_monitoring_api():
@@ -25,7 +24,7 @@ async def test_monitoring_api():
                 if response.status_code == 200:
                     data = response.json()
                     resources = data.get("data", {})
-                    print(f"  [OK] 系统资源获取成功")
+                    print("  [OK] 系统资源获取成功")
                     print(f"    CPU使用率: {resources.get('cpu', {}).get('usage_percent', 0)}%")
                     print(f"    内存使用率: {resources.get('memory', {}).get('usage_percent', 0)}%")
                     print(f"    磁盘使用率: {resources.get('disk', {}).get('usage_percent', 0)}%")
@@ -45,7 +44,7 @@ async def test_monitoring_api():
                     data = response.json()
                     metrics = data.get("data", {})
                     summary = metrics.get("summary", {})
-                    print(f"  [OK] API性能指标获取成功")
+                    print("  [OK] API性能指标获取成功")
                     print(f"    总请求数: {summary.get('total_requests', 0)}")
                     print(f"    总错误数: {summary.get('total_errors', 0)}")
                     print(f"    错误率: {summary.get('error_rate', 0) * 100:.2f}%")
@@ -63,7 +62,7 @@ async def test_monitoring_api():
                 if response.status_code == 200:
                     data = response.json()
                     statistics = data.get("data", {})
-                    print(f"  [OK] 统计信息获取成功")
+                    print("  [OK] 统计信息获取成功")
                     cpu_stats = statistics.get("cpu", {})
                     print(f"    CPU统计: 平均={cpu_stats.get('avg', 0)}%")
                 else:

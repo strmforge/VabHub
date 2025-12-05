@@ -114,7 +114,7 @@ def check_database():
         
         db_url = settings.DATABASE_URL
         if db_url.startswith("sqlite"):
-            print(f"  [INFO] 数据库类型: SQLite")
+            print("  [INFO] 数据库类型: SQLite")
             print(f"  [INFO] 数据库URL: {db_url}")
             # 检查SQLite文件是否存在
             if ":///" in db_url:
@@ -124,13 +124,13 @@ def check_database():
                     print(f"  [OK] 数据库文件存在: {db_file}")
                 else:
                     print(f"  [WARNING] 数据库文件不存在: {db_file}")
-                    print(f"  [INFO] 将在首次运行时自动创建")
+                    print("  [INFO] 将在首次运行时自动创建")
         elif db_url.startswith("postgresql"):
-            print(f"  [INFO] 数据库类型: PostgreSQL")
+            print("  [INFO] 数据库类型: PostgreSQL")
             print(f"  [INFO] 数据库URL: {db_url.split('@')[1] if '@' in db_url else '已配置'}")
-            print(f"  [WARNING] 需要检查PostgreSQL服务是否运行")
+            print("  [WARNING] 需要检查PostgreSQL服务是否运行")
         else:
-            print(f"  [INFO] 数据库类型: 未知")
+            print("  [INFO] 数据库类型: 未知")
             print(f"  [INFO] 数据库URL: {db_url}")
         
         return True
@@ -158,9 +158,9 @@ def main():
         print("")
         
         if pid:
-            print(f"[建议] 如果服务无响应，可以尝试:")
+            print("[建议] 如果服务无响应，可以尝试:")
             print(f"  1. 终止进程: taskkill /PID {pid} /F (Windows)")
-            print(f"  2. 重新启动服务: python backend/scripts/start.py")
+            print("  2. 重新启动服务: python backend/scripts/start.py")
     else:
         print("[建议] 端口未被占用，可以启动服务:")
         print("  python backend/scripts/start.py")

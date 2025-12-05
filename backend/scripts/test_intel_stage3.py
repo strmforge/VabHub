@@ -11,13 +11,11 @@ project_root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(project_root))
 
 from app.core.intel.service import (
-    get_intel_service,
     LocalIntelService,
     CloudIntelService,
     HybridIntelService,
 )
 from app.core.config import settings
-from loguru import logger
 
 
 async def test_cloud_intel():
@@ -31,7 +29,7 @@ async def test_cloud_intel():
     print("[测试1] 创建CloudIntelService...")
     try:
         cloud_intel = CloudIntelService()
-        print(f"  [OK] CloudIntelService创建成功")
+        print("  [OK] CloudIntelService创建成功")
         print(f"  [INFO] Intel端点: {settings.INTEL_INTEL_ENDPOINT}")
     except Exception as e:
         print(f"  [FAIL] 创建CloudIntelService失败: {e}")
@@ -84,7 +82,7 @@ async def test_hybrid_intel():
         local = LocalIntelService()
         cloud = CloudIntelService()
         hybrid = HybridIntelService(local=local, cloud=cloud)
-        print(f"  [OK] HybridIntelService创建成功")
+        print("  [OK] HybridIntelService创建成功")
         print(f"  [INFO] 降级配置: {settings.INTEL_FALLBACK_TO_LOCAL}")
     except Exception as e:
         print(f"  [FAIL] 创建HybridIntelService失败: {e}")
@@ -97,7 +95,7 @@ async def test_hybrid_intel():
         result = await hybrid.resolve_title("钢铁侠")
         if result:
             print(f"  [OK] 返回结果: {result}")
-            print(f"  [INFO] 来源: 本地（云端不可用，自动降级）")
+            print("  [INFO] 来源: 本地（云端不可用，自动降级）")
         else:
             print("  [WARN] 返回None（本地和云端都无数据）")
     except Exception as e:
@@ -112,7 +110,7 @@ async def test_hybrid_intel():
         print(f"  [OK] 返回结果: {result}")
         if result.get("sites"):
             print(f"  [INFO] 找到 {len(result.get('sites', []))} 个站点")
-            print(f"  [INFO] 来源: 本地（云端不可用，自动降级）")
+            print("  [INFO] 来源: 本地（云端不可用，自动降级）")
         else:
             print("  [INFO] 无站点数据（本地和云端都无数据）")
     except Exception as e:
@@ -216,7 +214,7 @@ async def main():
     print("阶段3：本地端集成云端测试")
     print("=" * 60)
     print()
-    print(f"当前配置:")
+    print("当前配置:")
     print(f"  INTEL_ENABLED: {settings.INTEL_ENABLED}")
     print(f"  INTEL_MODE: {settings.INTEL_MODE}")
     print(f"  INTEL_INTEL_ENDPOINT: {settings.INTEL_INTEL_ENDPOINT}")

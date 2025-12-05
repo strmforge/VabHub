@@ -111,12 +111,12 @@ async def test_cache_performance():
     endpoint = api_url("/dashboard/")
     
     print(f"\n测试端点: {endpoint}")
-    print(f"迭代次数: 20")
+    print("迭代次数: 20")
     
     result = await test_response_time(endpoint, "GET", headers, iterations=20)
     
     if result:
-        print(f"\n结果:")
+        print("\n结果:")
         print(f"  平均响应时间: {result['mean']:.2f} ms")
         print(f"  中位数响应时间: {result['median']:.2f} ms")
         print(f"  最小响应时间: {result['min']:.2f} ms")
@@ -126,9 +126,9 @@ async def test_cache_performance():
         
         # 分析缓存效果
         if result['max'] / result['min'] > 2:
-            print(f"  [INFO] 响应时间变化较大，可能缓存未生效")
+            print("  [INFO] 响应时间变化较大，可能缓存未生效")
         else:
-            print(f"  [INFO] 响应时间较稳定，缓存可能生效")
+            print("  [INFO] 响应时间较稳定，缓存可能生效")
     
     return result
 
@@ -150,12 +150,12 @@ async def test_database_query_performance():
     endpoint = api_url("/subscriptions/?page=1&page_size=10")
     
     print(f"\n测试端点: {endpoint}")
-    print(f"迭代次数: 10")
+    print("迭代次数: 10")
     
     result = await test_response_time(endpoint, "GET", headers, iterations=10)
     
     if result:
-        print(f"\n结果:")
+        print("\n结果:")
         print(f"  平均响应时间: {result['mean']:.2f} ms")
         print(f"  中位数响应时间: {result['median']:.2f} ms")
         print(f"  最小响应时间: {result['min']:.2f} ms")
@@ -165,11 +165,11 @@ async def test_database_query_performance():
         
         # 性能评估
         if result['mean'] < 100:
-            print(f"  [OK] 响应时间优秀 (< 100ms)")
+            print("  [OK] 响应时间优秀 (< 100ms)")
         elif result['mean'] < 500:
-            print(f"  [OK] 响应时间良好 (< 500ms)")
+            print("  [OK] 响应时间良好 (< 500ms)")
         else:
-            print(f"  [WARNING] 响应时间较慢 (> 500ms)")
+            print("  [WARNING] 响应时间较慢 (> 500ms)")
     
     return result
 
@@ -239,15 +239,15 @@ async def main():
     print("="*60)
     
     if results.get("cache"):
-        print(f"\n缓存性能:")
+        print("\n缓存性能:")
         print(f"  平均响应时间: {results['cache']['mean']:.2f} ms")
     
     if results.get("database"):
-        print(f"\n数据库查询性能:")
+        print("\n数据库查询性能:")
         print(f"  平均响应时间: {results['database']['mean']:.2f} ms")
     
     if results.get("endpoints"):
-        print(f"\nAPI端点性能:")
+        print("\nAPI端点性能:")
         for result in results["endpoints"]:
             print(f"  {result['endpoint']}: {result['mean']:.2f} ms")
     

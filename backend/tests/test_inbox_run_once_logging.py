@@ -13,62 +13,53 @@ from app.modules.inbox.media_detection.base import MediaTypeGuess
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_success(db: AsyncSession, tmp_path):
+async def test_run_once_logs_success(db_session: AsyncSession, tmp_path):
     """测试 run-once 成功时记录日志"""
     from app.api.inbox_dev import run_inbox_once
-    from app.modules.inbox.scanner import InboxScanner
     
     # 创建测试文件
     test_file = tmp_path / "test.mp4"
     test_file.write_bytes(b"fake video")
     
-    # Mock scanner 返回测试文件
-    with patch('app.api.inbox_dev.InboxScanner') as mock_scanner_class:
-        mock_scanner = MagicMock()
-        mock_scanner.scan_inbox.return_value = [
-            InboxItem(path=test_file)
+    # Mock run_inbox_classification 返回结果
+    with patch('app.api.inbox_dev.run_inbox_classification') as mock_classification:
+        mock_classification.return_value = [
+            {
+                "path": str(test_file),
+                "media_type": "movie",
+                "score": 0.9,
+                "reason": "extension_mp4",
+                "size_bytes": 1024,
+                "modified_at": datetime.utcnow().isoformat(),
+                "result": "handled:video:movie"
+            }
         ]
-        mock_scanner_class.return_value = mock_scanner
         
-        # Mock run_inbox_classification 返回结果
-        with patch('app.api.inbox_dev.run_inbox_classification') as mock_classification:
-            mock_classification.return_value = [
-                {
-                    "path": str(test_file),
-                    "media_type": "movie",
-                    "score": 0.9,
-                    "reason": "extension_mp4",
-                    "size_bytes": 1024,
-                    "modified_at": datetime.utcnow().isoformat(),
-                    "result": "handled:video:movie"
-                }
-            ]
-            
-            # 调用 run-once
-            response = await run_inbox_once(db)
-            
-            # 验证响应
-            assert response["success"] is True
-            assert len(response["data"]["items"]) == 1
-            
-            # 验证日志被写入
-            from sqlalchemy import select
-            stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-            result = await db.execute(stmt)
-            log = result.scalar_one_or_none()
-            
-            assert log is not None
-            assert log.status == "success"
-            assert log.total_items == 1
-            assert log.handled_items == 1
-            assert log.skipped_items == 0
-            assert log.failed_items == 0
-            assert log.message is not None
-            assert "成功" in log.message
+        # 调用 run-once
+        response = await run_inbox_once(db_session)
+        
+        # 验证响应
+        assert response["success"] is True
+        assert len(response["data"]["items"]) == 1
+        
+        # 验证日志被写入
+        from sqlalchemy import select
+        stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
+        result = await db_session.execute(stmt)
+        log = result.scalar_one_or_none()
+        
+        assert log is not None
+        assert log.status == "success"
+        assert log.total_items == 1
+        assert log.handled_items == 1
+        assert log.skipped_items == 0
+        assert log.failed_items == 0
+        assert log.message is not None
+        assert "成功" in log.message
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_partial(db: AsyncSession, tmp_path):
+async def test_run_once_logs_partial(db_session: AsyncSession, tmp_path):
     """测试 run-once 部分成功时记录日志"""
     from app.api.inbox_dev import run_inbox_once
     
@@ -96,12 +87,12 @@ async def test_run_once_logs_partial(db: AsyncSession, tmp_path):
         ]
         
         # 调用 run-once
-        response = await run_inbox_once(db)
+        response = await run_inbox_once(db_session)
         
         # 验证日志状态为 partial
         from sqlalchemy import select
         stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-        result = await db.execute(stmt)
+        result = await db_session.execute(stmt)
         log = result.scalar_one_or_none()
         
         assert log is not None
@@ -112,7 +103,7 @@ async def test_run_once_logs_partial(db: AsyncSession, tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_failed(db: AsyncSession, tmp_path):
+async def test_run_once_logs_failed(db_session: AsyncSession, tmp_path):
     """测试 run-once 全部失败时记录日志"""
     from app.api.inbox_dev import run_inbox_once
     
@@ -131,12 +122,12 @@ async def test_run_once_logs_failed(db: AsyncSession, tmp_path):
         ]
         
         # 调用 run-once
-        response = await run_inbox_once(db)
+        response = await run_inbox_once(db_session)
         
         # 验证日志状态为 failed
         from sqlalchemy import select
         stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-        result = await db.execute(stmt)
+        result = await db_session.execute(stmt)
         log = result.scalar_one_or_none()
         
         assert log is not None
@@ -147,7 +138,7 @@ async def test_run_once_logs_failed(db: AsyncSession, tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_empty(db: AsyncSession):
+async def test_run_once_logs_empty(db_session: AsyncSession):
     """测试 run-once 空结果时记录日志"""
     from app.api.inbox_dev import run_inbox_once
     
@@ -156,12 +147,12 @@ async def test_run_once_logs_empty(db: AsyncSession):
         mock_classification.return_value = []
         
         # 调用 run-once
-        response = await run_inbox_once(db)
+        response = await run_inbox_once(db_session)
         
         # 验证日志状态为 empty
         from sqlalchemy import select
         stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-        result = await db.execute(stmt)
+        result = await db_session.execute(stmt)
         log = result.scalar_one_or_none()
         
         assert log is not None
@@ -173,7 +164,7 @@ async def test_run_once_logs_empty(db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_by_media_type(db: AsyncSession):
+async def test_run_once_logs_by_media_type(db_session: AsyncSession):
     """测试 run-once 记录按 media_type 的统计"""
     from app.api.inbox_dev import run_inbox_once
     
@@ -210,12 +201,12 @@ async def test_run_once_logs_by_media_type(db: AsyncSession):
         ]
         
         # 调用 run-once
-        response = await run_inbox_once(db)
+        response = await run_inbox_once(db_session)
         
         # 验证日志包含按 media_type 的统计
         from sqlalchemy import select
         stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-        result = await db.execute(stmt)
+        result = await db_session.execute(stmt)
         log = result.scalar_one_or_none()
         
         assert log is not None
@@ -230,7 +221,7 @@ async def test_run_once_logs_by_media_type(db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_run_once_logs_on_exception(db: AsyncSession):
+async def test_run_once_logs_on_exception(db_session: AsyncSession):
     """测试 run-once 异常时也记录日志"""
     from app.api.inbox_dev import run_inbox_once
     
@@ -240,12 +231,12 @@ async def test_run_once_logs_on_exception(db: AsyncSession):
         
         # 调用 run-once（应该抛出 HTTPException）
         with pytest.raises(Exception):
-            await run_inbox_once(db)
+            await run_inbox_once(db_session)
         
         # 验证日志被记录（即使异常）
         from sqlalchemy import select
         stmt = select(InboxRunLog).order_by(InboxRunLog.created_at.desc()).limit(1)
-        result = await db.execute(stmt)
+        result = await db_session.execute(stmt)
         log = result.scalar_one_or_none()
         
         # 注意：由于异常处理，可能没有记录日志，或者记录了失败的日志

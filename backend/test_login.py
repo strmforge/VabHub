@@ -53,7 +53,7 @@ async def test_login():
                 print(f"  激活: {'是' if user.is_active else '否'}")
             else:
                 print(f"\n[❌] 用户 '{username}' 密码验证失败")
-                print(f"  需要重置密码")
+                print("  需要重置密码")
                 
                 # 尝试重置密码
                 try:
@@ -65,9 +65,9 @@ async def test_login():
                     
                     # 再次验证
                     if verify_password(password, user.hashed_password):
-                        print(f"  [修复] 已重置密码，现在可以正常登录")
+                        print("  [修复] 已重置密码，现在可以正常登录")
                     else:
-                        print(f"  [错误] 重置后仍然无法验证")
+                        print("  [错误] 重置后仍然无法验证")
                 except Exception as e:
                     print(f"  [错误] 重置密码失败: {e}")
                     await db.rollback()
@@ -107,7 +107,7 @@ async def test_login():
                     print(f"  响应: {response.text}")
             except Exception as e:
                 print(f"\n[⚠️] API登录测试跳过: {username}")
-                print(f"  原因: 后端服务可能未启动")
+                print("  原因: 后端服务可能未启动")
                 print(f"  错误: {e}")
                 break
     
