@@ -214,7 +214,8 @@ api_router.include_router(file_browser.router, tags=["文件浏览器"])  # 文�
 api_router.include_router(transfer_history.router, tags=["转移历史"])  # 转移历史记录（路由已包含/transfer-history前缀）
 api_router.include_router(category.router, tags=["分类配置"])  # 分类配置管理（路由已包含/category前缀）
 api_router.include_router(system_update.router, tags=["系统更新"])  # 系统更新管理（路由已包含/system前缀）
-api_router.include_router(site.router)  # 站点管理（路由已包含/site前缀）
+# 注意: site.router 已在上方 line 172 以 prefix="/sites" 注册，此处不再重复注册
+# api_router.include_router(site.router)  # 重复注册会导致 /{site_id} 路由捕获所有顶层路径
 api_router.include_router(site_manager.router, prefix="/sites", tags=["站点管理"])  # 站点管理 (SITE-MANAGER-1)
 api_router.include_router(subscription_refresh.router)  # 订阅刷新监控（路由已包含/subscription-refresh前缀）
 api_router.include_router(log_center.router)  # 实时日志中心（路由已包含/log-center前缀）

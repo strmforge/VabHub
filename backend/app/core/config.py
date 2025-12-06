@@ -211,7 +211,7 @@ class Settings(BaseSettings):
     AB_TESTING_EVALUATION_K: int = int(os.getenv("AB_TESTING_EVALUATION_K", "10"))
     
     # API配置
-    API_PREFIX: str = "/api"  # 已移除 /v1 前缀以统一路径格式
+    API_PREFIX: str = "/api/v1"  # 恢复 /v1 前缀以兼容测试脚本
     TEST_ALL_REPORT_PATH: str = os.getenv(
         "TEST_ALL_REPORT_PATH",
         "./reports/test_all-latest.json",

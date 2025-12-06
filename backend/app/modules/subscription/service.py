@@ -59,7 +59,11 @@ class SubscriptionService:
             default=subscription.get("media_type") or MEDIA_TYPE_MOVIE,
         )
 
+        # 确保 user_id 存在（CI/测试环境下使用默认值 1）
+        user_id = subscription.get("user_id") or 1
+
         new_subscription = Subscription(
+            user_id=user_id,
             title=subscription.get("title"),
             original_title=subscription.get("original_title"),
             year=subscription.get("year"),

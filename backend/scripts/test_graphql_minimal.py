@@ -16,6 +16,17 @@ if str(scripts_dir) not in sys.path:
 from api_test_config import API_BASE_URL, api_url
 
 
+def safe_print(label: str, data) -> None:
+    """安全打印，处理 Windows 编码问题"""
+    try:
+        print(f"{label}: {data}")
+    except UnicodeEncodeError:
+        # 将非 ASCII 字符替换为 ?
+        text = str(data)
+        safe_text = text.encode("ascii", errors="replace").decode("ascii")
+        print(f"{label}: {safe_text}")
+
+
 async def main() -> None:
     query = """
     query ($page: Int!, $pageSize: Int!) {
@@ -75,10 +86,11 @@ async def main() -> None:
             print("GraphQL errors:", payload["errors"])
             sys.exit(1)
         data = payload.get("data") or {}
-        print("GraphQL subscriptions sample:", data.get("subscriptions", {}))
-        print("GraphQL dashboard stats:", data.get("dashboardStats", {}))
-        print("GraphQL music subscriptions:", data.get("musicSubscriptions", []))
-        print("GraphQL music charts:", data.get("musicCharts", []))
+        safe_print("GraphQL subscriptions sample", data.get("subscriptions", {}))
+        safe_print("GraphQL dashboard stats", data.get("dashboardStats", {}))
+        safe_print("GraphQL music subscriptions", data.get("musicSubscriptions", []))
+        safe_print("GraphQL music charts", data.get("musicCharts", []))
+        print("[OK] GraphQL 最小可用性测试通过")
 
 
 if __name__ == "__main__":

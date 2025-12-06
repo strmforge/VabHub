@@ -184,7 +184,7 @@ async def run_test(execute_download: bool = False) -> None:
                             matched.append(item)
                 print(f"   下载任务匹配数量: {len(matched)}")
 
-        print("\n✅ 音乐最小闭环自测完成")
+        print("\n[OK] 音乐最小闭环自测完成")
 
 
 def parse_args():
