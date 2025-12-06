@@ -211,7 +211,7 @@ class Settings(BaseSettings):
     AB_TESTING_EVALUATION_K: int = int(os.getenv("AB_TESTING_EVALUATION_K", "10"))
     
     # API配置
-    API_PREFIX: str = "/api/v1"  # 恢复 /v1 前缀以兼容测试脚本
+    API_PREFIX: str = "/api"  # 统一使用 /api 前缀（pytest 测试和脚本共用）
     TEST_ALL_REPORT_PATH: str = os.getenv(
         "TEST_ALL_REPORT_PATH",
         "./reports/test_all-latest.json",

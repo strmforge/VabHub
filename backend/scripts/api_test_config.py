@@ -10,9 +10,9 @@ import os
 DEFAULT_BASE_URL = "http://127.0.0.1:8000"
 
 # 允许通过环境变量覆盖，保持向后兼容
-# 注意：后端 API_PREFIX 为 /api/v1（见 app/core/config.py）
+# 注意：后端 API_PREFIX 为 /api（见 app/core/config.py）
 API_BASE_URL = os.environ.get("API_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-API_PREFIX = os.environ.get("API_PREFIX", "/api/v1")
+API_PREFIX = os.environ.get("API_PREFIX", "/api")
 
 
 def api_url(path: str) -> str:

@@ -7,7 +7,7 @@
 3. 规则未命中 -> should_download = False
 4. HNR 风险 -> should_download = False
 
-API 前缀：/api/v1（见 api_test_config.py）
+API 前缀：/api（见 api_test_config.py）
 """
 
 from __future__ import annotations

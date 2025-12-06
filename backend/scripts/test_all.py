@@ -11,7 +11,7 @@
 5. test_graphql_minimal.py
 6. test_rsshub_minimal.py
 
-运行前请确保后端已启动，并配置好 `API_BASE_URL` / `API_PREFIX`（默认 http://127.0.0.1:8000 /api/v1）。
+运行前请确保后端已启动，并配置好 `API_BASE_URL` / `API_PREFIX`（默认 http://127.0.0.1:8000 /api）。
 """
 
 from __future__ import annotations
@@ -149,7 +149,7 @@ def main() -> None:
     env = os.environ.copy()
     # 与 api_test_config.py 和 app/core/config.py 保持一致
     env.setdefault("API_BASE_URL", "http://127.0.0.1:8000")
-    env.setdefault("API_PREFIX", "/api/v1")
+    env.setdefault("API_PREFIX", "/api")
 
     redis_enabled = _env_flag(env, "REDIS_ENABLED", True)
     rsshub_enabled = _env_flag(env, "RSSHUB_ENABLED", True)
