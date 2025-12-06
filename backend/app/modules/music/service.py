@@ -542,7 +542,12 @@ class MusicService:
             "chart_entry": payload.get("chart_entry"),
         }
         
+        # 默认用户 ID（CI/开发环境下使用）
+        # 实际生产环境应该从认证上下文中获取
+        default_user_id = payload.get("user_id", 1)
+        
         return {
+            "user_id": default_user_id,  # 必填字段
             "title": music_subscription.target_name or music_subscription.name,
             "original_title": music_subscription.name,
             "media_type": "music",

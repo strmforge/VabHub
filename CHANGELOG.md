@@ -68,6 +68,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **[backend] 修复音乐订阅在 CI 环境下创建失败的问题（BACKEND-REGRESSION-MUSIC-1）**
+  - 修复 `MusicService._build_core_subscription_payload` 缺少 `user_id` 导致的 NOT NULL 约束错误
+  - 增强 `test_music_minimal.py` 的 CI 模式支持和错误输出
+  - 详见 `docs/ci/BACKEND-REGRESSION-MUSIC-1.md`
+
 - **[backend] 修复 Backend Regression 健康检查导致 CI 失败的问题（BACKEND-REGRESSION-HEALTH-1）**
   - 重构 `/health` 状态码逻辑：`warning` 状态返回 200，仅 `unhealthy` 返回 503
   - 健康检查响应新增 `mode` 字段（ci/dev/prod）

@@ -522,6 +522,8 @@ VabHub 系统总览（单一事实来源）
   修复 Backend Regression 工作流中 SQLite 数据库目录未创建导致 API 启动失败的问题；开发 & Backend Regression 默认使用 SQLite（自动建库目录），生产部署使用 PostgreSQL。
 - **2025-12-06 – BACKEND-REGRESSION-HEALTH-1 完成**：
   修复 /health 端点在 CI 环境下因 warning 状态返回 503 的问题；重新定义状态码规则（warning → 200, unhealthy → 503）；新增运行模式检测（ci/dev/prod）。
+- **2025-12-06 – BACKEND-REGRESSION-MUSIC-1 完成**：
+  修复音乐订阅在 CI 环境下创建失败的问题（user_id NOT NULL 约束）；增强 test_music_minimal.py 的 CI 模式支持。
 - （此处由后续任务持续追加）
 
 ---
