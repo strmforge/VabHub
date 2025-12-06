@@ -68,6 +68,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **[backend] 修复决策最小脚本 API 前缀不匹配问题（BACKEND-REGRESSION-DECISION-2）**
+  - 修复 `api_test_config.py` 默认 `API_PREFIX` 从 `/api/v1` 改为 `/api`
+  - 增强 `test_decision_minimal.py` 错误输出和 CI 健壮性
+  - 详见 `docs/ci/BACKEND-REGRESSION-DECISION-2.md`
+
 - **[backend] 修复决策最小脚本导入路径问题（BACKEND-REGRESSION-DECISION-1）**
   - 修复 `test_decision_minimal.py` 等脚本的 `ModuleNotFoundError: No module named 'scripts'`
   - 统一 14 个测试脚本的导入风格，使用 `from api_test_config import ...`

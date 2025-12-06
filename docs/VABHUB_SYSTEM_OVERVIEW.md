@@ -526,6 +526,8 @@ VabHub 系统总览（单一事实来源）
   修复音乐订阅在 CI 环境下创建失败的问题（user_id NOT NULL 约束）；增强 test_music_minimal.py 的 CI 模式支持。
 - **2025-12-06 – BACKEND-REGRESSION-DECISION-1 完成**：
   修复测试脚本导入路径问题（ModuleNotFoundError），统一 14 个回归脚本使用 `api_test_config` 配置模块。
+- **2025-12-06 – BACKEND-REGRESSION-DECISION-2 完成**：
+  修复决策最小脚本 API 前缀不匹配问题（/api/v1 → /api），增强错误输出。现在的 Decision 自检脚本使用正确的 API 路径，不会在 CI 中产生 405 错误。
 - （此处由后续任务持续追加）
 
 ---

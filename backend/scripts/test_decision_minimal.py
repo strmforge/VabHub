@@ -1,21 +1,25 @@
 """
-下载决策层最小自测脚本
+下载决策层最小自测脚本（BACKEND-REGRESSION-DECISION-2 修复版）
 
 覆盖场景：
 1. 规则命中 + 质量满足 -> should_download = True
 2. 规则命中但质量降级 -> should_download = False
 3. 规则未命中 -> should_download = False
 4. HNR 风险 -> should_download = False
+
+注意：API 前缀已从 /api/v1 改为 /api（见 api_test_config.py）
 """
 
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
+from httpx import HTTPStatusError
 
 # 确保 scripts 目录在 sys.path（支持 CI 环境）
 scripts_dir = Path(__file__).parent
@@ -24,6 +28,9 @@ if str(scripts_dir) not in sys.path:
 
 from api_test_config import API_BASE_URL, api_url
 
+# CI 环境标识
+IS_CI = os.getenv("VABHUB_CI") == "1"
+
 
 def unwrap_response(payload: Dict[str, Any]) -> Dict[str, Any]:
     if "data" in payload and payload["data"] is not None:
@@ -31,37 +38,62 @@ def unwrap_response(payload: Dict[str, Any]) -> Dict[str, Any]:
     return payload
 
 
+def print_http_error(context: str, exc: HTTPStatusError) -> None:
+    """输出 HTTP 错误详情"""
+    print(f"[ERROR] {context}:")
+    print(f"  URL    : {exc.request.url}")
+    print(f"  Method : {exc.request.method}")
+    print(f"  Status : {exc.response.status_code}")
+    try:
+        body = exc.response.json()
+        print(f"  Body   : {body}")
+    except Exception:
+        print(f"  Body   : {exc.response.text[:500]}")
+
+
 async def create_subscription(client: httpx.AsyncClient) -> int:
-    resp = await client.post(
-        api_url("/subscriptions"),
-        json={
-            "title": "决策层测试订阅",
-            "media_type": "movie",
-            "quality": "2160p",
-            "resolution": "2160p",
-            "effect": "HDR",
-            "include": "HDR",
-            "exclude": "CAM",
-            "auto_download": False,
-            "min_seeders": 5,
-            "sites": ["test_site"],
-        },
-    )
-    resp.raise_for_status()
+    """创建测试订阅（用于决策测试）"""
+    payload = {
+        "title": "决策层测试订阅",
+        "media_type": "movie",
+        "quality": "2160p",
+        "resolution": "2160p",
+        "effect": "HDR",
+        "include": "HDR",
+        "exclude": "CAM",
+        "auto_download": False,
+        "min_seeders": 5,
+        # sites 字段期望 List[int]，CI 环境下不传（可选字段）
+    }
+    
+    try:
+        resp = await client.post(api_url("/subscriptions"), json=payload)
+        resp.raise_for_status()
+    except HTTPStatusError as exc:
+        print_http_error("创建订阅失败", exc)
+        raise SystemExit(1)
+    
     data = unwrap_response(resp.json())
     subscription_id = data.get("id")
     if not subscription_id:
+        print(f"[ERROR] 创建订阅响应缺少 ID: {data}")
         raise SystemExit("创建订阅失败：未返回订阅ID")
     print(f"[setup] 订阅创建成功 id={subscription_id}")
     return subscription_id
 
 
 async def delete_subscription(client: httpx.AsyncClient, subscription_id: int) -> None:
-    resp = await client.delete(api_url(f"/subscriptions/{subscription_id}"))
-    if resp.status_code in (404, 410):
-        return
-    resp.raise_for_status()
-    print(f"[cleanup] 订阅 {subscription_id} 已删除")
+    """删除测试订阅"""
+    try:
+        resp = await client.delete(api_url(f"/subscriptions/{subscription_id}"))
+        if resp.status_code in (404, 410):
+            print(f"[cleanup] 订阅 {subscription_id} 已不存在")
+            return
+        resp.raise_for_status()
+        print(f"[cleanup] 订阅 {subscription_id} 已删除")
+    except HTTPStatusError as exc:
+        print_http_error(f"删除订阅 {subscription_id} 失败", exc)
+        # 删除失败不阻塞测试
 
 
 async def dry_run(
@@ -71,18 +103,24 @@ async def dry_run(
     *,
     debug: bool = True,
 ) -> Dict[str, Any]:
-    resp = await client.post(
-        api_url("/decision/dry-run"),
-        json={
-            "subscription_id": subscription_id,
-            "candidate": candidate,
-            "debug": debug,
-        },
-    )
-    resp.raise_for_status()
+    """执行决策 Dry-Run"""
+    payload = {
+        "subscription_id": subscription_id,
+        "candidate": candidate,
+        "debug": debug,
+    }
+    
+    try:
+        resp = await client.post(api_url("/decision/dry-run"), json=payload)
+        resp.raise_for_status()
+    except HTTPStatusError as exc:
+        print_http_error("决策 Dry-Run 失败", exc)
+        raise SystemExit(1)
+    
     data = unwrap_response(resp.json()) or {}
     if not data.get("result"):
-        raise SystemExit(f"决策层未返回结果: {data}")
+        print(f"[ERROR] 决策层未返回结果: {data}")
+        raise SystemExit("决策层未返回结果")
     return data["result"]
 
 
