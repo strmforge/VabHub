@@ -12,11 +12,17 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
-from scripts.api_test_config import API_BASE_URL, api_url
+# 确保 scripts 目录在 sys.path（支持 CI 环境）
+scripts_dir = Path(__file__).parent
+if str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
+
+from api_test_config import API_BASE_URL, api_url
 
 
 def unwrap_response(payload: Dict[str, Any]) -> Dict[str, Any]:

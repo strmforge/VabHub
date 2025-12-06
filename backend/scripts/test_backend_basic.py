@@ -12,10 +12,15 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "backend"))
 
+# 确保 scripts 目录在 sys.path（支持 CI 环境）
+scripts_dir = Path(__file__).parent
+if str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
+
 import httpx
 from loguru import logger
 
-from scripts.api_test_config import API_BASE_URL, api_url
+from api_test_config import API_BASE_URL, api_url
 
 # 配置日志
 logger.remove()

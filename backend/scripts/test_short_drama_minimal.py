@@ -24,7 +24,12 @@ backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
-from scripts.api_test_config import API_BASE_URL, api_url  # noqa: E402
+# 确保 scripts 目录在 sys.path（支持 CI 环境）
+scripts_dir = Path(__file__).resolve().parent
+if str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
+
+from api_test_config import API_BASE_URL, api_url  # noqa: E402
 
 
 def unwrap(payload: Any) -> Any:

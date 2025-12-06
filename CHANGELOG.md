@@ -68,6 +68,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **[backend] 修复决策最小脚本导入路径问题（BACKEND-REGRESSION-DECISION-1）**
+  - 修复 `test_decision_minimal.py` 等脚本的 `ModuleNotFoundError: No module named 'scripts'`
+  - 统一 14 个测试脚本的导入风格，使用 `from api_test_config import ...`
+  - 详见 `docs/ci/BACKEND-REGRESSION-DECISION-1.md`
+
 - **[backend] 修复音乐订阅在 CI 环境下创建失败的问题（BACKEND-REGRESSION-MUSIC-1）**
   - 修复 `MusicService._build_core_subscription_payload` 缺少 `user_id` 导致的 NOT NULL 约束错误
   - 增强 `test_music_minimal.py` 的 CI 模式支持和错误输出

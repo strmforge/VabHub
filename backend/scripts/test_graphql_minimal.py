@@ -4,10 +4,16 @@ GraphQL 最小可用性测试脚本
 import asyncio
 import os
 import sys
+from pathlib import Path
 
 import httpx
 
-API_BASE_URL = os.environ.get("API_BASE_URL", "http://127.0.0.1:8000")
+# 确保 scripts 目录在 sys.path（支持 CI 环境）
+scripts_dir = Path(__file__).parent
+if str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
+
+from api_test_config import API_BASE_URL, api_url
 
 
 async def main() -> None:

@@ -29,7 +29,12 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from scripts.api_test_config import API_BASE_URL, api_url  # noqa: E402
+# 确保 scripts 目录在 sys.path（支持 CI 环境）
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from api_test_config import API_BASE_URL, api_url  # noqa: E402
 from app.core.database import AsyncSessionLocal  # noqa: E402
 from app.modules.rsshub.scheduler import RSSHubScheduler  # noqa: E402
 from app.models.rsshub import UserRSSHubSubscription  # noqa: E402
