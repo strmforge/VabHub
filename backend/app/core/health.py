@@ -1,8 +1,14 @@
 """
 健康检查系统
 提供系统健康状态检查和监控
+
+状态定义:
+- healthy: 所有检查通过
+- warning: 有非关键组件异常，但不影响核心功能（返回 HTTP 200）
+- unhealthy: 关键组件失败，服务不可用（返回 HTTP 503）
 """
 
+import os
 from typing import Dict, Any, Optional
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +18,16 @@ from loguru import logger
 from app.core.database import engine, AsyncSessionLocal
 from app.core.cache import get_cache
 from app.core.config import settings
+
+
+def _get_run_mode() -> str:
+    """获取当前运行模式"""
+    if os.getenv("VABHUB_CI") == "1":
+        return "ci"
+    elif settings.DATABASE_URL.startswith("sqlite"):
+        return "dev"
+    else:
+        return "prod"
 
 
 class HealthChecker:
@@ -203,7 +219,15 @@ class HealthChecker:
             }
     
     async def check_all(self) -> Dict[str, Any]:
-        """执行所有健康检查"""
+        """
+        执行所有健康检查
+        
+        返回:
+        - status: healthy | warning | unhealthy
+        - mode: ci | dev | prod
+        - timestamp: ISO 格式时间戳
+        - checks: 各项检查结果
+        """
         results = {}
         overall_status = "healthy"
         
@@ -226,6 +250,7 @@ class HealthChecker:
         
         return {
             "status": overall_status,
+            "mode": _get_run_mode(),
             "timestamp": datetime.utcnow().isoformat(),
             "checks": results
         }
@@ -309,7 +334,8 @@ def get_health_checker() -> HealthChecker:
                             results[name] = await check_func()
                         return {
                             "status": "warning",
-                            "timestamp": "2025-11-24T16:00:00.000000",
+                            "mode": _get_run_mode(),
+                            "timestamp": datetime.utcnow().isoformat(),
                             "checks": results
                         }
                     

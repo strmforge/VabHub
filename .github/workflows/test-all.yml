@@ -37,28 +37,39 @@ jobs:
       - name: Start backend server
         working-directory: backend
         env:
+          VABHUB_CI: "1"
           API_PREFIX: /api/v1
           # 使用显式的相对路径，避免 shell 展开问题
           # 注意：数据库模块会自动创建父目录
           DATABASE_URL: "sqlite:///./.ci_data/vabhub_regression.db"
           REDIS_ENABLED: "false"
         run: |
-          echo "Starting backend with SQLite regression database..."
-          echo "DATABASE_URL: sqlite:///./.ci_data/vabhub_regression.db"
+          echo "Starting backend in CI mode with SQLite regression database..."
+          echo "VABHUB_CI=1, DATABASE_URL=sqlite:///./.ci_data/vabhub_regression.db"
           uvicorn main:app --host 0.0.0.0 --port 8100 > ../uvicorn.log 2>&1 &
           echo $! > ../uvicorn.pid
           sleep 3
 
       - name: Wait for API readiness
         run: |
-          for i in {1..30}; do
-            if curl -sSf http://127.0.0.1:8100/health >/dev/null; then
-              echo "API is ready"
+          echo "Waiting for API to be ready (max 90s)..."
+          for i in {1..45}; do
+            HTTP_CODE=$(curl -sS -o /tmp/health_response.json -w "%{http_code}" http://127.0.0.1:8100/health 2>/dev/null || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ API is ready (HTTP $HTTP_CODE)"
+              echo "Health response:"
+              cat /tmp/health_response.json | jq . 2>/dev/null || cat /tmp/health_response.json
               exit 0
             fi
+            echo "Attempt $i/45: HTTP $HTTP_CODE, waiting..."
             sleep 2
           done
-          echo "API failed to start"
+          echo "❌ API failed to start after 90 seconds"
+          echo ""
+          echo "=== Health endpoint response ==="
+          curl -sS http://127.0.0.1:8100/health 2>/dev/null | jq . || curl -sS http://127.0.0.1:8100/health || true
+          echo ""
+          echo "=== Uvicorn logs ==="
           cat uvicorn.log || true
           exit 1
 

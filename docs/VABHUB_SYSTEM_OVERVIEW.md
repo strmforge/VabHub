@@ -520,6 +520,8 @@ VabHub 系统总览（单一事实来源）
   Docker 部署体验简化：SECRET_KEY/JWT_SECRET_KEY 自动生成并持久化、首次启动自动创建管理员（支持 ENV 或随机密码）、docker-compose 提供完整挂载路径示例、统一端口 52180。
 - **2025-12-06 – BACKEND-REGRESSION-SQLITE-FIX-1 完成**：
   修复 Backend Regression 工作流中 SQLite 数据库目录未创建导致 API 启动失败的问题；开发 & Backend Regression 默认使用 SQLite（自动建库目录），生产部署使用 PostgreSQL。
+- **2025-12-06 – BACKEND-REGRESSION-HEALTH-1 完成**：
+  修复 /health 端点在 CI 环境下因 warning 状态返回 503 的问题；重新定义状态码规则（warning → 200, unhealthy → 503）；新增运行模式检测（ci/dev/prod）。
 - （此处由后续任务持续追加）
 
 ---

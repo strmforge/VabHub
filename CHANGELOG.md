@@ -68,6 +68,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **[backend] 修复 Backend Regression 健康检查导致 CI 失败的问题（BACKEND-REGRESSION-HEALTH-1）**
+  - 重构 `/health` 状态码逻辑：`warning` 状态返回 200，仅 `unhealthy` 返回 503
+  - 健康检查响应新增 `mode` 字段（ci/dev/prod）
+  - 改进 CI 等待脚本，增加超时和诊断输出
+  - 新增健康检查端点测试用例
+  - 详见 `docs/ci/BACKEND-REGRESSION-HEALTH-1.md`
+
 - **[backend] 修复 Backend Regression 在 SQLite 开发模式下无法创建数据库文件的问题（BACKEND-REGRESSION-SQLITE-FIX-1）**
   - 数据库模块自动创建 SQLite 文件父目录
   - Backend Regression workflow 使用显式 DATABASE_URL 路径

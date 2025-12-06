@@ -362,10 +362,19 @@ else:
 
 @app.get("/health")
 async def health_check():
-    """健康检查"""
+    """
+    健康检查
+    
+    状态码规则:
+    - 200: healthy 或 warning（服务可用）
+    - 503: unhealthy（服务不可用）
+    
+    warning 状态表示有非关键组件异常，但不影响核心功能。
+    """
     health_checker = get_health_checker()
     result = await health_checker.check_all()
-    status_code = 200 if result["status"] == "healthy" else 503
+    # warning 不影响服务可用性，只有 unhealthy 才返回 503
+    status_code = 503 if result["status"] == "unhealthy" else 200
     return JSONResponse(content=result, status_code=status_code)
 
 
@@ -374,11 +383,14 @@ async def healthz():
     """
     健康检查端点（Kubernetes兼容）
     
-    返回200状态码表示健康，503表示不健康
+    状态码规则:
+    - 200: healthy 或 warning（服务可用）
+    - 503: unhealthy（服务不可用）
     """
     health_checker = get_health_checker()
     result = await health_checker.check_all()
-    status_code = 200 if result["status"] == "healthy" else 503
+    # warning 不影响服务可用性，只有 unhealthy 才返回 503
+    status_code = 503 if result["status"] == "unhealthy" else 200
     return JSONResponse(content=result, status_code=status_code)
 
 
@@ -412,7 +424,8 @@ async def health_check_item(check_name: str):
             content={"error": f"健康检查项不存在: {check_name}"},
             status_code=404
         )
-    status_code = 200 if result["status"] == "healthy" else 503
+    # warning 不影响服务可用性，只有 unhealthy 才返回 503
+    status_code = 503 if result["status"] == "unhealthy" else 200
     return JSONResponse(content=result, status_code=status_code)
 
 
