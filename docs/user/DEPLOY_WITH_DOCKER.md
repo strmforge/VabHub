@@ -31,10 +31,12 @@ cd vabhub
 cp .env.docker.example .env.docker
 ```
 
-编辑 `.env.docker` 文件，至少修改以下几个关键配置：
+编辑 `.env.docker` 文件，**仅需修改**：
 
-- `SECRET_KEY` 和 `JWT_SECRET_KEY`：设置为强随机字符串
-- `TMDB_API_KEY`：填写您的 TMDB API Key（获取地址：https://www.themoviedb.org/settings/api）
+- `DB_PASSWORD`：数据库密码（必须修改）
+- `TMDB_API_KEY`：媒体元数据获取（可选，推荐配置）
+
+> **密钥自动生成**：`SECRET_KEY` 和 `JWT_SECRET_KEY` 无需手动配置，系统会在首次启动时自动生成并持久化到 `/app/data/.vabhub_secrets.json`。
 
 ### 步骤 3：Docker Compose 配置
 
@@ -149,15 +151,36 @@ docker compose logs -f
 
 > 默认端口为 **52180**（避开常见下载器端口），可通过环境变量 `VABHUB_PORT` 修改。
 
-### 步骤 6：创建初始用户
+### 步骤 6：初始管理员
 
-首次部署后，通过以下方式创建初始用户：
+VabHub 会在首次启动时自动创建管理员账号：
 
-1. 访问 API 文档：http://<宿主机 IP>:52180/docs
-2. 找到 `/api/auth/register` 接口
-3. 点击 "Try it out" 按钮
-4. 填写用户名、邮箱和密码
-5. 点击 "Execute" 按钮完成注册
+**方式一：查看容器日志（推荐）**
+
+如果未设置 `SUPERUSER_PASSWORD`，系统会生成随机密码并输出到日志：
+
+```bash
+docker logs vabhub | grep "初始管理员"
+```
+
+输出示例：
+```
+🔐 初始管理员账号已创建
+   用户名: admin
+   密码: xK8mN3pQ2wR5tY7z
+⚠️  请尽快登录后修改密码！
+```
+
+**方式二：环境变量预设置**
+
+在 `.env.docker` 中添加：
+
+```bash
+SUPERUSER_NAME=admin
+SUPERUSER_PASSWORD=你的自定义密码
+```
+
+然后用设置的用户名和密码登录即可。
 
 ## §1.5 使用官方镜像部署（生产环境推荐）
 
@@ -347,20 +370,38 @@ backend:
 2. `docs/user/GETTING_STARTED.md` - 详细部署步骤中的 Docker Compose 说明
 3. `docs/user/DEPLOY_WITH_DOCKER.md` - 完整部署指南中的 Docker Compose 配置
 
-## §3. 环境变量说明（精简版）
+## §3. 环境变量说明
 
-| 变量名 | 必需 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `SECRET_KEY` | 是 | - | 应用密钥，首次启动会自动生成 |
-| `JWT_SECRET_KEY` | 是 | - | JWT 密钥，首次启动会自动生成 |
-| `DB_PASSWORD` | 是 | - | ⚠️ 数据库密码（必须自行设置，禁止使用默认值） |
-| `TMDB_API_KEY` | 是 | - | TMDB API Key，用于获取影视元数据 |
-| `APP_BASE_URL` | 否 | `http://localhost:8092` | 应用基础 URL |
-| `PORT` | 否 | `8092` | 后端服务端口 |
-| `REDIS_ENABLED` | 否 | `true` | 是否启用 Redis 缓存 |
-| `VITE_API_BASE_URL` | 否 | `http://localhost:8092/api` | 前端 API 基础 URL |
+### 必填项
 
-完整的环境变量说明请参考 `docs/CONFIG_OVERVIEW.md`。
+| 变量名 | 说明 |
+|--------|------|
+| `DB_PASSWORD` | 数据库密码（必须修改，禁止使用默认值） |
+
+### 推荐设置
+
+| 变量名 | 默认值 | 说明 |
+|--------|--------|------|
+| `SUPERUSER_NAME` | `admin` | 初始管理员用户名 |
+| `SUPERUSER_PASSWORD` | 自动生成 | 初始管理员密码，强烈建议设置 |
+| `TMDB_API_KEY` | - | 影视元数据获取，不配置影响海报显示 |
+
+### 可选配置
+
+| 变量名 | 默认值 | 说明 |
+|--------|--------|------|
+| `VABHUB_PORT` | `52180` | 应用端口 |
+| `APP_BASE_URL` | `http://localhost:52180` | 应用基础 URL |
+| `TZ` | `Asia/Shanghai` | 时区 |
+
+### 高级配置（一般无需修改）
+
+| 变量名 | 说明 |
+|--------|------|
+| `SECRET_KEY` | 应用密钥，**自动生成并持久化** |
+| `JWT_SECRET_KEY` | JWT 密钥，**自动生成并持久化** |
+
+> 完整环境变量说明请参考 `docs/admin/CONFIG_OVERVIEW.md`。
 
 ## §4. 升级与备份
 
@@ -466,13 +507,12 @@ docker context ls
 docker context use desktop-linux
    ```
 
-### Q7: 如何创建初始用户？
+### Q7: 如何获取初始管理员密码？
 
-首次启动后，可通过以下方式创建初始用户：
+VabHub 在首次启动时自动创建管理员账号：
 
-1. 访问 API 文档：http://localhost:8092/docs
-2. 找到 `/api/auth/register` 接口
-3. 填写用户名、邮箱、密码进行注册
+1. 查看容器日志：`docker logs vabhub | grep "初始管理员"`
+2. 或在 `.env.docker` 中设置 `SUPERUSER_PASSWORD` 后重启
 
 ### Q8: 如何更新 VabHub 版本？
 

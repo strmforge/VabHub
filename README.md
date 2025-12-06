@@ -41,54 +41,33 @@ VabHub 仅提供 Docker 部署方式的官方支持。
 
 #### 1. 克隆项目
 ```bash
-git clone https://github.com/your-username/vabhub.git
+git clone https://github.com/strmforge/vabhub.git
 cd vabhub
 ```
 
 #### 2. 配置环境变量
 ```bash
 cp .env.docker.example .env.docker
-# 编辑 .env.docker 文件，配置必要参数
+# 编辑 .env.docker，仅需修改 DB_PASSWORD
 ```
 
-#### 3. Docker Compose 配置示例
+#### 3. 修改挂载路径
 
-以下是 VabHub 的核心 Docker Compose 配置，完整配置请参考仓库中的 `docker-compose.yml` 文件：
+编辑 `docker-compose.yml`，将 `/volume1/...` 改为你的实际路径：
 
 ```yaml
-version: '3.8'
-
 services:
-  # VabHub 主应用 (All-in-One 单镜像)
   vabhub:
-    image: strmforge/vabhub:latest  # 或 ghcr.io/strmforge/vabhub:latest
-    environment:
-      - DATABASE_URL=postgresql://vabhub:${DB_PASSWORD}@db:5432/vabhub
-      - REDIS_URL=redis://redis:6379/0
+    image: strmforge/vabhub:latest
     volumes:
-      - vabhub_data:/app/data
+      # 应用数据 + 自动生成的密钥
+      - /your/path/vabhub/app-data:/app/data
+      # 媒体库根目录
+      - /your/path/media:/media
+      # 下载目录
+      - /your/path/downloads:/downloads
     ports:
       - "52180:52180"
-    depends_on:
-      - db
-      - redis
-
-  # PostgreSQL 数据库
-  db:
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_DB: vabhub
-      POSTGRES_USER: vabhub
-      POSTGRES_PASSWORD: ${DB_PASSWORD}  # ⚠️ 在 .env.docker 中设置
-    volumes:
-      - vabhub_db_data:/var/lib/postgresql/data
-
-  # Redis 缓存
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - vabhub_redis_data:/data
 ```
 
 #### 4. 启动服务
@@ -96,26 +75,31 @@ services:
 docker compose up -d
 ```
 
-默认访问地址：
-- 前端：http://localhost:80
-- 后端：http://localhost:8092
-- API 文档：http://localhost:8092/docs
+#### 5. 首次登录
+
+默认访问地址：http://localhost:52180
+
+初始管理员账号：
+- 如果设置了 `SUPERUSER_PASSWORD`，使用 `admin` + 你设置的密码登录
+- 如果未设置，查看容器日志获取自动生成的密码：
+  ```bash
+  docker logs vabhub | grep "初始管理员"
+  ```
 
 #### 服务说明
 
-| 服务 | 用途 | 端口 | 挂载卷 |
-|------|------|------|--------|
-| `db` | PostgreSQL 数据库，存储所有应用数据 | 无（内部网络） | `vabhub_db_data` |
-| `redis` | Redis 缓存，提高应用性能 | 无（内部网络） | `vabhub_redis_data` |
-| `backend` | 后端服务，处理核心业务逻辑 | 8092 | `vabhub_data`（应用数据）、`vabhub_logs`（日志） |
-| `frontend` | 前端服务，提供用户界面 | 80 | 无 |
+| 服务 | 用途 | 端口 |
+|------|------|------|
+| `vabhub` | VabHub 主应用（前后端合一） | 52180 |
+| `db` | PostgreSQL 数据库 | 无（内部网络） |
+| `redis` | Redis 缓存 | 无（内部网络） |
 
 ## 📚 文档
 
-- **完整部署指南**：[docs/user/DEPLOY_WITH_DOCKER.md](docs/user/DEPLOY_WITH_DOCKER.md)
-- **用户快速上手**：[docs/user/GETTING_STARTED.md](docs/user/GETTING_STARTED.md)
+- **Docker 部署指南**：[docs/user/DEPLOY_WITH_DOCKER.md](docs/user/DEPLOY_WITH_DOCKER.md)
+- **新用户上手**：[docs/user/GETTING_STARTED.md](docs/user/GETTING_STARTED.md)
 - **系统总览**：[docs/VABHUB_SYSTEM_OVERVIEW.md](docs/VABHUB_SYSTEM_OVERVIEW.md)
-- **完整文档索引**：[docs/INDEX.md](docs/INDEX.md)
+- **文档索引**：[docs/INDEX.md](docs/INDEX.md)
 
 ## 📄 许可证
 
@@ -129,8 +113,8 @@ docker compose up -d
 
 ## 📞 联系方式
 
-- 项目主页：[GitHub Repository](https://github.com/your-username/vabhub)
-- 问题反馈：[GitHub Issues](https://github.com/your-username/vabhub/issues)
+- 项目主页：[GitHub Repository](https://github.com/strmforge/vabhub)
+- 问题反馈：[GitHub Issues](https://github.com/strmforge/vabhub/issues)
 
 ---
 

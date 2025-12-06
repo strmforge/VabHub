@@ -1,14 +1,29 @@
+# ============================================================================
 # VabHub Docker Compose 配置
-# 简化版 - 类似 MoviePilot 的简洁风格
-# 使用方法: docker compose up -d
+# ============================================================================
+# 一机一容器（VabHub + 内置 DB/Redis），单端口 52180 的推荐示例
 #
-# 安全密钥会自动生成并保存到 /app/data/.vabhub_secrets.json
-# 如需自定义密钥，可在 .env 中设置 SECRET_KEY / JWT_SECRET_KEY
+# 使用方法:
+#   1. 复制 .env.docker.example 为 .env.docker
+#   2. 修改 .env.docker 中的 DB_PASSWORD（必须）
+#   3. 根据需要修改下方的挂载路径（将 /volume1/... 改为你的实际路径）
+#   4. docker compose up -d
+#
+# 安全密钥说明:
+#   - SECRET_KEY / JWT_SECRET_KEY 会自动生成并保存到 /app/data/.vabhub_secrets.json
+#   - 无需手动配置，重启后复用同一密钥
+#   - 如需自定义，可在 .env.docker 中设置（高级用法）
+#
+# 初始管理员说明:
+#   - 首次启动时自动创建 admin 用户
+#   - 随机密码会输出到容器日志：docker logs vabhub | grep "初始管理员"
+#   - 或在 .env.docker 中设置 SUPERUSER_PASSWORD 使用固定密码
+# ============================================================================
 
 services:
   # ============== VabHub 主应用 ==============
   vabhub:
-    image: ghcr.io/strmforge/vabhub:latest
+    image: strmforge/vabhub:latest  # Docker Hub（推荐）或 ghcr.io/strmforge/vabhub:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -18,21 +33,39 @@ services:
       - VABHUB_PORT=${VABHUB_PORT:-52180}
       - TZ=${TZ:-Asia/Shanghai}
       # ---------- 数据库 ----------
-      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:?Please set DB_PASSWORD in .env.docker}@db:5432/${DB_NAME:-vabhub}
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:?请在 .env.docker 中设置 DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}
       - REDIS_URL=redis://redis:6379/0
-      # ---------- 初始管理员 (首次启动有效) ----------
+      # ---------- 初始管理员 (仅首次启动生效) ----------
       - SUPERUSER_NAME=${SUPERUSER_NAME:-admin}
       - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-}
       # ---------- 可选配置 ----------
-      # - APP_BASE_URL=http://your-domain.com:52180
-      # - TMDB_API_KEY=your-tmdb-key
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:52180}
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
     volumes:
-      - vabhub_data:/app/data        # 数据 + 自动生成的密钥
-      - vabhub_logs:/app/logs        # 日志
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # UI 升级功能
-      # 媒体目录 (按需挂载)
-      # - /path/to/media:/media
-      # - /path/to/downloads:/downloads
+      # ========== VabHub 应用数据 ==========
+      # 数据目录：数据库迁移状态、索引、缓存、自动生成的密钥等
+      - /volume1/docker/vabhub/app-data:/app/data
+      # 日志目录
+      - /volume1/docker/vabhub/logs:/app/logs
+
+      # ========== 媒体库目录 ==========
+      # 媒体库根目录：电影/剧集/动漫/音乐/小说等
+      # 在 VabHub 设置中配置对应的库路径，如 /media/movies、/media/tv
+      - /volume1/media:/media
+
+      # ========== 下载目录 ==========
+      # QB/TR/SABnzbd 的完成下载路径
+      # 在 VabHub 设置中配置为 /downloads
+      - /volume1/downloads:/downloads
+
+      # ========== 待整理目录 (Inbox) ==========
+      # 用于 TXT/EPUB/视频等自动识别入库
+      # 在 VabHub 设置中配置 INBOX_ROOT=/inbox
+      - /volume1/inbox:/inbox
+
+      # ========== 可选：Docker Socket ==========
+      # 用于在 VabHub UI 中重启容器等操作
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "${VABHUB_PORT:-52180}:${VABHUB_PORT:-52180}"
     depends_on:
@@ -57,9 +90,10 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-vabhub}
       POSTGRES_USER: ${DB_USER:-vabhub}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env.docker}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在 .env.docker 中设置 DB_PASSWORD}
     volumes:
-      - vabhub_db_data:/var/lib/postgresql/data
+      # PostgreSQL 数据目录
+      - /volume1/docker/vabhub/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-vabhub}"]
       interval: 10s
@@ -75,7 +109,8 @@ services:
     container_name: vabhub-redis
     command: redis-server --appendonly yes
     volumes:
-      - vabhub_redis_data:/data
+      # Redis 数据目录
+      - /volume1/docker/vabhub/redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -84,16 +119,6 @@ services:
     networks:
       - vabhub-internal
     restart: unless-stopped
-
-volumes:
-  vabhub_db_data:
-    name: vabhub_db_data
-  vabhub_redis_data:
-    name: vabhub_redis_data
-  vabhub_data:
-    name: vabhub_data
-  vabhub_logs:
-    name: vabhub_logs
 
 networks:
   vabhub-internal:

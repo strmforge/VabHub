@@ -71,6 +71,13 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"密钥管理器初始化失败（不影响启动）: {e}")
     
+    # 初始化管理员账号（首次启动时自动创建）
+    try:
+        from app.core.initial_superuser import initialize_superuser
+        await initialize_superuser()
+    except Exception as e:
+        logger.warning(f"初始管理员创建失败（不影响启动）: {e}")
+    
     # 启动WebSocket后台任务
     try:
         from app.api.websocket import start_websocket_tasks

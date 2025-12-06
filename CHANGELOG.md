@@ -53,6 +53,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **[deploy] Docker 部署体验简化（DOCKER-DEPLOY-SIMPLE-1）**
+  - 自动生成安全密钥：`SECRET_KEY` / `JWT_SECRET_KEY` 首次启动自动生成并持久化
+  - 首次启动自动创建管理员：支持 `SUPERUSER_NAME` / `SUPERUSER_PASSWORD` 环境变量，未设置时生成随机密码输出到日志
+  - 提供带完整路径挂载示例的 docker-compose 模板
+  - 统一对外端口为 52180
+  - 详见 `docs/dev-notes/DOCKER-DEPLOY-SIMPLE-1.md`
+
 - **[ci] CI 支持同时推送 Docker Hub 镜像**
   - 新增 `strmforge/vabhub` 镜像（Docker Hub）
   - 保持 `ghcr.io/strmforge/vabhub` 镜像（GHCR）

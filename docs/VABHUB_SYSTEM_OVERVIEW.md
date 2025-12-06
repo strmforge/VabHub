@@ -74,6 +74,11 @@ VabHub 系统总览（单一事实来源）
 - **前端**：Vue 3 / TypeScript / Vite / Vuetify 3 / Pinia
 - **数据层**：PostgreSQL / SQLite（开发） / Redis（可选缓存）
 - **任务 / 消息**：Celery（部分异步任务）、APScheduler（定时任务）
+- **部署架构**：
+  - **All-in-One 单容器**：前后端合并为单一 Docker 镜像
+  - **统一端口 52180**：外部访问统一使用一个端口
+  - **自动化安全**：SECRET_KEY / JWT_SECRET_KEY 首次启动自动生成并持久化
+  - **初始管理员**：首次启动自动创建 admin 账号（密码可通过 ENV 设置或查看日志获取）
 - **外部集成**：
   - 下载器：qBittorrent / Transmission 等
   - 云盘：115 等（通过远程播放 / 挂载）
@@ -511,6 +516,8 @@ VabHub 系统总览（单一事实来源）
   GitGuardian 报警收尾 & 配置脱敏：移除所有硬编码默认密码，改用必填环境变量；添加 secret 扫描脚本；创建安全策略文档。
 - **2025-12-06 – DOCKER-HUB-INTEGRATION-1 完成**：
   CI 支持同时推送 GHCR + Docker Hub 镜像，文档更新双镜像源说明。
+- **2025-12-06 – DOCKER-DEPLOY-SIMPLE-1 完成**：
+  Docker 部署体验简化：SECRET_KEY/JWT_SECRET_KEY 自动生成并持久化、首次启动自动创建管理员（支持 ENV 或随机密码）、docker-compose 提供完整挂载路径示例、统一端口 52180。
 - （此处由后续任务持续追加）
 
 ---

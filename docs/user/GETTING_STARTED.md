@@ -41,32 +41,30 @@ cd vabhub
 cp .env.docker.example .env.docker
 ```
 
-**编辑 `.env.docker` 文件，配置必要参数**：
+**编辑 `.env.docker` 文件，仅需修改**：
 
 ```bash
-# 媒体信息服务
+# 必须修改：数据库密码
+DB_PASSWORD=your-strong-password
+
+# 推荐设置：TMDB API Key（用于影视海报显示）
 TMDB_API_KEY=your-tmdb-key  # 从 https://www.themoviedb.org/ 获取
 
-# 安全密钥（必须修改）
-SECRET_KEY=your-strong-random-string  # 建议使用 openssl rand -hex 32 生成
-JWT_SECRET_KEY=another-strong-random-string  # 建议使用 openssl rand -hex 32 生成
-
-# 应用配置
-APP_BASE_URL=http://localhost:8092  # 后端访问地址
-APP_WEB_BASE_URL=http://localhost:80  # 前端访问地址
-VITE_API_BASE_URL=http://localhost:8092/api  # 前端调用后端的 API 地址
+# 可选：初始管理员密码（不设置则自动生成随机密码）
+SUPERUSER_PASSWORD=your-admin-password
 ```
 
-##### 3. 检查 Docker 配置
+> **密钥自动生成**：`SECRET_KEY` 和 `JWT_SECRET_KEY` 无需手动配置，系统会自动生成并持久化。
 
-VabHub 使用 Docker Compose 管理多个服务，核心服务包括：
+##### 3. 修改挂载路径
 
-| 服务 | 功能 | 端口 | 挂载卷 |
-|------|------|------|--------|
-| `db` | PostgreSQL 数据库 | 无（内部网络） | `vabhub_db_data` |
-| `redis` | 缓存服务 | 无（内部网络） | `vabhub_redis_data` |
-| `backend` | 后端应用 | 8092 | `vabhub_data`（应用数据）、`vabhub_logs`（日志） |
-| `frontend` | 前端应用 | 80 | 无 |
+编辑 `docker-compose.yml`，将 `/volume1/...` 改为你的实际路径：
+
+| 服务 | 功能 | 端口 |
+|------|------|------|
+| `vabhub` | VabHub 主应用（前后端合一） | 52180 |
+| `db` | PostgreSQL 数据库 | 无（内部网络） |
+| `redis` | 缓存服务 | 无（内部网络） |
 
 ##### 4. 启动服务
 
@@ -83,18 +81,20 @@ docker compose logs -f
 
 ##### 5. 首次访问
 
-服务启动后，通过以下地址访问：
+服务启动后，访问：http://localhost:52180
 
-- **前端 UI**：http://localhost:80
-- **后端 API**：http://localhost:8092
-- **API 文档**：http://localhost:8092/docs
+**初始管理员登录**：
 
-**部署后第一次打开 VabHub**：
-1. 访问 API 文档（http://localhost:8092/docs）创建初始用户
-2. 用创建的用户登录前端 UI
-3. 查看首页 Dashboard 确认系统状态
-4. 进入「系统 & 设置」页面配置下载器和站点
-5. 进入「站点管理」添加 PT 站点
+1. 如果设置了 `SUPERUSER_PASSWORD`，使用 `admin` + 你设置的密码登录
+2. 如果未设置，查看容器日志获取自动生成的密码：
+   ```bash
+   docker logs vabhub | grep "初始管理员"
+   ```
+
+**登录后建议步骤**：
+1. 查看首页 Dashboard 确认系统状态
+2. 进入「系统 & 设置」页面配置下载器和站点
+3. 进入「站点管理」添加 PT 站点
 
 ##### 6. 后续操作
 
@@ -241,10 +241,10 @@ DEEP_LEARNING_GPU_ENABLED=true  # 无 GPU 时设为 false
 
 ```bash
 # 后端服务
-curl http://localhost:8092/api/health
+curl http://localhost:52180/health
 
 # AI 总控状态
-curl http://localhost:8092/api/ai/orchestrator/status
+curl http://localhost:52180/api/ai/orchestrator/status
 ```
 
 ### 5.2 详细自检
