@@ -1,0 +1,155 @@
+# VabHub Docker Release - 版本号驱动的镜像发布（双仓库）
+# DOCKER-RELEASE-1 实现
+#
+# 触发条件: 仅在推送 v* tag 时触发
+# 流程: 读取代码版本号 → 校验 tag 一致性 → 构建并推送镜像到 GHCR + Docker Hub
+#
+# 镜像发布目标（同时推送）:
+#   GHCR:
+#     - ghcr.io/strmforge/vabhub:<version>
+#     - ghcr.io/strmforge/vabhub:latest
+#   Docker Hub:
+#     - strmforge/vabhub:<version>
+#     - strmforge/vabhub:latest
+#
+# 所需 Secrets:
+#   - DOCKERHUB_USERNAME: Docker Hub 用户名
+#   - DOCKERHUB_TOKEN: Docker Hub Access Token
+
+name: Docker Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 例如 v0.1.0、v0.1.0-rc1
+  workflow_dispatch:
+    inputs:
+      version_override:
+        description: '版本号覆盖（留空则从代码读取）'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/strmforge/vabhub
+  DOCKERHUB_IMAGE: strmforge/vabhub
+
+jobs:
+  release:
+    name: Build & Push Release Image
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Read version from code
+        id: version
+        run: |
+          VERSION=$(python backend/scripts/print_version.py)
+          echo "value=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Code version: $VERSION"
+      
+      # P4: 防呆检查 - tag 与代码版本号必须一致
+      - name: Ensure tag matches version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"   # v0.1.0-rc1 -> 0.1.0-rc1
+          CODE_VERSION="${{ steps.version.outputs.value }}"
+          echo "🏷️  Tag version:  $TAG_VERSION"
+          echo "📝 Code version: $CODE_VERSION"
+          if [ "$TAG_VERSION" != "$CODE_VERSION" ]; then
+            echo ""
+            echo "❌ ERROR: Tag and code version mismatch!"
+            echo ""
+            echo "请确保以下两步骤已完成："
+            echo "1. 修改 backend/app/core/version.py 中的 APP_VERSION"
+            echo "2. 提交代码后再打 tag"
+            echo ""
+            exit 1
+          fi
+          echo "✅ Version check passed"
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # 计算 Docker 标签
+      - name: Generate Docker tags
+        id: tags
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          
+          # 版本标签 + latest (GHCR + Docker Hub)
+          TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
+          TAGS="${TAGS},${{ env.IMAGE_NAME }}:latest"
+          TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:${VERSION}"
+          TAGS="${TAGS},${{ env.DOCKERHUB_IMAGE }}:latest"
+          
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "📦 Docker tags:"
+          echo "$TAGS" | tr ',' '\n' | sed 's/^/   - /'
+      
+      # 构建并推送镜像
+      - name: Build & Push VabHub Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=vabhub
+          cache-to: type=gha,mode=max,scope=vabhub
+          labels: |
+            org.opencontainers.image.source=https://github.com/strmforge/VabHub
+            org.opencontainers.image.description=VabHub All-in-One Application
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      
+      # 输出发布结果
+      - name: Release Summary
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          echo "## 🎉 Docker Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published Images" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull Commands" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# From GHCR (推荐)" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.IMAGE_NAME }}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# From Docker Hub" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.DOCKERHUB_IMAGE }}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

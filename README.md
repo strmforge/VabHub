@@ -2,13 +2,13 @@
 
 > 面向 NAS/PT 玩家的「搜索 · 下载 · 媒体库」一体化平台
 
-![Version](https://img.shields.io/badge/version-0.0.1--rc1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.0--rc1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![Vue](https://img.shields.io/badge/vue-3.0+-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-strmforge%2Fvabhub-blue?logo=docker)](https://hub.docker.com/r/strmforge/vabhub)
 
-> **当前状态**: VabHub 处于 `0.0.1-rc1` 试用阶段，推荐通过 Docker 部署体验。  
+> **当前状态**: VabHub 处于 `0.1.0-rc1` 试用阶段，推荐通过 Docker 部署体验。  
 > **官方镜像**:  
 > - Docker Hub: `strmforge/vabhub:latest`（推荐）  
 > - GHCR: `ghcr.io/strmforge/vabhub:latest`  
@@ -99,6 +99,7 @@ docker compose up -d
 - **Docker 部署指南**：[docs/user/DEPLOY_WITH_DOCKER.md](docs/user/DEPLOY_WITH_DOCKER.md)
 - **新用户上手**：[docs/user/GETTING_STARTED.md](docs/user/GETTING_STARTED.md)
 - **系统总览**：[docs/VABHUB_SYSTEM_OVERVIEW.md](docs/VABHUB_SYSTEM_OVERVIEW.md)
+- **CI 与发版**：[docs/ci/CI_OVERVIEW.md](docs/ci/CI_OVERVIEW.md)
 - **文档索引**：[docs/INDEX.md](docs/INDEX.md)
 
 ## 📄 许可证

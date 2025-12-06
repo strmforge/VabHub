@@ -528,11 +528,42 @@ VabHub 系统总览（单一事实来源）
   修复测试脚本导入路径问题（ModuleNotFoundError），统一 14 个回归脚本使用 `api_test_config` 配置模块。
 - **2025-12-06 – BACKEND-REGRESSION-DECISION-2 完成**：
   修复决策最小脚本 API 前缀不匹配问题（/api/v1 → /api），增强错误输出。现在的 Decision 自检脚本使用正确的 API 路径，不会在 CI 中产生 405 错误。
+- **2025-12-06 – RSSHUB-MINIMAL-1 完成**：
+  让 `test_rsshub_minimal.py` 在 CI 环境（`VABHUB_CI=1`）下无 RSSHub 源时跳过检查并正常退出，避免阻塞回归测试。
+- **2025-12-06 – DOCKER-RELEASE-1 完成**：
+  版本号驱动的 Docker 镜像发布流水线，只有打 `v*` tag 时才构建并推送镜像到 GHCR + Docker Hub；CI 中 Docker 仅 build 不 push。
+- **2025-12-06 – CI-OVERVIEW-1 完成**：
+  CI 文档化总览，梳理所有 workflow/脚本/环境变量，创建 `docs/ci/CI_OVERVIEW.md` 等文档。
 - （此处由后续任务持续追加）
 
 ---
 
-## 8. 提示给未来的 AI / IDE
+## 8. CI 与发布流水线概览
+
+> 详细文档见 [docs/ci/CI_OVERVIEW.md](./ci/CI_OVERVIEW.md)
+
+### 8.1 质量门
+
+- **后端**：`scripts/dev_check_backend.sh`（Ruff + mypy + pytest）
+- **前端**：`cd frontend && pnpm dev_check`（TypeScript 类型检查）
+
+### 8.2 Workflow 概览
+
+| Workflow | 触发条件 | 功能 |
+|----------|---------|------|
+| `ci.yml` | push / PR | 后端 + 前端检查，Docker build（不推送） |
+| `docker-release.yml` | push `v*` tag | 版本发布，推送 GHCR + Docker Hub |
+| `test-all.yml` | 定时/手动 | 回归测试（`test_all.py`） |
+
+### 8.3 镜像发布规则
+
+- **只有打 `v*` tag 时才发布镜像**
+- 镜像地址：`ghcr.io/strmforge/vabhub:<version>` / `strmforge/vabhub:<version>`
+- tag 必须与代码中 `backend/app/core/version.py` 的版本号一致
+
+---
+
+## 9. 提示给未来的 AI / IDE
 
 > 如果你是新加入的 AI / IDE，请按以下顺序理解并操作本项目：
 

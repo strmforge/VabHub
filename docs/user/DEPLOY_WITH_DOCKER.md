@@ -38,6 +38,21 @@ cp .env.docker.example .env.docker
 
 > **密钥自动生成**：`SECRET_KEY` 和 `JWT_SECRET_KEY` 无需手动配置，系统会在首次启动时自动生成并持久化到 `/app/data/.vabhub_secrets.json`。
 
+### 镜像 Tag 选择
+
+VabHub 提供以下镜像来源和 tag：
+
+| 来源 | 镜像地址 | 说明 |
+|------|---------|------|
+| Docker Hub（推荐） | `strmforge/vabhub:latest` | 国内访问速度快 |
+| GHCR | `ghcr.io/strmforge/vabhub:latest` | GitHub 官方仓库 |
+
+**Tag 规则**：
+- `latest` - 最新正式版本（推荐开发/测试环境使用）
+- `0.1.0-rc1` - 精确版本号（**推荐生产环境使用**）
+
+> 💡 **生产环境建议**：使用固定版本 tag（如 `strmforge/vabhub:0.1.0-rc1`）而非 `latest`，以确保部署可重复性和稳定性。
+
 ### 步骤 3：Docker Compose 配置
 
 VabHub 使用 Docker Compose 管理所有服务。采用 **All-in-One 单镜像架构**，只需配置一个主应用服务即可：
@@ -50,7 +65,7 @@ version: '3.8'
 services:
   # VabHub 主应用 (前端 + 后端合一)
   vabhub:
-    image: strmforge/vabhub:latest  # Docker Hub（推荐）或 ghcr.io/strmforge/vabhub:latest
+    image: strmforge/vabhub:0.1.0-rc1  # 推荐使用固定版本，或 :latest
     container_name: vabhub
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}  # ⚠️ 在 .env.docker 中设置 DB_PASSWORD
@@ -532,6 +547,9 @@ docker compose pull && docker compose up -d --build
 - **配置详解**：请参考 `docs/CONFIG_OVERVIEW.md`
 - **健康检查**：请参考 `docs/SYSTEM_SELF_CHECK_GUIDE.md`
 - **已知限制**：请参考 `docs/KNOWN_LIMITATIONS.md`
+- **CI 与发版**：请参考 `docs/ci/CI_OVERVIEW.md` 和 `docs/ci/DOCKER-RELEASE-1.md`
+
+> 💡 **镜像发布说明**：官方镜像只在打 `v*` tag 时发布。想了解镜像构建和发布流程，请查看 [CI 总览](../ci/CI_OVERVIEW.md)。
 
 ## §7. 开发者提示
 

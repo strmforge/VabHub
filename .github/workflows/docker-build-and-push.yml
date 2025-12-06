@@ -153,13 +153,13 @@ jobs:
           echo "Backend tags: ${BACKEND_TAGS}"
           echo "Frontend tags: ${FRONTEND_TAGS}"
       
-      # 构建并推送后端镜像
-      - name: Build & Push Backend Image
+      # [DEPRECATED] 仅构建，不推送 - 镜像发布已迁移到 docker-release.yml
+      - name: Build Backend Image (no push)
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          push: true
+          push: false
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.backend_tags }}
           cache-from: type=gha,scope=backend
@@ -169,13 +169,13 @@ jobs:
             org.opencontainers.image.description=VabHub Backend Service
             org.opencontainers.image.revision=${{ github.sha }}
       
-      # 构建并推送前端镜像
-      - name: Build & Push Frontend Image
+      # [DEPRECATED] 仅构建，不推送 - 镜像发布已迁移到 docker-release.yml
+      - name: Build Frontend Image (no push)
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: true
+          push: false
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.frontend_tags }}
           build-args: |
