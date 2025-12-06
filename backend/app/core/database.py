@@ -2,17 +2,50 @@
 数据库连接和会话管理
 """
 
+from pathlib import Path
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 from loguru import logger
 
+
+def _ensure_sqlite_dir(url: str) -> None:
+    """
+    确保 SQLite 数据库文件的父目录存在
+    
+    Args:
+        url: 数据库连接 URL
+    """
+    # 仅处理 sqlite / sqlite+aiosqlite
+    if not url.startswith("sqlite"):
+        return
+    
+    # 去掉 scheme 部分，获取文件路径
+    # 格式可能是: sqlite:///path/to/db 或 sqlite+aiosqlite:///path/to/db
+    # 三斜杠后面是相对路径，四斜杠后面是绝对路径
+    path_part = url.split("///", 1)
+    if len(path_part) < 2 or not path_part[1]:
+        return  # 内存数据库或无效路径
+    
+    db_path = Path(path_part[1])
+    
+    # 如果路径有父目录且父目录不存在，则创建
+    if db_path.parent and db_path.parent != Path("."):
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"已创建 SQLite 数据库目录: {db_path.parent}")
+
+
 # 创建异步数据库引擎
 # 默认使用PostgreSQL，如果URL是SQLite则使用SQLite
 if settings.DATABASE_URL.startswith("sqlite"):
     # SQLite异步支持（用于开发/测试）
+    sqlite_url = settings.DATABASE_URL.replace("sqlite://", "sqlite+aiosqlite://")
+    
+    # 确保 SQLite 数据库目录存在
+    _ensure_sqlite_dir(sqlite_url)
+    
     engine = create_async_engine(
-        settings.DATABASE_URL.replace("sqlite://", "sqlite+aiosqlite://"),
+        sqlite_url,
         echo=settings.DEBUG,
         future=True,
         pool_pre_ping=True

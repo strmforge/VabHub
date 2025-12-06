@@ -68,6 +68,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **[backend] 修复 Backend Regression 在 SQLite 开发模式下无法创建数据库文件的问题（BACKEND-REGRESSION-SQLITE-FIX-1）**
+  - 数据库模块自动创建 SQLite 文件父目录
+  - Backend Regression workflow 使用显式 DATABASE_URL 路径
+  - 新增 SQLite 目录创建测试用例
+  - 详见 `docs/ci/BACKEND-REGRESSION-SQLITE-FIX-1.md`
+
 - **[frontend] 修复 Docker 构建时缺失 downloads 组件导致的前端打包失败**
   - 根因：`.gitignore` 中 `downloads/` 规则过于宽泛，意外忽略了 `frontend/src/components/downloads/` 目录
   - 修复：将规则改为 `/downloads/` 只匹配根目录

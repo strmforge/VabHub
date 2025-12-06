@@ -518,6 +518,8 @@ VabHub 系统总览（单一事实来源）
   CI 支持同时推送 GHCR + Docker Hub 镜像，文档更新双镜像源说明。
 - **2025-12-06 – DOCKER-DEPLOY-SIMPLE-1 完成**：
   Docker 部署体验简化：SECRET_KEY/JWT_SECRET_KEY 自动生成并持久化、首次启动自动创建管理员（支持 ENV 或随机密码）、docker-compose 提供完整挂载路径示例、统一端口 52180。
+- **2025-12-06 – BACKEND-REGRESSION-SQLITE-FIX-1 完成**：
+  修复 Backend Regression 工作流中 SQLite 数据库目录未创建导致 API 启动失败的问题；开发 & Backend Regression 默认使用 SQLite（自动建库目录），生产部署使用 PostgreSQL。
 - （此处由后续任务持续追加）
 
 ---

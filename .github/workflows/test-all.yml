@@ -29,13 +29,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      - name: Prepare CI data directory
+        run: |
+          mkdir -p .ci_data
+          echo "CI data directory created: $(pwd)/.ci_data"
+
       - name: Start backend server
         working-directory: backend
         env:
           API_PREFIX: /api/v1
-          DATABASE_URL: sqlite:///$(pwd)/vabhub_ci.db
+          # 使用显式的相对路径，避免 shell 展开问题
+          # 注意：数据库模块会自动创建父目录
+          DATABASE_URL: "sqlite:///./.ci_data/vabhub_regression.db"
           REDIS_ENABLED: "false"
         run: |
+          echo "Starting backend with SQLite regression database..."
+          echo "DATABASE_URL: sqlite:///./.ci_data/vabhub_regression.db"
           uvicorn main:app --host 0.0.0.0 --port 8100 > ../uvicorn.log 2>&1 &
           echo $! > ../uvicorn.pid
           sleep 3
