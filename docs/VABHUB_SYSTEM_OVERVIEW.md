@@ -534,6 +534,10 @@ VabHub 系统总览（单一事实来源）
   版本号驱动的 Docker 镜像发布流水线，只有打 `v*` tag 时才构建并推送镜像到 GHCR + Docker Hub；CI 中 Docker 仅 build 不 push。
 - **2025-12-06 – CI-OVERVIEW-1 完成**：
   CI 文档化总览，梳理所有 workflow/脚本/环境变量，创建 `docs/ci/CI_OVERVIEW.md` 等文档。
+- **2025-12-13 – VABHUB-0.0.2-UI-BASELINE 完成**：
+  UI 基线升级 & 导航梳理 & 空态不报错。合并「阅读&听书&漫画」模块、发现页默认加载 TMDB 热门、修复 TTS SQL 查询 Bug、绿联飞牛 NAS 部署示例、版本号更新为 0.0.2。
+- **2025-12-13 – DISCOVER-MUSIC-HOME-0.0.3 完成**：
+  发现页 & 音乐首页重构 + 公共 Metadata Key 支持。新增 PUBLIC_TMDB_DISCOVER_KEY 配置层、发现页多源聚合（TMDB/豆瓣/Bangumi）、音乐首页 API、版本号更新为 0.0.3。
 - （此处由后续任务持续追加）
 
 ---

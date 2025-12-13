@@ -2,22 +2,129 @@
   <div class="discover-page">
     <PageHeader
       title="发现"
-      subtitle="探索新内容"
+      subtitle="探索热门影视内容"
     >
       <template #actions>
         <v-btn
           icon="mdi-refresh"
           variant="text"
-          @click="refreshData"
-          :loading="loading"
+          @click="loadDiscoverHome"
+          :loading="homeLoading"
         />
       </template>
     </PageHeader>
 
     <v-container fluid>
+      <!-- 数据源状态提示 (0.0.3) -->
+      <v-alert
+        v-if="keySource !== 'none' && !homeLoading"
+        :type="keySource === 'public' ? 'success' : 'info'"
+        variant="tonal"
+        density="compact"
+        class="mb-4"
+      >
+        <div class="d-flex align-center">
+          <v-icon size="small" class="mr-2">
+            {{ keySource === 'public' ? 'mdi-cloud-check' : 'mdi-key' }}
+          </v-icon>
+          <span class="text-body-2">
+            {{ keySource === 'public' ? '当前使用公共数据源' : '当前使用您的个人 API Key' }}
+          </span>
+          <v-chip size="x-small" class="ml-2" variant="outlined">
+            TMDB + 豆瓣 + Bangumi
+          </v-chip>
+        </div>
+      </v-alert>
+
+      <!-- 未配置提示 -->
+      <v-alert
+        v-if="keySource === 'none' && !homeLoading && discoverSections.length === 0"
+        type="info"
+        variant="tonal"
+        class="mb-4"
+        prominent
+      >
+        <v-alert-title>欢迎使用发现页</v-alert-title>
+        <div class="mt-2">
+          {{ tmdbMessage || '豆瓣/Bangumi 无需配置即可使用。配置 TMDB API Key 可获取更多热门内容。' }}
+        </div>
+        <template #append>
+          <v-btn
+            color="primary"
+            variant="flat"
+            size="small"
+            @click="$router.push({ name: 'Settings' })"
+          >
+            去配置
+          </v-btn>
+        </template>
+      </v-alert>
+
+      <!-- TMDB 热门内容区块 -->
+      <div v-if="homeLoading" class="text-center py-12">
+        <v-progress-circular indeterminate color="primary" size="64" />
+        <div class="mt-4 text-body-1 text-medium-emphasis">加载热门内容中...</div>
+      </div>
+
+      <template v-else-if="discoverSections.length > 0">
+        <div v-for="section in discoverSections" :key="section.title" class="mb-6">
+          <div class="d-flex align-center mb-3">
+            <h2 class="text-h6 font-weight-bold">{{ section.title }}</h2>
+            <v-spacer />
+            <v-btn
+              v-if="section.more_link"
+              variant="text"
+              size="small"
+              color="primary"
+              @click="$router.push(section.more_link)"
+            >
+              更多 <v-icon size="small">mdi-chevron-right</v-icon>
+            </v-btn>
+          </div>
+          <v-row>
+            <v-col
+              v-for="item in section.items"
+              :key="item.id"
+              cols="6"
+              sm="4"
+              md="3"
+              lg="2"
+            >
+              <v-card
+                class="media-card"
+                @click="goToMedia(item.tmdb_id, item.media_type)"
+                style="cursor: pointer"
+              >
+                <LazyImage
+                  :src="getPosterUrl(item.poster_path)"
+                  aspect-ratio="2/3"
+                  :cover="true"
+                />
+                <v-card-text class="pa-2">
+                  <div class="text-body-2 font-weight-bold text-truncate">
+                    {{ item.title }}
+                  </div>
+                  <div class="d-flex align-center justify-space-between">
+                    <span v-if="item.release_date" class="text-caption text-medium-emphasis">
+                      {{ getYear(item.release_date) }}
+                    </span>
+                    <v-chip v-if="item.vote_average" size="x-small" color="warning" variant="flat">
+                      <v-icon size="x-small" class="mr-1">mdi-star</v-icon>
+                      {{ item.vote_average?.toFixed(1) }}
+                    </v-chip>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+      </template>
+
+      <v-divider class="my-6" />
+
       <!-- 数据源选择 -->
       <v-tabs v-model="activeSource" class="mb-4">
-        <v-tab value="tmdb">TMDB</v-tab>
+        <v-tab value="tmdb">TMDB 搜索</v-tab>
         <v-tab value="douban">豆瓣</v-tab>
         <v-tab value="bangumi">Bangumi</v-tab>
       </v-tabs>
@@ -431,11 +538,21 @@ import { useToast } from 'vue-toastification'
 import PageHeader from '@/components/common/PageHeader.vue'
 import BangumiDetailDialog from '@/components/bangumi/BangumiDetailDialog.vue'
 import LazyImage from '@/components/common/LazyImage.vue'
-import { mediaApi, doubanApi, bangumiApi } from '@/services/api'
+import { mediaApi, doubanApi, bangumiApi, discoverApi } from '@/services/api'
 import { debounce } from '@/utils/debounce'
 
 const router = useRouter()
 const toast = useToast()
+
+// 发现页首页状态 (0.0.3 多源版本)
+const homeLoading = ref(false)
+const tmdbConfigured = ref(true)
+const tmdbMessage = ref('')
+const discoverSections = ref<any[]>([])
+// 0.0.3 新增: key 来源状态
+const keySource = ref<'public' | 'private' | 'none'>('none')
+const hasPublicKeys = ref(false)
+const hasPrivateKeys = ref(false)
 
 // 状态
 const loading = ref(false)
@@ -719,10 +836,36 @@ const refreshData = () => {
   toast.success('已清空搜索结果')
 }
 
-// 初始化：自动加载热门动漫
+// 加载发现页首页内容 (0.0.3 多源版本)
+const loadDiscoverHome = async () => {
+  try {
+    homeLoading.value = true
+    const response = await discoverApi.getHome()
+    const data = response.data || response
+    
+    // 0.0.2 兼容字段
+    tmdbConfigured.value = data.tmdb_configured !== false
+    tmdbMessage.value = data.tmdb_message || ''
+    discoverSections.value = data.sections || []
+    
+    // 0.0.3 新增字段
+    keySource.value = data.key_source || 'none'
+    hasPublicKeys.value = data.has_public_keys || false
+    hasPrivateKeys.value = data.has_private_keys || false
+  } catch (err: any) {
+    console.error('加载发现页内容失败:', err)
+    tmdbConfigured.value = false
+    tmdbMessage.value = '加载失败，请稍后重试'
+    discoverSections.value = []
+    keySource.value = 'none'
+  } finally {
+    homeLoading.value = false
+  }
+}
+
+// 初始化：自动加载热门内容
 onMounted(() => {
-  // 切换到Bangumi标签页时自动加载热门
-  // 这里不自动加载，让用户手动点击刷新按钮
+  loadDiscoverHome()
 })
 </script>
 

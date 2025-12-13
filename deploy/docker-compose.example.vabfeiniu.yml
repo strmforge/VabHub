@@ -1,0 +1,143 @@
+# ============================================================================
+# VabHub Docker Compose - 绿联飞牛 NAS 简化部署示例
+# ============================================================================
+# 适用场景：单一 VabHub + PostgreSQL + Redis 的简化部署
+# 不包含：qBittorrent、Transmission 等外部下载器服务
+#
+# 使用方法:
+#   1. 复制本文件为 docker-compose.yml
+#   2. 复制 .env.docker.example 为 .env.docker
+#   3. 修改 .env.docker 中的 DB_PASSWORD（必须）
+#   4. 根据实际 NAS 路径修改下方的挂载目录
+#   5. docker compose up -d
+#
+# 绿联飞牛 NAS 路径说明:
+#   - /vol1/1000/... 是飞牛 NAS 的典型用户数据路径
+#   - 请根据您的实际存储卷和用户 ID 调整路径
+#
+# 当前版本: 0.0.2 (Testing)
+# ============================================================================
+
+services:
+  # ============== VabHub 主应用 ==============
+  vabhub:
+    image: strmforge/vabhub:latest  # Docker Hub（推荐）或 ghcr.io/strmforge/vabhub:latest
+    container_name: vabhub
+    environment:
+      # ---------- 基础配置 ----------
+      - VABHUB_PORT=${VABHUB_PORT:-52180}
+      - TZ=${TZ:-Asia/Shanghai}
+      # ---------- 数据库 ----------
+      - DATABASE_URL=postgresql://${DB_USER:-vabhub}:${DB_PASSWORD:?请在 .env.docker 中设置 DB_PASSWORD}@db:5432/${DB_NAME:-vabhub}
+      - REDIS_URL=redis://redis:6379/0
+      # ---------- 初始管理员 (仅首次启动生效) ----------
+      - SUPERUSER_NAME=${SUPERUSER_NAME:-admin}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD:-}
+      # ---------- 可选配置 ----------
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:52180}
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
+    volumes:
+      # ========== VabHub 应用数据（飞牛 NAS 路径示例）==========
+      # 数据目录：数据库迁移状态、索引、缓存、自动生成的密钥等
+      - /vol1/1000/docker/vabhub/app-data:/app/data
+      # 日志目录
+      - /vol1/1000/docker/vabhub/logs:/app/logs
+
+      # ========== 媒体库目录 ==========
+      # 媒体库根目录：电影/剧集/动漫/音乐/小说等
+      # 在 VabHub 设置中配置对应的库路径，如 /media/movies、/media/tv
+      - /vol1/1000/media:/media
+
+      # ========== 下载目录 ==========
+      # QB/TR/SABnzbd 的完成下载路径
+      # 在 VabHub 设置中配置为 /downloads
+      - /vol1/1000/downloads:/downloads
+
+      # ========== 待整理目录 (Inbox) ==========
+      # 用于 TXT/EPUB/视频等自动识别入库
+      # 在 VabHub 设置中配置 INBOX_ROOT=/inbox
+      - /vol1/1000/inbox:/inbox
+
+      # ========== 可选：Docker Socket ==========
+      # 用于在 VabHub UI 中重启容器等操作
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "${VABHUB_PORT:-52180}:${VABHUB_PORT:-52180}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${VABHUB_PORT:-52180}/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # ============== PostgreSQL 数据库 ==============
+  db:
+    image: postgres:14-alpine
+    container_name: vabhub-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vabhub}
+      POSTGRES_USER: ${DB_USER:-vabhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在 .env.docker 中设置 DB_PASSWORD}
+    volumes:
+      # PostgreSQL 数据目录（飞牛 NAS 路径示例）
+      - /vol1/1000/docker/vabhub/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-vabhub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+  # ============== Redis 缓存 ==============
+  redis:
+    image: redis:7-alpine
+    container_name: vabhub-redis
+    command: redis-server --appendonly yes
+    volumes:
+      # Redis 数据目录（飞牛 NAS 路径示例）
+      - /vol1/1000/docker/vabhub/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vabhub-internal
+    restart: unless-stopped
+
+networks:
+  vabhub-internal:
+    driver: bridge
+
+# ============================================================================
+# 空库体验说明（0.0.2 版本）
+# ============================================================================
+# 本配置文件适用于 VabHub 0.0.2 测试版的"空库基线"体验：
+#
+# 1. 首次启动时，数据库为空：
+#    - 无媒体库数据
+#    - 无订阅配置
+#    - 无 TTS 任务
+#    - 无漫画源配置
+#
+# 2. 0.0.2 版本的优化目标：
+#    - 所有页面在空库状态下可正常打开，不报 404/500 错误
+#    - 空态页面显示友好的引导提示
+#    - 日志中心可以正常显示基础流水
+#
+# 3. 建议的初始配置步骤：
+#    a. 登录后进入"系统设置"配置 TMDB API Key
+#    b. 在"站点管理"添加 PT 站点
+#    c. 在"下载设置"配置下载器连接
+#    d. 开始使用搜索、订阅等功能
+# ============================================================================

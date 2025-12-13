@@ -84,14 +84,18 @@ async def get_audiobook_center_list(
         audiobook_ebook_ids = set(audiobook_result.scalars().all())
         
         # 1.2 从 TTSJob 获取最近有任务的作品 ID（即使目前没有 AudiobookFile）
+        # 修复 PostgreSQL DISTINCT + ORDER BY 问题：使用 GROUP BY 代替 DISTINCT
         recent_job_stmt = (
-            select(TTSJob.ebook_id)
-            .order_by(desc(TTSJob.requested_at))
+            select(
+                TTSJob.ebook_id,
+                func.max(TTSJob.requested_at).label("last_requested_at")
+            )
+            .group_by(TTSJob.ebook_id)
+            .order_by(desc("last_requested_at"))
             .limit(100)  # 限制最近 100 个任务
-            .distinct()
         )
         recent_job_result = await db.execute(recent_job_stmt)
-        recent_job_ebook_ids = set(recent_job_result.scalars().all())
+        recent_job_ebook_ids = set(row.ebook_id for row in recent_job_result.all())
         
         # 合并
         candidate_ebook_ids = audiobook_ebook_ids | recent_job_ebook_ids

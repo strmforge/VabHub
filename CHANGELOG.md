@@ -49,6 +49,76 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.0.3] - 2025-12-13 (Testing)
+
+发现页 & 音乐首页重构 + 公共 Metadata Key 支持
+
+### Added
+
+- **[后端] 公共 Metadata Key 配置层**
+  - 新增 `PUBLIC_TMDB_DISCOVER_KEY` 环境变量，用于发现页热门内容
+  - 公共 key 与私有 key 分离：发现页优先使用公共 key，刮削使用私有 key
+  - 豆瓣/Bangumi 无需 key，始终可用
+
+- **[后端] 发现页聚合服务**
+  - 新增 `discover_service.py` 统一聚合 TMDB/豆瓣/Bangumi 数据源
+  - 单源失败不影响整体响应
+  - 返回 `key_source` 标识当前使用的是公共/私有 key
+
+- **[后端] 音乐首页 API**
+  - 新增 `/api/music/home` 接口
+  - 支持 RSSHub 榜单源（网易云/QQ音乐）
+
+- **[前端] 发现页多源显示**
+  - 顶部显示当前数据源状态（公共/私有/未配置）
+  - 支持 TMDB + 豆瓣 + Bangumi 多源热门内容
+
+- **[前端] 音乐首页 API 集成**
+  - 新增 `musicHomeApi` 前端服务
+
+### Changed
+
+- **[后端] 发现页 API 升级**
+  - `/api/discover/home` 从纯 TMDB 升级为多源聚合
+  - 保持向后兼容 0.0.2 的 `tmdb_configured` 字段
+
+---
+
+## [0.0.2] - 2025-12-13 (Testing)
+
+UI 基线升级 & 导航梳理 & 空态不报错
+
+### Added
+
+- **[前端] 导航结构重组**
+  - 合并「阅读 & 听书」和「漫画中心」为统一的「阅读 & 听书 & 漫画」模块
+  - 音乐中心新增「榜单 & 订阅」Tab
+  - 「站点 & 插件」重命名为「站点 & 安全」
+  - 侧栏版本号更新为 0.0.2
+
+- **[前端] 发现页增强**
+  - 默认加载 TMDB 热门电影/剧集（本周热门 + 流行榜）
+  - 未配置 TMDB API Key 时显示友好引导提示
+  - 新增 /api/discover/home 聚合接口
+
+- **[部署] 绿联飞牛 NAS 部署示例**
+  - 新增 deploy/docker-compose.example.vabfeiniu.yml
+  - 适用于单一 VabHub + Postgres + Redis 的简化部署
+
+### Fixed
+
+- **[后端] 修复 TTS 有声书中心 SQL 查询问题**
+  - 修复 PostgreSQL DISTINCT + ORDER BY 不兼容问题
+  - 使用 GROUP BY + MAX() 替代 DISTINCT
+
+### Changed
+
+- **[前端] 空态页面体验优化**
+  - 发现页、漫画追更、音乐中心等页面空库时不再报错
+  - 提供清晰的引导提示（「去配置」「去添加」等）
+
+---
+
 ## [Unreleased]
 
 ### Added

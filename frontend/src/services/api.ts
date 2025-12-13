@@ -2445,3 +2445,19 @@ export const pluginHubApi = {
     return data
   },
 }
+
+// 发现页 API (0.0.2 -> 0.0.3 多源版本)
+export const discoverApi = {
+  // 获取发现页首页内容（TMDB/豆瓣/Bangumi 热门聚合）
+  getHome: () => api.get('/discover/home'),
+  
+  // 获取热门内容
+  getTrending: (mediaType: 'movie' | 'tv' | 'all', timeWindow: 'day' | 'week' = 'week') => 
+    api.get(`/discover/trending/${mediaType}`, { params: { time_window: timeWindow } })
+}
+
+// 音乐首页 API (0.0.3)
+export const musicHomeApi = {
+  // 获取音乐首页内容（榜单聚合）
+  getHome: () => api.get('/music/home'),
+}

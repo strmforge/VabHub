@@ -153,11 +153,11 @@
         :active="$route.name === 'Workflows'"
       />
       
-      <!-- ========== 阅读 & 听书 ========== -->
+      <!-- ========== 阅读 & 听书 & 漫画 ========== -->
       <v-divider class="my-2" />
       <v-list-subheader>
         <v-icon size="small" class="mr-1">mdi-book-open-variant</v-icon>
-        阅读 & 听书
+        阅读 & 听书 & 漫画
       </v-list-subheader>
       
       <v-list-item
@@ -207,13 +207,6 @@
         :to="{ name: 'TTSCenter' }"
         :active="$route.name === 'TTSCenter'"
       />
-      
-      <!-- ========== 漫画中心 ========== -->
-      <v-divider class="my-2" />
-      <v-list-subheader>
-        <v-icon size="small" class="mr-1">mdi-book-open-page-variant</v-icon>
-        漫画中心
-      </v-list-subheader>
       
       <v-list-item
         prepend-icon="mdi-bookshelf"
@@ -268,6 +261,14 @@
         value="music-center"
         :to="{ name: 'MusicCenter' }"
         :active="$route.name === 'MusicCenter'"
+      />
+      
+      <v-list-item
+        prepend-icon="mdi-playlist-music"
+        title="榜单 & 订阅"
+        value="music-charts"
+        :to="{ name: 'MusicSubscriptions' }"
+        :active="$route.name === 'MusicSubscriptions'"
       />
       
       <!-- ========== AI 中心 ========== -->
@@ -345,11 +346,11 @@
         :active="$route.name === 'Recommendations'"
       />
       
-      <!-- ========== 站点 & 插件 ========== -->
+      <!-- ========== 站点 & 安全 ========== -->
       <v-divider class="my-2" />
       <v-list-subheader>
-        <v-icon size="small" class="mr-1">mdi-server</v-icon>
-        站点 & 插件
+        <v-icon size="small" class="mr-1">mdi-shield-check</v-icon>
+        站点 & 安全
       </v-list-subheader>
       
       <v-list-item
@@ -598,7 +599,7 @@ const drawer = computed({
   set: (value) => appStore.setDrawer(value)
 })
 
-const appVersion = '1.0.0'
+const appVersion = '0.0.3'
 </script>
 
 <style lang="scss" scoped>

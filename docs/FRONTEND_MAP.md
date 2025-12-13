@@ -1,7 +1,7 @@
 # VabHub 前端路由地图
 
 > 本文件是前端页面/路由/导航结构的单一事实来源。  
-> 更新于 2025-12-03，任务 NAV-STRUCTURE-CLEANUP-1 + UI-LAYOUT-TUNING-1 + PRE-RELEASE-CHECK-1 + RELEASE-NOTES-RC1-1。
+> 更新于 2025-12-13，任务 VABHUB-0.0.2-UI-BASELINE。
 
 ---
 
@@ -34,15 +34,13 @@
 📌 订阅相关模块协作关系详见 SUBS_RULES_OVERVIEW.md
 📌 本模块在完整下载流水线中的位置，详见 DOWNLOAD_MEDIA_PIPELINE_OVERVIEW.md
 
-📚 阅读 & 听书
+📚 阅读 & 听书 & 漫画
 ├── 阅读中心        /reading               ReadingHubPage [NOW]
 ├── 我的书架        /my/shelf              MyShelf [NOW]
 ├── 我的收藏        /reading/favorites     ReadingFavoriteShelf [NOW]
 ├── 小说中心        /novels                NovelCenter [NOW]
 ├── 有声书中心      /audiobooks            AudiobookCenter [NOW]
-└── TTS 有声书      /tts/center            TTSCenter [NOW]
-
-📖 漫画中心
+├── TTS 有声书      /tts/center            TTSCenter [NOW]
 ├── 本地漫画库      /manga/library         MangaLibraryPage [NOW]
 ├── 漫画追更中心    /manga/following       MangaFollowCenter [NOW]
 ├── 远程漫画        /manga/remote          MangaRemoteExplorer [NOW]
@@ -51,7 +49,8 @@
 📌 阅读/听书/漫画完整链路详见 READING_STACK_OVERVIEW.md
 
 🎵 音乐中心
-└── 音乐库          /music                 MusicCenter [NOW]
+├── 音乐库          /music                 MusicCenter [NOW]
+└── 榜单 & 订阅    /subscriptions/music   MusicSubscriptions [NOW]
 
 🤖 AI 中心 [Beta]
 ├── AI 实验室       /ai-lab                AiLab         [GENERIC]
@@ -62,7 +61,7 @@
 └── AI 推荐         /recommendations       Recommendations [NOW]
 📌 AI 中心各页面与 Orchestrator 模式映射详见 AI_CENTER_UI_OVERVIEW.md
 
-🌐 站点 & 插件
+🛡️ 站点 & 安全
 ├── 站点管理        /site-manager          SiteManager [NOW]
 ├── HNR 风险检测    /hnr                   HNRMonitoring [PRO] [NOW]
 ├── 插件市场        /plugins               Plugins [NOW]
@@ -169,4 +168,4 @@
 
 ---
 
-*最后更新：2025-12-06 FRONTEND-DOWNLOADS-SPEEDLIMIT-1（修复 downloads 组件 gitignore 问题，添加限速弹窗说明）*
+*最后更新：2025-12-13 VABHUB-0.0.2-UI-BASELINE（导航重组、版本 0.0.2、发现页增强）*
