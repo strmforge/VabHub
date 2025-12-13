@@ -80,24 +80,18 @@ class DiscoverService:
         # 并行获取各数据源
         tasks = []
         
-        # TMDB 数据
+        # TMDB 数据（需要 key）
         tmdb_key = get_tmdb_key_for_discover()
         if tmdb_key:
             tasks.append(self._fetch_tmdb_sections(tmdb_key))
-        else:
-            tasks.append(asyncio.coroutine(lambda: [])())
         
-        # 豆瓣数据
+        # 豆瓣数据（无需 key，始终尝试获取）
         if is_douban_available():
             tasks.append(self._fetch_douban_sections())
-        else:
-            tasks.append(asyncio.coroutine(lambda: [])())
         
-        # Bangumi 数据
+        # Bangumi 数据（无需 key，始终尝试获取）
         if is_bangumi_available():
             tasks.append(self._fetch_bangumi_sections())
-        else:
-            tasks.append(asyncio.coroutine(lambda: [])())
         
         # 并行执行
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -112,10 +106,12 @@ class DiscoverService:
         
         # 构建消息
         message = None
-        if key_source == "none" and not sections:
-            message = "未配置任何数据源，请在设置中配置 TMDB API Key 以获取热门内容"
+        if not sections:
+            message = "暂无热门内容，请稍后重试"
+        elif key_source == "none":
+            message = "豆瓣/Bangumi 数据可用。配置 TMDB API Key 可获取更多内容"
         elif key_source == "public":
-            message = "当前使用公共数据源"
+            message = "当前使用公共数据源（TMDB + 豆瓣 + Bangumi）"
         elif key_source == "private":
             message = "当前使用您的个人 API Key"
         

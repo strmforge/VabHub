@@ -101,9 +101,16 @@ class Settings(BaseSettings):
     # 各类媒体库和存储路径配置
     # 详见 docs/CONFIG_OVERVIEW.md §2.2
     
-    # 文件存储
-    STORAGE_PATH: str = "./data"
-    TEMP_PATH: str = "./tmp"
+    # Docker /config 模式支持 (0.0.3)
+    # 优先使用 VABHUB_*_DIR 环境变量，兼容旧路径
+    # 用户只需设置 VABHUB_CONFIG_DIR=/config 即可
+    VABHUB_CONFIG_DIR: str = os.getenv("VABHUB_CONFIG_DIR", "./config")  # 配置文件目录
+    VABHUB_DATA_DIR: str = os.getenv("VABHUB_DATA_DIR", os.getenv("VABHUB_CONFIG_DIR", "./config") + "/data")  # 数据目录
+    VABHUB_LOG_DIR: str = os.getenv("VABHUB_LOG_DIR", os.getenv("VABHUB_CONFIG_DIR", "./config") + "/logs")  # 日志目录
+    
+    # 文件存储（兼容旧配置，优先使用 VABHUB_DATA_DIR）
+    STORAGE_PATH: str = os.getenv("STORAGE_PATH", os.getenv("VABHUB_DATA_DIR", "./data"))
+    TEMP_PATH: str = os.getenv("TEMP_PATH", os.getenv("VABHUB_CONFIG_DIR", "./config") + "/tmp")
     MAX_UPLOAD_SIZE: int = 10737418240  # 10GB
     
     # 电子书库配置

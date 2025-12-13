@@ -63,10 +63,12 @@ else:
         echo=settings.DEBUG,
         future=True,
         pool_pre_ping=True,  # 连接前ping，确保连接有效
-        pool_size=10,  # 连接池大小
-        max_overflow=20  # 最大溢出连接数
+        pool_size=5,  # 连接池大小（降低以避免耗尽）
+        max_overflow=10,  # 最大溢出连接数
+        pool_timeout=30,  # 获取连接超时（秒）
+        pool_recycle=1800,  # 30分钟回收连接，防止连接老化
     )
-    logger.info("使用PostgreSQL数据库（生产模式）")
+    logger.info("使用PostgreSQL数据库（生产模式，连接池: size=5, overflow=10, timeout=30s, recycle=30min）")
 
 # 创建异步会话工厂
 AsyncSessionLocal = async_sessionmaker(

@@ -2461,3 +2461,20 @@ export const musicHomeApi = {
   // 获取音乐首页内容（榜单聚合）
   getHome: () => api.get('/music/home'),
 }
+
+// 公共榜单 API (0.0.3) - 内置榜单平台，无需配置即可使用
+export const chartsApi = {
+  // 获取支持的音乐榜单平台（QQ音乐、网易云、Spotify等内置平台）
+  getMusicPlatforms: () => api.get('/charts/music/platforms'),
+  
+  // 获取指定平台的榜单数据
+  getMusicChart: (platform: string, chartType: string = 'hot', limit: number = 50) => 
+    api.get('/charts/music/jsonl', { params: { platform, chart_type: chartType, limit } }),
+  
+  // 获取影视榜单平台
+  getVideoPlatforms: () => api.get('/charts/video/sources'),
+  
+  // 获取影视榜单数据
+  getVideoChart: (source: string, chartType: string, region: string = 'CN', limit: number = 20) =>
+    api.get('/charts/video', { params: { source, chart_type: chartType, region, limit } }),
+}
